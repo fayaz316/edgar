@@ -1,0 +1,8 @@
+# cp terraform.tfvars.example terraform.tfvars   (tfvars is gitignored)
+# Find values:
+#   gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)'
+#   gcloud billing accounts list
+project_id     = "REPLACE_ME"
+project_number = "REPLACE_ME"
+region         = "europe-west1"
+billing_account = "REPLACE_ME"

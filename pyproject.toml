@@ -1,0 +1,40 @@
+[project]
+name = "edgar-analyst"
+version = "0.1.0"
+description = "Citation-grounded AI research analyst over SEC filings — a one-person forward deployment"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "structlog>=24.4",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "httpx>=0.27",          # TestClient transport
+  "ruff>=0.7",
+  "mypy>=1.13",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["services/gateway"]
+
+[tool.pytest.ini_options]
+testpaths = ["services/gateway/tests"]
+addopts = "-q"
+
+[tool.uv]
+package = false  # app monorepo: uv sync installs deps only, no build/packaging
