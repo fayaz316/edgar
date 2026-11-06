@@ -9,6 +9,10 @@ dependencies = [
   "pydantic>=2.9",
   "pydantic-settings>=2.6",
   "structlog>=24.4",
+  "httpx>=0.27",
+  "beautifulsoup4>=4.12",
+  "psycopg[binary]>=3.2",
+  "python-dotenv>=1.0",
 ]
 
 [dependency-groups]
@@ -30,10 +34,14 @@ ignore = ["E501"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["services/gateway"]
+files = ["services/gateway", "services/ingest"]
+
+[[tool.mypy.overrides]]
+module = "bs4.*"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["services/gateway/tests"]
+testpaths = ["services/gateway/tests", "services/ingest/tests"]
 addopts = "-q"
 
 [tool.uv]

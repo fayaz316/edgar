@@ -17,9 +17,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime config. Env prefix EA_; secrets never live in code or tfvars."""
+    """Runtime config. Env prefix EA_; secrets never live in code or tfvars.
 
-    model_config = SettingsConfigDict(env_prefix="EA_", env_file=".env")
+    extra="ignore": the repo-root .env also carries dev-infra secrets
+    (DATABASE_URL etc.) owned by other services — this app ignores what
+    isn't prefixed EA_.
+    """
+
+    model_config = SettingsConfigDict(env_prefix="EA_", env_file=".env", extra="ignore")
 
     environment: str = "dev"  # dev | prod — drives log verbosity and feature gates
     log_level: str = "INFO"
