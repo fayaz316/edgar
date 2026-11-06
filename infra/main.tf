@@ -16,6 +16,9 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
+  # needed because billing budgets live on the billing account, outside our
+  # project — calls must ride our project's quota (user creds + quota project)
+  user_project_override = true
 }
 
 # --- Budget alarms: the €5 / €25 / €100 guardrails ---
@@ -74,8 +77,10 @@ resource "google_billing_budget" "alert_100" {
 # --- Storage: data lake (filings, chunks, eval artifacts) ---
 
 resource "google_storage_bucket" "lake" {
-  name     = "${var.project_id}-lake"
-  location = var.region
+  name                        = "${var.project_id}-lake"
+  location                    = var.region
+  uniform_bucket_level_access = true # enforced by program policy; IAM-only, no legacy ACLs
+  public_access_prevention    = "enforced"
 }
 
 # --- Artifact Registry for our containers ---
@@ -91,7 +96,7 @@ resource "google_artifact_registry_repository" "repo" {
 resource "google_cloud_run_v2_service" "hello" {
   name     = "edgar-hello"
   location = var.region
-  ingress  = "INGRESS_ALL"
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     containers {
@@ -108,6 +113,15 @@ resource "google_cloud_run_v2_service" "hello" {
       max_instance_count = 1
     }
   }
+}
+
+# Canary only: public invoker on the hello endpoint. Real gateway (P4) uses
+# per-customer auth instead — this contrast is deliberate.
+resource "google_cloud_run_v2_service_iam_member" "hello_public" {
+  name     = google_cloud_run_v2_service.hello.name
+  location = var.region
+  role     = "roles/run.invoker"
+  member   = "allUsers"
 }
 
 output "hello_url" {
