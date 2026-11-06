@@ -39,3 +39,15 @@ cost: ## Current month spend
 url: ## Hello-world service URL
 	gcloud run services describe edgar-hello --region=$(REGION) \
 		--format="value(status.url)" 2>/dev/null || echo "not deployed yet"
+
+db-up: ## Start local dev database (Docker)
+	docker compose up -d
+	@until [ "$$(docker inspect --format='{{.State.Health.Status}}' edgar-pg 2>/dev/null)" = "healthy" ]; do sleep 2; done
+	@echo "db ready on :5433"
+
+embed: ## Resume embedding backfill (idempotent, ctrl-C safe)
+	uv run python -m services.ingest.embed_backfill
+
+embed-status: ## How many chunks have embeddings
+	docker exec edgar-pg psql -U edgar -d edgar -tc \
+		"SELECT count(*) FILTER (WHERE embedding IS NOT NULL) || ' / ' || count(*) FROM chunks"
