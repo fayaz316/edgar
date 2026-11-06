@@ -1,0 +1,329 @@
+# Golden set v0 — 30 items, hand-authored against the live corpus.
+# Authoring rule: answer_type=numeric ONLY where the number was verified in a
+# pulled passage. Refusal items are questions filings cannot support — the
+# correctness-critical behavior is to SAY SO, not to guess.
+# Referential integrity (accession+section exist in DB) is enforced by
+# evals/validate_golden.py.
+
+# ---------------- NVDA (accession 0001045810-26-000075 = 10-Q filed 2026-08-26,
+# 0001045810-26-000021 = 10-K filed 2026-02-25) ----------------
+- id: nvda-10q-001
+  question: "Which three percentages of total revenue did NVIDIA's three direct customers represent in the first half of fiscal year 2027?"
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Business"
+      snippet_hint: "three direct customers represented 16%, 15%, and 13%"
+  must_not_appear: ["percentages for fiscal 2026 presented as current-year figures"]
+  tags: [nvda, customer-concentration, numeric]
+  difficulty: medium
+
+- id: nvda-10q-002
+  question: "How much stock did NVIDIA repurchase in the second quarter of fiscal year 2027, and how does that compare to the same quarter a year earlier?"
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Business"
+      snippet_hint: "stock for $ 19.7 billion and $ 9.7 billion during the second quarter"
+  must_not_appear: ["full-year repurchase totals presented as quarterly figures"]
+  tags: [nvda, buybacks, numeric]
+  difficulty: easy
+
+- id: nvda-10q-003
+  question: "Which NVIDIA segment is most affected by direct customer revenue concentration?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Business"
+      snippet_hint: "primarily attributable to the Compute & Networking segment"
+  must_not_appear: []
+  tags: [nvda, customer-concentration]
+  difficulty: easy
+
+- id: nvda-10q-004
+  question: "What export-control or China-related regulatory risks does NVIDIA describe?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Risk Factors"
+      snippet_hint: "export control laws or sanctions"
+  must_not_appear: ["specific future policy decisions stated as fact"]
+  tags: [nvda, regulatory, risk-factors]
+  difficulty: medium
+
+- id: nvda-10q-005
+  question: "What does NVIDIA say could happen to its inventory if export rules change?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Risk Factors"
+      snippet_hint: "unable to sell our inventory of such products"
+  must_not_appear: []
+  tags: [nvda, export-controls, risk-factors]
+  difficulty: medium
+
+- id: nvda-10k-006
+  question: "How does NVIDIA describe trends in its Gaming segment in the fiscal 2026 10-K?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: "MD&A"
+      snippet_hint: "Gaming segment revenue and operating income"
+  must_not_appear: []
+  tags: [nvda, gaming, segments]
+  difficulty: medium
+
+- id: nvda-10k-007
+  question: "What does NVIDIA disclose about supply commitments and inventory purchase obligations?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: "MD&A"
+      snippet_hint: "purchase obligations"
+  must_not_appear: []
+  tags: [nvda, supply-chain]
+  difficulty: medium
+
+- id: nvda-ref-008
+  question: "What did Jensen Huang say on the most recent NVIDIA earnings call about next year's demand?"
+  answer_type: refusal
+  expected_evidence: []
+  must_not_appear: ["any quoted earnings-call statement"]  # corpus contains filings only
+  tags: [nvda, refusal, out-of-corpus]
+  difficulty: easy
+
+- id: nvda-10q-009
+  question: "How has NVIDIA's direct customer concentration changed compared with the first half of the prior fiscal year?"
+  answer_type: comparative
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Business"
+      snippet_hint: "of total revenue for the second quarter and first half"
+  must_not_appear: []
+  tags: [nvda, customer-concentration, comparative]
+  difficulty: hard
+
+# ---------------- AAPL (0000320193-26-000026 = 10-K FY2026, 0000320193-25-000079 = FY2025) ----------------
+- id: aapl-10k-001
+  question: "How does Apple describe the risk of relying on a limited number of suppliers?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: "Risk Factors"
+      snippet_hint: "ability to obtain sufficient quantities"
+  must_not_appear: []
+  tags: [aapl, supply-chain, risk-factors]
+  difficulty: easy
+
+- id: aapl-10k-002
+  question: "What does Apple say about media, political, and regulatory scrutiny?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: "Risk Factors"
+      snippet_hint: "intense media, political and regulatory scrutiny"
+  must_not_appear: []
+  tags: [aapl, regulatory, risk-factors]
+  difficulty: easy
+
+- id: aapl-10k-003
+  question: "Through which sales channels does Apple distribute its products, and what role do indirect channels play?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: "Business"
+      snippet_hint: "net sales through its indirect distribution channels"
+  must_not_appear: []
+  tags: [aapl, distribution]
+  difficulty: medium
+
+- id: aapl-10k-004
+  question: "What was the remaining deemed repatriation tax payable under the TCJA that Apple disclosed, and in which fiscal year?"
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-25-000079"
+      section: "MD&A"
+      snippet_hint: "Tax Cuts and Jobs Act of 2017 (TCJA) was $8.8 billion"
+  must_not_appear: []
+  tags: [aapl, tax, numeric]
+  difficulty: hard
+
+- id: aapl-10k-005
+  question: "What does Apple's latest 10-K say about research and development spending trends?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: "MD&A"
+      snippet_hint: "Research and Development"
+  must_not_appear: []
+  tags: [aapl, rnd]
+  difficulty: medium
+
+- id: aapl-10k-006
+  question: "Which services does Apple include in its Services segment description?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: "Business"
+      snippet_hint: "payment services, including Apple"
+  must_not_appear: []
+  tags: [aapl, services]
+  difficulty: easy
+
+- id: aapl-ref-007
+  question: "What are Apple's unannounced product plans for next year?"
+  answer_type: refusal
+  expected_evidence: []
+  must_not_appear: ["any claimed future product detail"]
+  tags: [aapl, refusal, out-of-corpus]
+  difficulty: easy
+
+- id: aapl-10k-008
+  question: "How does Apple frame competitive risk in its markets?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: "Risk Factors"
+      snippet_hint: "highly competitive and subject to rapid technological change"
+  must_not_appear: []
+  tags: [aapl, competition, risk-factors]
+  difficulty: easy
+
+- id: aapl-ref-009
+  question: "What price target do analysts have for Apple shares?"
+  answer_type: refusal
+  expected_evidence: []
+  must_not_appear: ["any analyst price target"]
+  tags: [aapl, refusal, out-of-corpus]
+  difficulty: easy
+
+# ---------------- JPM (0001628280-26-069523 = 10-Q filed 2026-11-03, 0001628280-26-008131 = 10-K) ----------------
+- id: jpm-10q-001
+  question: "What was JPMorgan's net interest income in the latest quarter and how did it change year over year?"
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: "Front Matter"
+      snippet_hint: "Net interest income of $27.0 billion, up 13%"
+  must_not_appear: []
+  tags: [jpm, nii, numeric]
+  difficulty: easy
+
+- id: jpm-10k-002
+  question: "What sources of cyber attacks does JPMorgan identify in its risk factors?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: "Risk Factors"
+      snippet_hint: "cyber attacks can originate from a wide variety of sources"
+  must_not_appear: []
+  tags: [jpm, cybersecurity, risk-factors]
+  difficulty: easy
+
+- id: jpm-10k-003
+  question: "How does JPMorgan describe its derivatives clearing and futures commission merchant registration?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: "Business"
+      snippet_hint: "registered with the CFTC as a futures commission merchant"
+  must_not_appear: []
+  tags: [jpm, regulatory, derivatives]
+  difficulty: medium
+
+- id: jpm-10k-004
+  question: "What does JPMorgan say about workforce development and career programs?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: "Business"
+      snippet_hint: "internship training"
+  must_not_appear: []
+  tags: [jpm, workforce]
+  difficulty: easy
+
+- id: jpm-10q-005
+  question: "What does the latest JPMorgan 10-Q say about the provision for credit losses?"
+  answer_type: grounded
+  expected_evidence:
+    # PARSER DEBT: JPM MD&A is table-formatted -> lands in Front Matter (98% of
+    # this filing). Anchor reflects corpus reality until parser handles table
+    # headings; eval gate keeps this visible.
+    - accession: "0001628280-26-069523"
+      section: "Front Matter"
+      snippet_hint: "provision for credit losses"
+  must_not_appear: []
+  tags: [jpm, credit]
+  difficulty: medium
+
+- id: jpm-10q-006
+  question: "What Basel III capital-related disclosures appear in JPMorgan's latest filings?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: "Front Matter"
+      snippet_hint: "BaselIII"
+  must_not_appear: []
+  tags: [jpm, basel, capital]
+  difficulty: hard
+
+- id: jpm-ref-007
+  question: "Which companies is JPMorgan rumored to be acquiring next?"
+  answer_type: refusal
+  expected_evidence: []
+  must_not_appear: ["any rumored acquisition target"]
+  tags: [jpm, refusal, out-of-corpus]
+  difficulty: easy
+
+- id: jpm-ref-008
+  question: "What guidance does JPMorgan give for next quarter's net interest income?"
+  answer_type: refusal
+  expected_evidence: []
+  must_not_appear: ["any specific forward NII guidance number"]
+  tags: [jpm, refusal, forward-looking]
+  difficulty: medium
+
+- id: nvda-10q-010
+  question: "What drove the year-over-year change in NVIDIA's Graphics segment operating income?"
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Business"
+      snippet_hint: "Graphics segment operating income in the second quarter"
+  must_not_appear: []
+  tags: [nvda, graphics, segments]
+  difficulty: medium
+
+# ---------------- Cross-company ----------------
+- id: x-001
+  question: "How do NVIDIA's and Apple's supply-chain risk disclosures differ in emphasis?"
+  answer_type: comparative
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: "Risk Factors"
+      snippet_hint: "export control"
+    - accession: "0000320193-26-000026"
+      section: "Risk Factors"
+      snippet_hint: "sufficient quantities"
+  must_not_appear: []
+  tags: [nvda, aapl, supply-chain, comparative]
+  difficulty: hard
+
+- id: x-002
+  question: "What is Tesla's capital expenditure guidance for next year?"
+  answer_type: refusal
+  expected_evidence: []
+  must_not_appear: ["any Tesla figure"]
+  tags: [refusal, out-of-corpus]
+  difficulty: easy
+
+- id: x-003
+  question: "Which of the three companies in this corpus discuss artificial intelligence most centrally, and in what context?"
+  answer_type: comparative
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: "Risk Factors"
+      snippet_hint: "artificial intelligence"
+  must_not_appear: []
+  tags: [jpm, nvda, aapl, ai, comparative]
+  difficulty: hard

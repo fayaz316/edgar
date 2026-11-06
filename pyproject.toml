@@ -14,6 +14,7 @@ dependencies = [
   "psycopg[binary]>=3.2",
   "python-dotenv>=1.0",
   "google-genai>=1.0",
+  "pyyaml>=6.0",
 ]
 
 [dependency-groups]
@@ -22,6 +23,7 @@ dev = [
   "httpx>=0.27",          # TestClient transport
   "ruff>=0.7",
   "mypy>=1.13",
+  "types-pyyaml>=6.0.12.20261103",
 ]
 
 [tool.ruff]
@@ -35,7 +37,7 @@ ignore = ["E501"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["services/gateway", "services/ingest"]
+files = ["services/gateway", "services/ingest", "evals"]
 
 [[tool.mypy.overrides]]
 module = "bs4.*"
