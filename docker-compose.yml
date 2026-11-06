@@ -1,0 +1,23 @@
+# Local dev stack. Same schema promotes to Cloud SQL for the demo phase.
+# pgvector/pgvector = image published by the pgvector project (verified source).
+services:
+  edgar-pg:
+    image: pgvector/pgvector:pg17
+    container_name: edgar-pg
+    environment:
+      POSTGRES_USER: edgar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: edgar
+    ports:
+      - "5433:5432" # 5433 avoids clashing with any local postgres
+    volumes:
+      - edgar-pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro # schema applies on first boot
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edgar -d edgar"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  edgar-pgdata:
