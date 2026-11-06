@@ -12,11 +12,8 @@ TFVARS := $(TF_DIR)/terraform.tfvars
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-bootstrap: ## Enable APIs, create tf state bucket, init terraform
-	gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
-		artifactregistry.googleapis.com sqladmin.googleapis.com \
-		bigquery.googleapis.com secretmanager.googleapis.com \
-		scheduler.googleapis.com --project=$(PROJECT)
+bootstrap: ## Enable APIs (just-in-time), create tf state bucket, init terraform
+	gcloud services enable run.googleapis.com artifactregistry.googleapis.com --project=$(PROJECT)
 	gsutil mb -l $(REGION) gs://$(PROJECT)-tfstate || true
 	cd $(TF_DIR) && terraform init -backend-config="bucket=$(PROJECT)-tfstate"
 

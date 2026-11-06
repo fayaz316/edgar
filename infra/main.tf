@@ -3,9 +3,14 @@
 terraform {
   required_version = ">= 1.6"
   required_providers {
-    google = { source = "hashicorp/google", version = "~> 5.40" }
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.40"
+    }
   }
-  backend "gcs" { prefix = "edgar-analyst" }
+  backend "gcs" {
+    prefix = "edgar-analyst"
+  }
 }
 
 provider "google" {
@@ -13,7 +18,8 @@ provider "google" {
   region  = var.region
 }
 
-# --- Budget alarms: the €5 / €25 / €100 guardrails (thresholds in billing-account currency) ---
+# --- Budget alarms: the €5 / €25 / €100 guardrails ---
+
 resource "google_billing_budget" "alert_5" {
   billing_account = var.billing_account
   display_name    = "edgar-analyst-alert-5"
@@ -21,33 +27,59 @@ resource "google_billing_budget" "alert_5" {
     projects = ["projects/${var.project_number}"]
   }
   amount {
-    specified_amount { currency_code = "EUR", units = "5" }
+    specified_amount {
+      currency_code = "EUR"
+      units         = "5"
+    }
   }
-  threshold_rules { threshold_percent = 1.0 }
+  threshold_rules {
+    threshold_percent = 1.0
+  }
 }
+
 resource "google_billing_budget" "alert_25" {
   billing_account = var.billing_account
   display_name    = "edgar-analyst-alert-25"
-  budget_filter { projects = ["projects/${var.project_number}"] }
-  amount { specified_amount { currency_code = "EUR", units = "25" } }
-  threshold_rules { threshold_percent = 1.0 }
+  budget_filter {
+    projects = ["projects/${var.project_number}"]
+  }
+  amount {
+    specified_amount {
+      currency_code = "EUR"
+      units         = "25"
+    }
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+  }
 }
+
 resource "google_billing_budget" "alert_100" {
   billing_account = var.billing_account
   display_name    = "edgar-analyst-alert-100"
-  budget_filter { projects = ["projects/${var.project_number}"] }
-  amount { specified_amount { currency_code = "EUR", units = "100" } }
-  threshold_rules { threshold_percent = 1.0 }
+  budget_filter {
+    projects = ["projects/${var.project_number}"]
+  }
+  amount {
+    specified_amount {
+      currency_code = "EUR"
+      units         = "100"
+    }
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+  }
 }
 
-# --- Storage: data lake + eval artifacts ---
+# --- Storage: data lake (filings, chunks, eval artifacts) ---
+
 resource "google_storage_bucket" "lake" {
   name     = "${var.project_id}-lake"
   location = var.region
-  # keep it cheap: no versioning on the lake
 }
 
 # --- Artifact Registry for our containers ---
+
 resource "google_artifact_registry_repository" "repo" {
   location      = var.region
   repository_id = "edgar"
@@ -55,16 +87,20 @@ resource "google_artifact_registry_repository" "repo" {
 }
 
 # --- Hello-world Cloud Run (free tier friendly, scales to zero) ---
+
 resource "google_cloud_run_v2_service" "hello" {
   name     = "edgar-hello"
   location = var.region
   ingress  = "INGRESS_ALL"
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
       resources {
-        limits = { cpu = "1", memory = "512Mi" }
-        startup_cpu_boost = false
+        limits = {
+          cpu    = "1"
+          memory = "512Mi"
+        }
       }
     }
     scaling {
@@ -74,7 +110,14 @@ resource "google_cloud_run_v2_service" "hello" {
   }
 }
 
-output "hello_url" { value = google_cloud_run_v2_service.hello.uri }
+output "hello_url" {
+  value = google_cloud_run_v2_service.hello.uri
+}
+
 output "budget_names" {
-  value = [for b in [google_billing_budget.alert_5, google_billing_budget.alert_25, google_billing_budget.alert_100] : b.display_name]
+  value = [
+    google_billing_budget.alert_5.display_name,
+    google_billing_budget.alert_25.display_name,
+    google_billing_budget.alert_100.display_name,
+  ]
 }
