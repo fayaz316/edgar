@@ -62,3 +62,4 @@ Status: Proposed | Accepted | Superseded by ADR XXXX · Date: YYYY-MM-DD
 | 0014 | Claim-level support checking: only the deterministic layer is enforced | Accepted |
 | 0015 | Agent over HTTP with a streamed trace, and a single-file UI | Accepted |
 | 0016 | Two-layer eval gate: offline in CI, full retrieval gate locally | Accepted |
+| 0017 | Security hardening: API keys, limits, browser protections, injection defence | Accepted |

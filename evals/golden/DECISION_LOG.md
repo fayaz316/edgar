@@ -22,3 +22,7 @@ Runs of `make eval-gate` over all four sets are regression checks, not design de
 uses above. The baseline (`evals/baselines/retrieval_baseline.json`) was generated 2026-11-08 from the product defaults
 (BM25 keyword leg, filing hints on, no reranker). Regenerating it needs an entry here.
 
+## Injection set (ADR 0017)
+`evals/injection/attacks.py` (8 attacks + criteria) was used ONCE per prompt variant to choose the default prompt (v1). It is frozen
+in the manifest. A new defence needs new attacks written before it is tried; reusing these would be adaptive reuse.
+

@@ -24,11 +24,11 @@ Anonymous internet user · authenticated but abusive user · text inside retriev
 | T3 | Key theft / leakage | Keys are 256-bit random, shown once, only their SHA-256 stored in config; constant-time comparison; never logged (tested); UI keeps the key in `sessionStorage` only | built |
 | T4 | Guessing keys | 256-bit keys make guessing infeasible; failed attempts are throttled per client IP and audit-logged | built |
 | T5 | XSS through model or filing text | Untrusted text only via `textContent`; strict CSP (`script-src 'self'`, no inline script), `nosniff`, `frame-ancestors 'none'` | built |
-| T6 | Indirect prompt injection in a retrieved passage | Passages are labelled as data and delimited; tools are read-only (no write, exec or network), so the blast radius is a wrong answer; answers still pass the grounding check; attack success rate measured on a fixed attack set | built + measured |
+| T6 | Indirect prompt injection in a retrieved passage | Hardened prompt (security rules + an "untrusted data" note on every tool result); tools are read-only (no write, exec or network), so the blast radius is a wrong answer; answers still pass the grounding check | built + measured: 2/8 attacks succeeded against the original prompt, 0/8 against the hardened one (ADR 0017; small set) |
 | T7 | Runaway agent (loops, slow model) | Limits on model turns, tool calls, repairs; wall-clock deadline; question length cap | built |
 | T8 | SQL injection | All SQL uses bound parameters (the ticker, form type and section filters included); a test asserts user text never reaches the SQL string | built |
 | T9 | Secrets in the repo or logs | `.env` ignored; log redaction test; secret scan in the review checklist | partly |
-| T10 | Vulnerable or malicious dependency | `uv.lock` pins versions with hashes; dependency audit run | built (audit); not in CI |
+| T10 | Vulnerable or malicious dependency | `uv.lock` pins versions with hashes; `pip-audit` on the locked runtime dependencies found no known vulnerabilities (2026-11-08) | audited once; not in CI |
 | T11 | CSRF | Auth is a bearer header, not a cookie, so browsers do not attach it automatically | by design |
 | T12 | Corpus poisoning | Ingest only from SEC EDGAR; every chunk keeps its accession for traceability | partial: no integrity check after ingest |
 
