@@ -52,3 +52,28 @@ passage can carry instructions aimed at the model. Phase 4 asks for authenticati
 - **Not done:** Secret Manager, service accounts, IAP/WAF, PII redaction, shipping the audit log, running the dependency audit in CI,
   TLS/size limits (assumed from the host), and a load test with an SLO report.
 - **Revisit trigger:** multi-instance deployment (shared limiter), multiple end users (JWT), or a larger/adaptive attack set showing v1 failing.
+
+## Amendment 2026-11-08 — independent code review (10 findings, all fixed)
+A review of the gateway, agent, tools, MCP server and eval gate found problems in the work above. Fixed, each with a test:
+- **`/ask` was not hardened.** Only the agent carried the injection rules; `/ask` still used the original prompt (which fell to
+  2/8 attacks). It now uses the same security rules. Only the agent path was measured; `/ask` is covered by a test that the rules
+  are present, not by an attack run.
+- **A streaming run could leak its concurrency slot forever** (a semaphore released only inside a generator that may never start).
+  Slots are now expiring leases, so a leak heals after the run's time budget plus 60 s.
+- **"Busy" rejections burned quota** (daily cap and per-minute window were counted before the slot check). They are now refunded.
+- **Internal and upstream error text reached clients** (database or Gemini error strings in the stream and in refusal answers). Clients
+  now get generic messages; details go to the server log.
+- **A non-`ToolError` failure inside a tool crashed the run.** It is now an observation the model can act on (retry, answer, or
+  refuse), without leaking the cause.
+- **The eval gate checked the candidate's settings but not the baseline's,** so a baseline built with a weaker retriever made the gate
+  pass trivially. The baseline's settings are now checked too.
+- **A negated term (`-china`) was inverted** by the BM25 keyword leg (the rewrite matched 4777 of 4867 chunks and scored the
+  excluded word positively). Negated words are now dropped from the keyword query and the candidate query is built from lexemes
+  directly. Side effect: hyphenated words are now counted correctly; the retrieval gate still passes (0 questions lost) and
+  combined MRR moved 0.489 -> 0.491. That is a bug-fix side effect, not an adopted improvement.
+- **`EA_ENVIRONMENT` was free text,** so `production` silently kept the API docs on. It is now `dev` or `prod`, anything else fails at startup.
+- **Clients could set `max_steps` up to 12,** multiplying model calls per run inside the run cap. The step budget is now server-side
+  (`EA_AGENT_MAX_STEPS`) and the default daily cap dropped from 200 to 50 runs to fit the free-tier quota.
+- A stale module docstring (it still said there was no authentication) and a test that could never fail were corrected/removed.
+The tests run in a clean environment without the optional embedding group (as CI does): 214 pass.
+
