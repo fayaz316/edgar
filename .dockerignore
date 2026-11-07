@@ -1,0 +1,12 @@
+# keep secrets, caches and big local data OUT of every image build context
+.env
+.git
+.venv
+.mypy_cache
+.ruff_cache
+.pytest_cache
+data
+infra
+evals/results
+**/__pycache__
+**/tests

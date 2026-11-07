@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: edgar
     ports:
-      - "5433:5432" # 5433 avoids clashing with any local postgres
+      - "127.0.0.1:5433:5432" # loopback only: never expose dev Postgres to the LAN; 5433 avoids clashing with a local postgres
     volumes:
       - edgar-pgdata:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d:ro # schema applies on first boot

@@ -23,6 +23,8 @@ jobs:
         run: uv run mypy
       - name: Tests
         run: uv run pytest
+      - name: Golden set schema + semantics
+        run: uv run python -m evals.validate_golden --skip-db
       - name: Terraform validate
         run: cd infra && terraform init -backend=false && terraform validate
         continue-on-error: true  # remove once CI gets GCP creds (Phase 1)

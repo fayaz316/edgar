@@ -12,3 +12,5 @@ infra/terraform.tfstate*
 .DS_Store
 node_modules/
 .next/
+data/
+evals/results/latest.json
