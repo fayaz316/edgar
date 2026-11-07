@@ -7,16 +7,19 @@ request correlation, liveness/readiness split, and grounded-answer contract
 
 from __future__ import annotations
 
+import hashlib
 import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from typing import Literal
 
 import psycopg
 import structlog
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from google import genai
 from psycopg_pool import ConnectionPool
 from pydantic import AliasChoices, BaseModel, Field
@@ -24,9 +27,19 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from services.agent.llm import GeminiLLM
 from services.embeddings import EmbeddingError, make_embedder
+from services.gateway.agent_api import STATIC
 from services.gateway.agent_api import router as agent_router
 from services.gateway.answer import SYSTEM_PROMPT, GroundedAnswer, build_passages, validate_answer
 from services.gateway.retrieval import Retriever
+from services.gateway.security import (
+    SECURITY_HEADERS,
+    UI_CSP,
+    KeyStore,
+    RateLimiter,
+    Security,
+    authenticated,
+    parse_keys,
+)
 from services.tools.filings import ToolContext, build_registry
 
 load_dotenv()  # shared repo .env; Settings picks only its aliased keys
@@ -53,6 +66,14 @@ class Settings(BaseSettings):
     gemini_api_key: str = Field(
         default="", validation_alias=AliasChoices("EA_GEMINI_API_KEY", "GEMINI_API_KEY")
     )
+    # security (docs/security/threat-model.md)
+    api_keys: str = (
+        ""  # "name:sha256hex,name2:sha256hex"; create with `python -m services.gateway.keys NAME`
+    )
+    auth: Literal["on", "off"] = "on"  # "off" is only accepted when environment == "dev"
+    rate_per_min: int = Field(default=20, ge=1)  # calls per key per minute on spending endpoints
+    agent_daily_cap: int = Field(default=200, ge=1)  # agent runs per key per UTC day
+    agent_max_seconds: float = Field(default=120.0, gt=0)  # wall-clock budget for one agent run
 
 
 settings = Settings()
@@ -87,6 +108,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         open=False,
     )
     pool.open(wait=True, timeout=15)
+    app.state.security = _build_security()
     genai_client = genai.Client(api_key=settings.gemini_api_key)
     app.state.pool = pool
     app.state.genai = genai_client
@@ -103,6 +125,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.retriever = Retriever(pool, embedder)
     app.state.registry = build_registry(ToolContext(retriever=app.state.retriever, pool=pool))
     app.state.agent_llm = GeminiLLM(settings.gemini_api_key)
+    app.state.agent_max_seconds = settings.agent_max_seconds
     log.info(
         "startup",
         environment=settings.environment,
@@ -114,8 +137,47 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     log.info("shutdown")
 
 
-app = FastAPI(title="Edgar Analyst Gateway", version="0.3.0", lifespan=lifespan)
+def _build_security() -> Security:
+    """Fail closed: production never starts without keys, and auth can only be switched off in dev."""
+    if settings.auth == "off":
+        if settings.environment != "dev":
+            raise RuntimeError("EA_AUTH=off is only allowed when EA_ENVIRONMENT=dev")
+        log.warning("auth_disabled", note="dev only")
+        return Security.open()
+    keys = KeyStore(parse_keys(settings.api_keys))
+    if not len(keys):
+        raise RuntimeError(
+            "no API keys configured: run `uv run python -m services.gateway.keys NAME` and set "
+            "EA_API_KEYS (or EA_AUTH=off with EA_ENVIRONMENT=dev for local use)"
+        )
+    return Security(keys, RateLimiter(settings.rate_per_min, settings.agent_daily_cap))
+
+
+_docs = (
+    settings.environment != "prod"
+)  # no interactive API docs (they load third-party scripts) in prod
+app = FastAPI(
+    title="Edgar Analyst Gateway",
+    version="0.4.0",
+    lifespan=lifespan,
+    docs_url="/docs" if _docs else None,
+    redoc_url="/redoc" if _docs else None,
+    openapi_url="/openapi.json" if _docs else None,
+)
 app.include_router(agent_router)
+app.mount("/static", StaticFiles(directory=STATIC), name="static")
+
+
+@app.middleware("http")
+async def security_headers(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    response = await call_next(request)
+    for name, value in SECURITY_HEADERS.items():
+        response.headers.setdefault(name, value)
+    if request.url.path == "/" or request.url.path.startswith("/static"):
+        response.headers["content-security-policy"] = UI_CSP
+    return response
 
 
 @app.middleware("http")
@@ -187,7 +249,7 @@ def readyz(request: Request) -> JSONResponse:
 
 
 @app.post("/ask", response_model=AskResponse)
-def ask(req: AskRequest, request: Request) -> AskResponse:
+def ask(req: AskRequest, request: Request, caller: str = Depends(authenticated)) -> AskResponse:
     # Plain `def` on purpose: FastAPI runs it in a worker thread, so the blocking
     # DB + Gemini calls below don't freeze the event loop for other requests.
     retriever: Retriever = request.app.state.retriever
@@ -236,7 +298,9 @@ def ask(req: AskRequest, request: Request) -> AskResponse:
     ]
     log.info(
         "ask",
-        question=req.question[:80],
+        caller=caller,
+        question_len=len(req.question),
+        question_hash=hashlib.sha256(req.question.encode()).hexdigest()[:8],
         refused=grounded.refused,
         n_cited=len(citations),
         dangling=grounded.dangling_citations,

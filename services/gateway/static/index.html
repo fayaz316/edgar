@@ -4,94 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Edgar Analyst</title>
-<style>
-  :root {
-    --bg: #f7f6f2; --surface: #ffffff; --ink: #1b1d21; --muted: #666a73; --line: #e2e0d8;
-    --accent: #1f5fbf; --accent-ink: #ffffff;
-    --model: #5b4bc4; --tool: #0f766e; --verify: #a15c00; --bad: #b42318; --ok: #1a7f37;
-    --chip: #eeece5; --focus: #1f5fbf;
-    --radius: 10px; --gap: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color-scheme: light dark;
-  }
-  :root:not([data-theme="light"]) { }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #14161a; --surface: #1c1f25; --ink: #e8e9ec; --muted: #9aa0ab; --line: #2c3038;
-      --accent: #6aa0f5; --accent-ink: #0d1117;
-      --model: #a99bf5; --tool: #4fd1c5; --verify: #f0b04a; --bad: #ff7b72; --ok: #56d364;
-      --chip: #262a32; --focus: #6aa0f5;
-    }
-  }
-  * { box-sizing: border-box; }
-  [hidden] { display: none !important; }
-  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.5; }
-  main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 64px; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
-  form { display: flex; gap: 8px; flex-wrap: wrap; }
-  textarea {
-    flex: 1 1 420px; min-height: 52px; resize: vertical; padding: 12px 14px; font: inherit;
-    color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-  }
-  button { font: inherit; cursor: pointer; }
-  .ask {
-    padding: 0 22px; min-height: 44px; border: 0; border-radius: var(--radius);
-    background: var(--accent); color: var(--accent-ink); font-weight: 600;
-  }
-  .ask:disabled { opacity: .55; cursor: progress; }
-  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 24px; }
-  .chip {
-    border: 1px solid var(--line); background: var(--chip); color: var(--ink); border-radius: 999px;
-    padding: 6px 12px; font-size: 13px;
-  }
-  .grid { display: grid; gap: var(--gap); grid-template-columns: 1fr; }
-  @media (min-width: 900px) { .grid { grid-template-columns: 5fr 7fr; align-items: start; } }
-  section {
-    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px;
-  }
-  h2 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
-  ol#trace { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  ol#trace li {
-    display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline;
-    padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px;
-  }
-  .badge { font: 600 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; padding: 4px 7px; border-radius: 5px; color: #fff; }
-  .b-model { background: var(--model); } .b-tool { background: var(--tool); }
-  .b-verify { background: var(--verify); } .b-budget, .b-error { background: var(--bad); }
-  :root[data-theme="dark"] .badge, .badge { color: #fff; }
-  @media (prefers-color-scheme: dark) { .badge { color: #0d1117; } }
-  .detail { overflow-wrap: anywhere; }
-  .secs { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
-  .working { color: var(--muted); font-size: 14px; padding: 8px 2px; }
-  .working::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 8px;
-    border: 2px solid var(--muted); border-top-color: transparent; border-radius: 50%; animation: spin 0.9s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .working::before { animation: none; } }
-  .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-  .status.ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
-  .status.refused { background: color-mix(in srgb, var(--verify) 20%, transparent); color: var(--verify); }
-  #answer { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 15px; }
-  .cite {
-    border: 1px solid var(--line); background: var(--chip); color: var(--accent); border-radius: 5px;
-    padding: 0 5px; font-size: 12px; font-weight: 600; margin: 0 1px;
-  }
-  .stats { color: var(--muted); font-size: 12px; margin-top: 10px; }
-  .passage { border-top: 1px solid var(--line); padding: 10px 0; }
-  .passage:first-child { border-top: 0; }
-  .passage.hl { background: color-mix(in srgb, var(--accent) 12%, transparent); border-radius: 6px; }
-  .passage summary { cursor: pointer; font-size: 14px; }
-  .passage pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 inherit; color: var(--muted); margin: 8px 0 0; }
-  .err { color: var(--bad); font-size: 14px; margin: 12px 0 0; }
-  .empty { color: var(--muted); font-size: 14px; }
-</style>
+<link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
 <main>
   <h1>Edgar Analyst</h1>
   <p class="sub">Ask about Apple, JPMorgan and NVIDIA 10-K / 10-Q filings. Watch every step the agent takes, then check the passages it cites.</p>
 
+  <div class="keyrow">
+    <label for="key">API key</label>
+    <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="ea_… (kept in this tab only)">
+  </div>
   <form id="form">
     <label for="q" hidden>Question</label>
     <textarea id="q" maxlength="400" placeholder="e.g. How do NVIDIA's and Apple's supply-chain risk disclosures differ?" required minlength="8"></textarea>
@@ -105,7 +28,7 @@
       <ol id="trace" aria-live="polite"></ol>
       <p class="empty" id="trace-empty">Steps appear here as the agent works.</p>
     </section>
-    <div style="display:grid; gap:var(--gap)">
+    <div class="stack">
       <section aria-labelledby="ah"><h2 id="ah">Answer</h2>
         <div id="status-slot"></div>
         <div id="answer" class="empty">No answer yet.</div>
@@ -117,128 +40,6 @@
     </div>
   </div>
 </main>
-<script>
-"use strict";
-const $ = (id) => document.getElementById(id);
-const EXAMPLES = [
-  "How do NVIDIA's and Apple's supply-chain risk disclosures differ in emphasis?",
-  "How much commercial paper did Apple have outstanding in March 2026 and September 2025?",
-  "What did China's antitrust regulators conclude about NVIDIA's Mellanox acquisition?",
-  "What was Tesla's total revenue in 2025?"
-];
-EXAMPLES.forEach((text) => {
-  const b = document.createElement("button");
-  b.type = "button"; b.className = "chip"; b.textContent = text;
-  b.addEventListener("click", () => { $("q").value = text; $("q").focus(); });
-  $("examples").appendChild(b);
-});
-
-function el(tag, cls, text) {
-  const n = document.createElement(tag);
-  if (cls) n.className = cls;
-  if (text !== undefined) n.textContent = text;   // never innerHTML: model/filing text is untrusted
-  return n;
-}
-
-function addTrace(ev) {
-  $("trace-empty").hidden = true;
-  const li = el("li");
-  li.appendChild(el("span", "badge b-" + ev.kind, ev.kind));
-  li.appendChild(el("span", "detail", ev.detail));
-  li.appendChild(el("span", "secs", ev.seconds.toFixed(2) + "s"));
-  const w = $("working"); if (w) w.remove();
-  $("trace").appendChild(li);
-  if (!$("done")) $("trace").appendChild(workingRow());
-}
-function workingRow() { const li = el("li", "working", "working…"); li.id = "working"; li.style.display = "block"; li.style.border = "0"; return li; }
-
-function appendText(box, text) {
-  // **bold** only; everything is built with DOM nodes, never parsed as HTML
-  text.split(/(\*\*[^*]+\*\*)/).forEach((part) => {
-    if (/^\*\*[^*]+\*\*$/.test(part)) box.appendChild(el("strong", "", part.slice(2, -2)));
-    else box.appendChild(document.createTextNode(part));
-  });
-}
-function renderAnswer(text, hasCitations) {
-  const box = $("answer"); box.className = ""; box.replaceChildren();
-  text.split(/(\[\d{1,2}\])/).forEach((part) => {
-    const m = /^\[(\d{1,2})\]$/.exec(part);
-    if (m && hasCitations.has(Number(m[1]))) {
-      const b = el("button", "cite", part); b.type = "button";
-      b.setAttribute("aria-label", "Show passage " + m[1]);
-      b.addEventListener("click", () => focusPassage(Number(m[1])));
-      box.appendChild(b);
-    } else appendText(box, part);
-  });
-}
-function focusPassage(n) {
-  const d = $("p" + n); if (!d) return;
-  document.querySelectorAll(".passage.hl").forEach((x) => x.classList.remove("hl"));
-  d.classList.add("hl"); d.querySelector("details").open = true;
-  d.scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-function renderResult(r) {
-  const w = $("working"); if (w) w.remove();
-  const marker = el("li"); marker.id = "done"; marker.hidden = true; $("trace").appendChild(marker);
-  const slot = $("status-slot"); slot.replaceChildren();
-  slot.appendChild(el("span", "status " + (r.refused ? "refused" : "ok"),
-    r.refused ? "Refused: not supported by the filings" : "Answered with citations"));
-  renderAnswer(r.answer, new Set(r.citations.map((c) => c.passage)));
-  $("stats").textContent = r.steps + " model turns · " + r.tool_calls + " tool calls · " + r.repairs + " repairs";
-  const ev = $("evidence"); ev.className = ""; ev.replaceChildren();
-  if (!r.citations.length) { ev.className = "empty"; ev.textContent = "This answer cites no passages."; return; }
-  r.citations.forEach((c) => {
-    const wrap = el("div", "passage"); wrap.id = "p" + c.passage;
-    const d = el("details");
-    d.appendChild(el("summary", "", "[" + c.passage + "]  " + c.ticker + " · " + c.form_type + " · filed " + c.filed_at + " · " + c.section));
-    d.appendChild(el("pre", "", c.text || c.excerpt));
-    wrap.appendChild(d); ev.appendChild(wrap);
-  });
-}
-
-function parseSSE(buffer, onEvent) {
-  const blocks = buffer.split("\n\n"); const rest = blocks.pop();
-  blocks.forEach((blk) => {
-    let name = "message", data = "";
-    blk.split("\n").forEach((line) => {
-      if (line.startsWith("event: ")) name = line.slice(7);
-      else if (line.startsWith("data: ")) data += line.slice(6);
-    });
-    if (data) onEvent(name, JSON.parse(data));
-  });
-  return rest;
-}
-
-$("form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const question = $("q").value.trim(); if (question.length < 8) return;
-  $("go").disabled = true; $("err").hidden = true;
-  $("trace").replaceChildren(); $("trace-empty").hidden = true; $("trace").appendChild(workingRow());
-  $("status-slot").replaceChildren(); $("stats").textContent = "";
-  $("answer").className = "empty"; $("answer").textContent = "Working…";
-  $("evidence").className = "empty"; $("evidence").textContent = "Passages the answer cites appear here.";
-  try {
-    const res = await fetch("/agent/stream", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question }) });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(res.status === 429 ? "The agent is busy; try again in a few seconds." : (body.detail || ("Request failed (" + res.status + ")")));
-    }
-    const reader = res.body.getReader(), dec = new TextDecoder(); let buf = "", finished = false;
-    for (;;) {
-      const { value, done } = await reader.read(); if (done) break;
-      buf = parseSSE(buf + dec.decode(value, { stream: true }), (name, data) => {
-        if (name === "trace") addTrace(data);
-        else if (name === "result") { finished = true; renderResult(data); }
-        else if (name === "error") throw new Error(data.detail);
-      });
-    }
-    if (!finished) throw new Error("The stream ended before an answer arrived.");
-  } catch (err) {
-    const w = $("working"); if (w) w.remove();
-    $("answer").className = "empty"; $("answer").textContent = "No answer.";
-    $("err").textContent = err.message; $("err").hidden = false;
-  } finally { $("go").disabled = false; }
-});
-</script>
+<script src="/static/app.js" defer></script>
 </body>
 </html>

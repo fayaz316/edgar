@@ -101,9 +101,10 @@ def test_busy_agent_returns_429_and_releases_slots_afterwards(wire: Any) -> None
     assert client.post("/agent", json={"question": QUESTION}).status_code == 200  # slot freed
 
 
-def test_ui_page_is_served_and_uses_no_innerhtml() -> None:
-    r = client.get("/")
-    assert r.status_code == 200 and "Edgar Analyst" in r.text
-    assert "innerHTML" not in r.text.replace(
+def test_ui_is_served_and_its_script_never_uses_innerhtml() -> None:
+    page = client.get("/")
+    assert page.status_code == 200 and "Edgar Analyst" in page.text
+    js = client.get("/static/app.js").text
+    assert "innerHTML" not in js.replace(
         "never innerHTML", ""
     )  # untrusted text goes via textContent

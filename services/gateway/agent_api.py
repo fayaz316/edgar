@@ -18,11 +18,12 @@ from pathlib import Path
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from services.agent.graph import AgentResult, TraceEvent, run_agent, stream_agent
+from services.gateway.security import apply_daily_cap, authenticated
 
 log = structlog.get_logger()
 router = APIRouter()
@@ -64,6 +65,10 @@ def _response(result: AgentResult) -> AgentResponse:
     )
 
 
+def _max_seconds(request: Request) -> float:
+    return float(getattr(request.app.state, "agent_max_seconds", 120.0))
+
+
 def _acquire() -> None:
     if not _slots.acquire(blocking=False):
         raise HTTPException(status_code=429, detail="agent is busy; try again in a few seconds")
@@ -75,7 +80,10 @@ def ui() -> FileResponse:
 
 
 @router.post("/agent", response_model=AgentResponse)
-def agent(req: AgentRequest, request: Request) -> AgentResponse:
+def agent(
+    req: AgentRequest, request: Request, caller: str = Depends(authenticated)
+) -> AgentResponse:
+    apply_daily_cap(request, caller)
     _acquire()
     try:
         result = run_agent(
@@ -83,6 +91,7 @@ def agent(req: AgentRequest, request: Request) -> AgentResponse:
             request.app.state.agent_llm,
             request.app.state.registry,
             max_steps=req.max_steps,
+            max_seconds=_max_seconds(request),
         )
     finally:
         _slots.release()
@@ -95,13 +104,19 @@ def _sse(event: str, payload: dict[str, Any]) -> str:
 
 
 @router.post("/agent/stream")
-def agent_stream(req: AgentRequest, request: Request) -> StreamingResponse:
+def agent_stream(
+    req: AgentRequest, request: Request, caller: str = Depends(authenticated)
+) -> StreamingResponse:
+    apply_daily_cap(request, caller)
     _acquire()
     llm, registry = request.app.state.agent_llm, request.app.state.registry
+    seconds = _max_seconds(request)
 
     def events() -> Iterator[str]:
         try:
-            for item in stream_agent(req.question, llm, registry, max_steps=req.max_steps):
+            for item in stream_agent(
+                req.question, llm, registry, max_steps=req.max_steps, max_seconds=seconds
+            ):
                 if isinstance(item, TraceEvent):
                     yield _sse("trace", asdict(item))
                 else:

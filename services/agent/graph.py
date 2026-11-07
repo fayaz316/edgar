@@ -93,10 +93,16 @@ def build_graph(
     max_tool_calls: int = 8,
     max_repairs: int = 2,
     claim_check: Literal["off", "l1"] = "l1",
+    max_seconds: float | None = None,
 ) -> Any:
+    deadline = None if max_seconds is None else time.monotonic() + max_seconds
+
     def plan(state: AgentState) -> AgentState:
         if state["steps"] >= max_steps:
             return _refuse(state, f"step budget of {max_steps} model turns exhausted", "budget")
+        if deadline is not None and time.monotonic() > deadline:
+            # checked between steps: a model call already in flight is not interrupted
+            return _refuse(state, f"time budget of {max_seconds:.0f}s exhausted", "budget")
         start = time.perf_counter()
         try:
             turn = llm.generate(SYSTEM_PROMPT, state["messages"], registry.specs())
@@ -262,6 +268,7 @@ def stream_agent(
     max_tool_calls: int = 8,
     max_repairs: int = 2,
     claim_check: Literal["off", "l1"] = "l1",
+    max_seconds: float | None = None,
 ) -> Iterator[TraceEvent | AgentResult]:
     """Run the agent, yielding each TraceEvent as soon as it happens, then the AgentResult last."""
     graph = build_graph(
@@ -271,6 +278,7 @@ def stream_agent(
         max_tool_calls=max_tool_calls,
         max_repairs=max_repairs,
         claim_check=claim_check,
+        max_seconds=max_seconds,
     )
     initial: AgentState = {
         "question": question,
@@ -325,6 +333,7 @@ def run_agent(
     max_tool_calls: int = 8,
     max_repairs: int = 2,
     claim_check: Literal["off", "l1"] = "l1",
+    max_seconds: float | None = None,
 ) -> AgentResult:
     result: AgentResult | None = None
     for item in stream_agent(
@@ -335,6 +344,7 @@ def run_agent(
         max_tool_calls=max_tool_calls,
         max_repairs=max_repairs,
         claim_check=claim_check,
+        max_seconds=max_seconds,
     ):
         if isinstance(item, AgentResult):
             result = item

@@ -226,3 +226,24 @@ def test_claim_check_off_keeps_the_old_behaviour() -> None:
     llm = ScriptedLLM([_search(), ModelTurn(text="NVIDIA revenue was $13.5 billion [1].")])
     r = run_agent("q", llm, _registry(_numeric_retriever()), claim_check="off")
     assert not r.refused and r.repairs == 0
+
+
+class SlowLLM(ScriptedLLM):
+    def generate(
+        self, system: str, messages: list[Message], tools: list[dict[str, Any]]
+    ) -> ModelTurn:
+        import time
+
+        time.sleep(0.05)
+        return super().generate(system, messages, tools)
+
+
+def test_wall_clock_deadline_stops_a_slow_run_between_steps() -> None:
+    r = run_agent("q", SlowLLM([_search()] * 10), _registry(), max_seconds=0.02)
+    assert r.refused and "time budget" in r.answer and r.trace[-1].kind == "budget"
+    assert r.steps == 1  # one model call completed, the next plan step refused to start
+
+
+def test_no_deadline_by_default() -> None:
+    r = run_agent("q", _llm([_search(), ModelTurn(text="ok [1].")]), _registry())
+    assert not r.refused
