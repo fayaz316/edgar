@@ -10,7 +10,7 @@ EMBEDDER ?= local
 UV_EMB = uv run $(if $(filter local,$(EMBEDDER)),--group local-embed,)
 TFVARS := $(TF_DIR)/terraform.tfvars
 
-.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline db-migrate mcp
+.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline db-migrate mcp eval-gate eval-gate-baseline verify
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -97,3 +97,11 @@ image: ## Build the gateway image locally (context = repo root)
 
 mcp: ## Run the MCP server over stdio (point Claude Desktop / an MCP client at this command)
 	$(UV_EMB) python -m services.mcp.server
+
+eval-gate: ## Full retrieval regression gate vs the committed baseline (needs db-up + local embedder)
+	bash scripts/eval-gate.sh
+
+eval-gate-baseline: ## Regenerate the gate baseline (deliberate; add a DECISION_LOG entry)
+	bash scripts/eval-gate.sh --baseline
+
+verify: lint test eval-gate ## Everything a change must pass before it is pushed

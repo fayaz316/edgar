@@ -1,0 +1,10 @@
+{
+ "claims/PROTOCOL.md": "78f844977f25387d47f4b0b23230f81486963e4559da4bfe5cc8ad7c8831e866",
+ "claims/claims_v1.yaml": "397f953b0c7f4e830d37f53ed0024a5227a7e8e0a3936ab6c799aa3fb10cfe54",
+ "claims/passages_v1.yaml": "e24e40aa4e4a8fb740f14305bbcb144866f0ea0d3cb77585e49f4150bf6c621f",
+ "golden/HELDOUT_PROTOCOL.md": "312918eb133bc9f5965dcc386cb0167558b13096daa4c2d76468e8106ab78105",
+ "golden/golden_v0.yaml": "746dfe3576a47339178a0efd40a9238649ecb622c81243179c6c6e1dae8f60ca",
+ "golden/golden_v1_heldout.yaml": "4b3a20b40a2d20541fd832d94d7bba7908ec6a208526911ecba9e5a210e32623",
+ "golden/golden_v2_heldout.yaml": "f7eaad0dad4795fa815b5d91e26b57574ed5d375d8f014d5cac843f6ff28e6c0",
+ "golden/golden_v3_heldout.yaml": "47823d4d8f6ee0e0358ac4cbf5d1b4a2e7422303222d018dd0645e412d83a99f"
+}

@@ -215,3 +215,17 @@ def test_bm25_ranks_by_idf_and_applies_the_scope_filters_afterwards() -> None:
     meta_sql, meta_params = pool.log[3]
     assert "d.ticker = %s" in meta_sql and "NVDA" in meta_params
     assert meta_params[-1][0] == 10  # candidate ids passed in BM25 rank order
+
+
+def test_product_defaults_are_what_the_eval_gate_protects() -> None:
+    """If a default changes, evals/gate.py DEFAULT_CONFIG and the baseline must change with it (ADR required)."""
+    import inspect
+
+    from evals.gate import DEFAULT_CONFIG
+
+    pool, emb = RecordingPool(), FakeEmbedder(LOCAL_MODEL_ID)
+    retriever = Retriever(pool, emb)  # type: ignore[arg-type]
+    assert retriever.keyword == DEFAULT_CONFIG["lexical"]
+    assert retriever._reranker is None and DEFAULT_CONFIG["rerank"] is False
+    assert inspect.signature(Retriever.retrieve).parameters["infer_filing"].default is True
+    assert DEFAULT_CONFIG["filing_hints"] is True

@@ -22,7 +22,7 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from dotenv import load_dotenv
 from psycopg_pool import ConnectionPool
@@ -61,6 +61,16 @@ def embedded_coverage(pool: ConnectionPool, model_id: str) -> tuple[int, int]:
     return (int(row[0]), int(row[1])) if row else (0, 0)
 
 
+def corpus_fingerprint(pool: ConnectionPool) -> str:
+    """Hash of every chunk's text in a stable order: two runs are comparable only on the same corpus."""
+    with pool.connection() as conn:
+        row = conn.execute(
+            "SELECT md5(string_agg(md5(c.text), '' ORDER BY d.accession, c.section, c.seq)) "
+            "FROM chunks c JOIN documents d ON d.id = c.document_id"
+        ).fetchone()
+    return str(row[0]) if row else ""
+
+
 def company_equivalents(pool: ConnectionPool) -> Equivalents:
     """accession -> every accession of the same ticker (lenient scoring: same company's text)."""
     with pool.connection() as conn:
@@ -97,8 +107,8 @@ def main() -> int:
     ap.add_argument(
         "--lexical",
         choices=tuple(KEYWORD_MODES),
-        default="bm25",
-        help="keyword leg: bm25 (default, ADR 0010) | all = old AND leg | any = OR (rejected, ADR 0009)",
+        default=None,
+        help="keyword leg; omit to use the product default (bm25, ADR 0010) | all = old AND | any = OR",
     )
     ap.add_argument(
         "--no-filing-hints",
@@ -151,10 +161,13 @@ def main() -> int:
             return 2
 
         reranker = CrossEncoderReranker() if args.rerank else None
-        retriever = Retriever(
-            pool, embedder, keyword=KEYWORD_MODES[args.lexical], reranker=reranker
-        )
+        # no flag -> the Retriever's own defaults, so the gate tests what the product actually does
+        options: dict[str, Any] = {"reranker": reranker}
+        if args.lexical:
+            options["keyword"] = KEYWORD_MODES[args.lexical]
+        retriever = Retriever(pool, embedder, **options)
         equivalents = company_equivalents(pool)
+        fingerprint = corpus_fingerprint(pool)
         rows: list[dict[str, object]] = []
         ranks: list[int | None] = []
         lenient_ranks: list[int | None] = []
@@ -211,6 +224,12 @@ def main() -> int:
                 "k": args.k,
                 "embedder": embedder.model_id,
                 "corpus": {"embedded": embedded, "total": total},
+                "corpus_fingerprint": fingerprint,
+                "config": {
+                    "lexical": retriever.keyword,
+                    "rerank": bool(args.rerank),
+                    "filing_hints": not args.no_filing_hints,
+                },
                 "overall": overall,
                 "overall_lenient": overall_lenient,
                 "rerank_seconds_median": (

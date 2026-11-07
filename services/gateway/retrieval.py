@@ -88,6 +88,10 @@ class Retriever:
         self._rerank_pool = rerank_pool
         self._corpus: tuple[int, float] | None = None  # (chunk count, mean chunk length)
 
+    @property
+    def keyword(self) -> str:
+        return self._keyword
+
     def retrieve(
         self,
         query: str,

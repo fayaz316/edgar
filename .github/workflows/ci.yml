@@ -23,6 +23,8 @@ jobs:
         run: uv run mypy
       - name: Tests
         run: uv run pytest
+      - name: Frozen evaluation files unchanged (eval gate, layer 1)
+        run: uv run python -m evals.freeze --check
       - name: Golden sets schema + semantics (all sets)
         run: |
           for f in evals/golden/golden_v0.yaml evals/golden/golden_v1_heldout.yaml \
