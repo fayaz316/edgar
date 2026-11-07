@@ -1,0 +1,254 @@
+[
+ {
+  "id": "f01",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f02",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f03",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f04",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f05",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f06",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f07",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f08",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f09",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f10",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f11",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f12",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f13",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f14",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f15",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f16",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f17",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "supported",
+  "raw": "SUPPORTED"
+ },
+ {
+  "id": "f18",
+  "kind": "faithful",
+  "mine": "supported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "n01",
+  "kind": "number",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "n02",
+  "kind": "number",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "n03",
+  "kind": "number",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "n04",
+  "kind": "number",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "e01",
+  "kind": "entity",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "e02",
+  "kind": "entity",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "e03",
+  "kind": "entity",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "e04",
+  "kind": "entity",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "x01",
+  "kind": "extrapolation",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "x02",
+  "kind": "extrapolation",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "x03",
+  "kind": "extrapolation",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "x04",
+  "kind": "extrapolation",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "d01",
+  "kind": "direction",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "d02",
+  "kind": "direction",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "d03",
+  "kind": "direction",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "w01",
+  "kind": "wrong_passage",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "w02",
+  "kind": "wrong_passage",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ },
+ {
+  "id": "w03",
+  "kind": "wrong_passage",
+  "mine": "unsupported",
+  "other": "unsupported",
+  "raw": "UNSUPPORTED"
+ }
+]

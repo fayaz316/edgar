@@ -1,0 +1,52 @@
+# Labeled claims for the claim-level support check. See PROTOCOL.md (written before this file).
+# Each item: one claim sentence citing [1] = evidence[0] (passages in passages_v1.yaml).
+# label: supported | unsupported. kind: faithful | number | entity | extrapolation | direction | wrong_passage.
+# Labels were fixed at authoring time and are not changed after the checker's first run.
+
+# ---- faithful: what a careful answer would say, paraphrased from its passage ----
+- {id: f01, kind: faithful, label: supported, evidence: [c9129], claim: "As of March 28, 2026, Apple had $2.0 billion of commercial paper outstanding, down from $8.0 billion at September 27, 2025. [1]"}
+- {id: f02, kind: faithful, label: supported, evidence: [c5893], claim: "Equity Markets revenue was $5.0 billion, up 49%, driven by strong performance across products. [1]"}
+- {id: f03, kind: faithful, label: supported, evidence: [c5209], claim: "A hypothetical 10% decrease in NVIDIA's publicly-held equity securities would reduce their fair value by $1.8 billion as of January 25, 2026. [1]"}
+- {id: f04, kind: faithful, label: supported, evidence: [c5758], claim: "As of January 26, 2025, NVIDIA had federal research tax credit carryforwards of $46 million, which begin to expire in fiscal year 2026. [1]"}
+- {id: f05, kind: faithful, label: supported, evidence: [c4843], claim: "NVIDIA says first-quarter revenue growth was driven by data center products for accelerated computing and AI solutions. [1]"}
+- {id: f06, kind: faithful, label: supported, evidence: [c4968], claim: "NVIDIA describes an end-to-end accelerated computing platform for AI that covers both training and inferencing. [1]"}
+- {id: f07, kind: faithful, label: supported, evidence: [c8527], claim: "JPMorgan calculates basic earnings per share using the two-class method. [1]"}
+- {id: f08, kind: faithful, label: supported, evidence: [c5862], claim: "JPMorgan has three reportable business segments: Consumer & Community Banking, Commercial & Investment Bank, and Asset & Wealth Management. [1]"}
+- {id: f09, kind: faithful, label: supported, evidence: [c8797], claim: "Apple says producing its own digital content can be costly because of intense competition for talent, content and subscribers. [1]"}
+- {id: f10, kind: faithful, label: supported, evidence: [c9231], claim: "Apple notes it may need to seek or renew licenses for third-party technology, and there is no guarantee they could be obtained on reasonable terms. [1]"}
+- {id: f11, kind: faithful, label: supported, evidence: [c5481], claim: "NVIDIA says it may have limited insight into the security practices of its third-party suppliers. [1]"}
+- {id: f12, kind: faithful, label: supported, evidence: [c6866], claim: "JPMorgan says its valuation methods and assumptions reflect management judgment and may vary across its businesses and portfolios. [1]"}
+- {id: f13, kind: faithful, label: supported, evidence: [c8828], claim: "Apple says compliance with these laws and regulations is onerous and expensive, and violations could result in penalties and fines. [1]"}
+- {id: f14, kind: faithful, label: supported, evidence: [c5281], claim: "NVIDIA states that its equity method investments were not material. [1]"}
+- {id: f15, kind: faithful, label: supported, evidence: [c4651], claim: "On March 25, 2026, the district court granted class certification for investors who bought NVIDIA stock between August 10, 2017 and November 15, 2018. [1]"}
+- {id: f16, kind: faithful, label: supported, evidence: [c4811], claim: "NVIDIA's foreign currency contracts designated as accounting hedges had a notional value of $2,114 million as of April 26, 2026. [1]"}
+- {id: f17, kind: faithful, label: supported, evidence: [c7353], claim: "JPMorgan lists conduct risks, including the negative impact that could result from misconduct of its employees. [1]"}
+- {id: f18, kind: faithful, label: supported, evidence: [c9388], claim: "Apple records all derivative instruments on its balance sheets at fair value. [1]"}
+
+# ---- number: a figure changed ----
+- {id: n01, kind: number, label: unsupported, evidence: [c9129], claim: "As of March 28, 2026, Apple had $3.5 billion of commercial paper outstanding. [1]"}
+- {id: n02, kind: number, label: unsupported, evidence: [c5893], claim: "Equity Markets revenue was $5.0 billion, up 94%. [1]"}
+- {id: n03, kind: number, label: unsupported, evidence: [c5209], claim: "A hypothetical 10% decrease would reduce the fair value of NVIDIA's publicly-held equity securities by $2.8 billion as of January 25, 2026. [1]"}
+- {id: n04, kind: number, label: unsupported, evidence: [c5758], claim: "As of January 26, 2025, NVIDIA had federal research tax credit carryforwards of $64 million. [1]"}
+
+# ---- entity: the wrong company is named for the cited passage ----
+- {id: e01, kind: entity, label: unsupported, evidence: [c4843], claim: "Apple says first-quarter revenue growth was driven by data center products for accelerated computing and AI solutions. [1]"}
+- {id: e02, kind: entity, label: unsupported, evidence: [c4968], claim: "JPMorgan describes an end-to-end accelerated computing platform for AI that covers both training and inferencing. [1]"}
+- {id: e03, kind: entity, label: unsupported, evidence: [c8527], claim: "Apple calculates basic earnings per share using the two-class method. [1]"}
+- {id: e04, kind: entity, label: unsupported, evidence: [c5862], claim: "NVIDIA has three reportable business segments: Consumer & Community Banking, Commercial & Investment Bank, and Asset & Wealth Management. [1]"}
+
+# ---- extrapolation: a plausible cause or consequence the passage does not state ----
+- {id: x01, kind: extrapolation, label: unsupported, evidence: [c8797], claim: "Apple expects the high cost of producing its own content to reduce its profit margins next year. [1]"}
+- {id: x02, kind: extrapolation, label: unsupported, evidence: [c9231], claim: "Apple says it will lose access to key licensed technology within two years. [1]"}
+- {id: x03, kind: extrapolation, label: unsupported, evidence: [c5481], claim: "NVIDIA says a security incident at a third-party supplier has already exposed its customers' data. [1]"}
+- {id: x04, kind: extrapolation, label: unsupported, evidence: [c6866], claim: "JPMorgan says its valuation methods have caused material losses in recent quarters. [1]"}
+
+# ---- direction: increase/decrease or negation flipped ----
+- {id: d01, kind: direction, label: unsupported, evidence: [c8828], claim: "Apple says compliance with these laws and regulations is inexpensive and straightforward. [1]"}
+- {id: d02, kind: direction, label: unsupported, evidence: [c5281], claim: "NVIDIA states that its equity method investments were material. [1]"}
+- {id: d03, kind: direction, label: unsupported, evidence: [c4651], claim: "On March 25, 2026, the district court denied class certification in the case against NVIDIA. [1]"}
+
+# ---- wrong_passage: a true statement, but the cited passage is a different one ----
+- {id: w01, kind: wrong_passage, label: unsupported, evidence: [c5209], claim: "NVIDIA's foreign currency contracts designated as accounting hedges had a notional value of $2,114 million as of April 26, 2026. [1]"}
+- {id: w02, kind: wrong_passage, label: unsupported, evidence: [c5862], claim: "JPMorgan lists conduct risks, including the negative impact that could result from misconduct of its employees. [1]"}
+- {id: w03, kind: wrong_passage, label: unsupported, evidence: [c8797], claim: "Apple has generally been able to obtain third-party licenses on commercially reasonable terms in the past. [1]"}

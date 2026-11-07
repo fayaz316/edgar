@@ -19,6 +19,7 @@ from typing import Any, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from services.agent.claims import ClaimCheck, check_answer
 from services.agent.llm import LLM, Message, ModelTurn
 from services.gateway.answer import validate_answer
 from services.tools.registry import ToolError, ToolRegistry
@@ -90,6 +91,7 @@ def build_graph(
     max_steps: int = 8,
     max_tool_calls: int = 8,
     max_repairs: int = 2,
+    claim_check: Literal["off", "l1"] = "l1",
 ) -> Any:
     def plan(state: AgentState) -> AgentState:
         if state["steps"] >= max_steps:
@@ -161,6 +163,10 @@ def build_graph(
         text = (state["messages"][-1].turn or ModelTurn()).text
         checked = validate_answer(text, n_passages=len(state["evidence"]))
         model_refused = text.strip().upper().startswith("INSUFFICIENT_CONTEXT")
+        if not model_refused and not checked.refused and claim_check == "l1":
+            bad = [c for c in check_answer(text, state["evidence"]) if c.l1_unsupported]
+            if bad:
+                return _reject(state, _l1_problem(bad), max_repairs)
         if model_refused or not checked.refused:
             event = TraceEvent(
                 "verify",
@@ -181,18 +187,7 @@ def build_graph(
             if checked.dangling_citations
             else "it has no valid [n] citations (search first, then cite what you found)"
         )
-        if state["repairs"] >= max_repairs:
-            return _refuse(state, f"the answer could not be grounded ({problem})", "verify")
-        feedback = (
-            f"Your answer was rejected: {problem}. Cite only passage numbers returned by the "
-            "tools, as [n]. Search again if you need more evidence, or reply INSUFFICIENT_CONTEXT."
-        )
-        return {
-            **state,
-            "messages": [*state["messages"], Message("user", text=feedback)],
-            "repairs": state["repairs"] + 1,
-            "trace": [*state["trace"], TraceEvent("verify", f"rejected: {problem}")],
-        }
+        return _reject(state, problem, max_repairs)
 
     def after_verify(state: AgentState) -> str:
         return END if state["done"] else "plan"
@@ -206,6 +201,36 @@ def build_graph(
     graph.add_edge("act", "plan")
     graph.add_conditional_edges("verify", after_verify, {"plan": "plan", END: END})
     return graph.compile()
+
+
+def _l1_problem(bad: list[ClaimCheck]) -> str:
+    parts = []
+    for c in bad[:3]:
+        what = []
+        if c.missing_numbers:
+            what.append(f"figures not in the cited passages {c.missing_numbers}")
+        if c.missing_companies:
+            what.append(f"company not among the cited passages {c.missing_companies}")
+        parts.append(f'"{c.text[:70]}" ({"; ".join(what)})')
+    return "some claims are not grounded in what they cite: " + " | ".join(parts)
+
+
+def _reject(state: AgentState, problem: str, max_repairs: int) -> AgentState:
+    """Send a bad answer back to `plan` with feedback, or refuse once repairs are used up."""
+    if state["repairs"] >= max_repairs:
+        return _refuse(state, f"the answer could not be grounded ({problem})", "verify")
+    feedback = (
+        f"Your answer was rejected: {problem}. State figures exactly as they appear in the "
+        "passages you cite (do not state computed or rounded values), name only the company "
+        "whose passage you cite, and cite only passage numbers the tools returned, as [n]. "
+        "Search again if you need more evidence, or reply INSUFFICIENT_CONTEXT."
+    )
+    return {
+        **state,
+        "messages": [*state["messages"], Message("user", text=feedback)],
+        "repairs": state["repairs"] + 1,
+        "trace": [*state["trace"], TraceEvent("verify", f"rejected: {problem}")],
+    }
 
 
 def _short(args: dict[str, Any]) -> str:
@@ -235,9 +260,15 @@ def run_agent(
     max_steps: int = 8,
     max_tool_calls: int = 8,
     max_repairs: int = 2,
+    claim_check: Literal["off", "l1"] = "l1",
 ) -> AgentResult:
     graph = build_graph(
-        llm, registry, max_steps=max_steps, max_tool_calls=max_tool_calls, max_repairs=max_repairs
+        llm,
+        registry,
+        max_steps=max_steps,
+        max_tool_calls=max_tool_calls,
+        max_repairs=max_repairs,
+        claim_check=claim_check,
     )
     initial: AgentState = {
         "question": question,

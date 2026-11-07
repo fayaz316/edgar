@@ -1,0 +1,368 @@
+# Passages for claims_v1.yaml - copied verbatim from the corpus (chunk ids as of the 2026-11-07 ingest).
+# Sampled with md5(c.id::text || 'claims-v1'), 8 per ticker, 500-1500 chars. Skipped (reason):
+#   9458 boilerplate (exhibit index) | 8962 boilerplate (auditor's report) | 9064 boilerplate (controls & procedures)
+#   6557, 7142, 5867 table-fragment (JPMorgan ratio, deposit and segment tables)
+c4651:
+  accession: 0001045810-26-000075
+  chunk_id: 4651
+  form_type: 10-Q
+  section: Financial Statements
+  text: ', 2025. On February 20, 2025, the Ninth Circuit’s judgment, entered August 25, 2023 and corrected August 28, 2023, took effect, and the case was remanded to the district court for further proceedings.
+
+    On March 25, 2026, the district court granted plaintiffs’ motion for class certification and certified a class of investors consisting of all persons or entities who purchased or otherwise acquired NVIDIA common stock between August 10, 2017, and November 15, 2018, inclusive, excluding certain persons and entities, such as NVIDIA’s officers and directors, and members of their immediate families, among others.'
+  ticker: NVDA
+c4811:
+  accession: 0001045810-26-000052
+  chunk_id: 4811
+  form_type: 10-Q
+  section: Financial Statements
+  text: 'impact of foreign currency forward contracts designated as accounting hedges on other comprehensive income or loss was not significant and all such instruments were determined to be highly effective.
+
+    We also entered into foreign currency forward contracts to mitigate the impact of foreign currency movements on monetary assets and liabilities. For our foreign currency contracts for assets and liabilities, the change in fair value of these non-designated contracts was recorded in Other income or expense and offsets the change in fair value of the hedged foreign currency denominated monetary assets and liabilities, which was also recorded in Other income (expense), net.
+
+    The table below presents the notional value of our foreign currency contracts outstanding:
+
+    Apr 26, 2026 | Jan 25, 2026
+
+    (In millions)
+
+    Designated as accounting hedges | $2,114 | $1,765
+
+    Not designated as accounting hedges | $1,850 | $2,332
+
+    The fair values of our foreign currency contracts were not significant as of April 26, 2026 and January 25, 2026.
+
+    As of April 26, 2026, all foreign currency contracts mature within
+
+    18'
+  ticker: NVDA
+c4843:
+  accession: 0001045810-26-000052
+  chunk_id: 4843
+  form_type: 10-Q
+  section: MD&A
+  text: 'is Quarterly Report on Form 10-Q for additional information.
+
+    Headquartered in Santa Clara, California, NVIDIA was incorporated in California in April 1993 and reincorporated in Delaware in April 1998.
+
+    Recent Developments, Future Objectives and Challenges
+
+    Revenue growth in the first quarter was driven by data center products for accelerated computing and AI solutions. Blackwell continued to account for the majority of our system shipments.
+
+    The availability of data centers, energy, and capital to support the buildout of NVIDIA AI infrastructure by our customers and partners is crucial, and any shortage of these or other necessary resources could impact our future revenue and financial performance. Expanding energy capacity to meet demand is a complex, multi-year process that involves significant regulatory, technical, and construction challenges. In addition, access to capital can be particularly constrained for less-capitalized companies, which may face difficulties securing financing for large-scale infrastructure projects. These limitations could delay customer and partner deployments or reduce the scale of accelerated computing and AI adoption.
+
+    23'
+  ticker: NVDA
+c4968:
+  accession: 0001045810-26-000021
+  chunk_id: 4968
+  form_type: 10-K
+  section: Business
+  text: ': we can support several multi-billion-dollar end markets with shared underlying technology by using a variety of software stacks developed either internally or by third-party developers and partners.
+
+    We utilize this platform approach in each of our target markets.
+
+    Extending our technology and platform leadership in AI.
+
+    We provide a complete, end-to-end accelerated computing platform for AI, addressing both training and inferencing. This includes full-stack data center-scale compute and networking solutions across processing units, interconnects, systems, and software. Our compute solutions include all three major processing units in AI servers – GPUs, CPUs, and DPUs. GPUs are uniquely suited to AI, and we will continue to add AI-specific features to our GPU architecture to further extend our leadership position.'
+  ticker: NVDA
+c5209:
+  accession: 0001045810-26-000021
+  chunk_id: 5209
+  form_type: 10-K
+  section: Quantitative and Qualitative Disclosures About Market Risk
+  text: 'hanges in interest rates. Refer to Note 11 of the Notes to the Consolidated Financial Statements in Part IV, Item 15 of this Annual Report on Form 10-K for additional information.
+
+    44
+
+    Table of Contents
+
+    Publicly-held equity securities are subject to market price volatility. A hypothetical 10% decrease in our publicly-held equity securities would decrease the fair value of the publicly-held equity securities balance by $1.8 billion and an insignificant amount as of January 25, 2026 and January 26, 2025, respectively.
+
+    Non-marketable equity securities are measured based on cost minus impairment, if any, and are adjusted for observable price changes in orderly transactions for an identical or similar investment in the same issuer. Valuations of our non-marketable equity securities are inherently complex due to the lack of readily available market data and observable transactions, and impact of macroeconomic factors.
+
+    For a description of our equity investments, refer to Notes 7 and 8 of the Notes to Condensed Consolidated Financial Statements in Part IV, Item 15 of this Annual Report on Form 10-K for additional information.
+
+    Foreign Exchange Rate Risk'
+  ticker: NVDA
+c5281:
+  accession: 0001045810-26-000021
+  chunk_id: 5281
+  form_type: 10-K
+  section: Financial Statements
+  text: 'sence of market prices and inherent lack of liquidity. All gains and losses on these investments, realized and unrealized, are recognized in Other income, net on our Consolidated Statements of Income.
+
+    We assess whether an impairment loss has occurred on our investments in non-marketable equity securities, accounted for under the measurement alternative based on quantitative and qualitative factors. If any impairment is identified for non-marketable equity securities, we write down the investment to its fair value and record the corresponding charge through Other income, net on our Consolidated Statements of Income.
+
+    The Company assesses its investments for significant influence to determine the appropriate method of accounting, including application of the equity method. Equity method investments were not material.
+
+    Recently Issued Accounting Pronouncements
+
+    Recent Accounting Pronouncements Not Yet Adopted'
+  ticker: NVDA
+c5481:
+  accession: 0001045810-25-000023
+  chunk_id: 5481
+  form_type: 10-K
+  section: Risk Factors
+  text: 'rn, affect our partners'' operations, customer trust, and our revenue. We may have limited insight into the data privacy or security practices of third-party suppliers, including for our AI algorithms.
+
+    Our ability to monitor these third parties’ information security practices is limited, and they may not have adequate information security measures in place. In addition, if one of our third-party suppliers suffers a security incident (which has happened in the past and may happen in the future), our response may be limited or more difficult because we may not have direct access to their systems, logs and other information related to the security incident. Additionally, we are incorporated into the supply chain of a large number of entities worldwide and, as a result, if our products or services are compromised, a significant number of our customers and their data could be affected, which could result in potential liability and harm our business.'
+  ticker: NVDA
+c5758:
+  accession: 0001045810-25-000023
+  chunk_id: 5758
+  form_type: 10-K
+  section: Financial Statements
+  text: 'uld vary based on our assessment of all available information.
+
+    As of January 26, 2025, we had U.S. federal, state and foreign net operating loss carryforwards of $
+
+    479
+
+    million, $
+
+    332
+
+    million and $
+
+    349
+
+    million, respectively. The federal and state carryforwards will begin to expire in fiscal years 2026 and 2027, respectively. The foreign net operating loss carryforwards of $
+
+    349
+
+    million may be carried forward indefinitely. As of January 26, 2025, we had federal research tax credit carryforwards of $
+
+    46
+
+    million, before the impact of uncertain tax positions, that will begin to expire in fiscal year 2026. We have state research tax credit carryforwards of $
+
+    1.5
+
+    billion, before the impact of uncertain tax positions. $
+
+    1.4
+
+    billion is attributable to the State of California and may be carried over indefinitely and $
+
+    98
+
+    million is attributable to various other states and will begin to expire in fiscal year 2026. As of January 26, 2025, we had federal capital loss carryforwards of $
+
+    1.3
+
+    billion that will begin to expire in fiscal year 2028.
+
+    76
+
+    Table of Contents
+
+    NVIDIA Corporation and Subsidiaries
+
+    Notes to the Consolidated Financial Statements
+
+    (Continued)'
+  ticker: NVDA
+c5862:
+  accession: 0001628280-26-069523
+  chunk_id: 5862
+  form_type: 10-Q
+  section: MD&A
+  text: 'on an LOB basis. There are three reportable business segments – Consumer & Community Banking, Commercial & Investment Bank, and Asset & Wealth Management – with the remaining activities in Corporate.
+
+    The business segments are determined based on the products and services provided, or the type of customer served, and they reflect the manner in which financial information is evaluated by the Firm’s Operating Committee, whose members act collectively as the Firm’s chief operating decision maker. Segment results are presented on a managed basis. Refer to Explanation and Reconciliation of the Firm’s Use of Non-GAAP Financial Measures on pages 19-20 for a definition of managed basis.
+
+    Description of business segment reporting methodology'
+  ticker: JPM
+c5893:
+  accession: 0001628280-26-069523
+  chunk_id: 5893
+  form_type: 10-Q
+  section: MD&A
+  text: '.8 billion, up 13%. Markets revenue was $10.3 billion, up 15%.
+
+    •
+
+    Equity Markets revenue was $5.0 billion, up 49%, driven by strong performance across products, particularly in Prime and Derivatives.
+
+    •
+
+    Fixed Income Markets revenue was $5.4 billion, down 4%, driven by lower revenue in Commodities,
+
+    29
+
+    Rates, Credit and Public Finance, largely offset by higher revenue in Currencies & Emerging Markets.
+
+    •
+
+    Securities Services revenue was $1.6 billion, up 14%, predominantly driven by fee growth on higher market levels and client activity, as well as higher average deposits and higher deposit margin.
+
+    •
+
+    Credit Adjustments & Other was a loss of $170 million, compared with a gain of $28 million in the prior year.
+
+    Noninterest expense was $10.8 billion, up 11%, predominantly driven by higher brokerage expense and higher compensation expense, including higher revenue-related compensation.'
+  ticker: JPM
+c6866:
+  accession: 0001628280-26-054343
+  chunk_id: 6866
+  form_type: 10-Q
+  section: MD&A
+  text: 'fected by the wider variation of reasonable valuation estimates, particularly for positions that are less liquid. Refer to Note 2 for a further discussion of valuation adjustments applied by the Firm.
+
+    Imprecision in estimating unobservable market inputs or other factors can affect the amount of gain or loss recorded for a particular position. Furthermore, while the Firm believes its valuation methods are appropriate and consistent with those of other market participants, the methods and assumptions used reflect management judgment and may vary across the Firm’s businesses and portfolios.
+
+    The Firm uses various methodologies and assumptions in the determination of fair value. The use of methodologies or assumptions different than those used by the Firm could result in a different estimate of
+
+    fair value at the reporting date. Refer to Note 2 for a detailed discussion of the Firm’s valuation process and hierarchy, and its determination of fair value for individual financial instruments.
+
+    Credit card rewards liability'
+  ticker: JPM
+c7353:
+  accession: 0001628280-26-008131
+  chunk_id: 7353
+  form_type: 10-K
+  section: Risk Factors
+  text: 'work and control environment, its models and estimations and associated judgments used in its stress testing and financial statements, and controls over disclosure and financial reporting.
+
+    •
+
+    Strategic
+
+    risks, including the damage to JPMorganChase’s competitive standing that could result from ineffective business strategies; risks associated with the significant competition that JPMorganChase faces; and the potential adverse impacts of climate change on JPMorganChase’s business and operations and those of its clients and customers.
+
+    •
+
+    Conduct
+
+    risks, including the negative impact that could result from misconduct of JPMorganChase’s employees.
+
+    •
+
+    Reputation
+
+    risks, including the potential negative commercial impacts that can arise from JPMorganChase’s decisions related to clients and business activities; and the failure to effectively manage conflicts of interest or to satisfy fiduciary obligations, or other factors that could damage JPMorganChase’s reputation.
+
+    •
+
+    Country
+
+    risks, including potential impacts on JPMorganChase’s businesses from an outbreak or escalation of hostilities between countries or within a country or region; and the potential adverse effects
+
+    9
+
+    Part I'
+  ticker: JPM
+c8527:
+  accession: 0001628280-26-008131
+  chunk_id: 8527
+  form_type: 10-K
+  section: Financial Statements
+  text: 'ive, compensation, option and stock purchase plans, and directors’ compensation plans.
+
+    JPMorgan Chase & Co./2025 Form 10-K | 285
+
+    Notes to consolidated financial statements
+
+    Note 23 –
+
+    Earnings per share
+
+    Basic earnings per share (“EPS”) is calculated using the two-class method. Under the two-class method, all earnings (distributed and undistributed) are allocated to common stock and participating securities. JPMorganChase grants RSUs under its share-based compensation programs, predominantly all of which entitle recipients to receive nonforfeitable dividends during the vesting period on a basis equivalent to dividends paid to holders of the Firm’s common stock. These unvested RSUs meet the definition of participating securities based on their respective rights to receive nonforfeitable dividends, and they are treated as a separate class of securities in computing basic EPS. Participating securities are not included as incremental shares in computing diluted EPS; refer to Note 9 for additional information.'
+  ticker: JPM
+c8797:
+  accession: 0000320193-26-000026
+  chunk_id: 8797
+  form_type: 10-K
+  section: Risk Factors
+  text: 'the Company’s access to, or increase the cost of, such content. The Company may be unable to continue to offer a wide variety of content at commercially reasonable prices with acceptable usage rules.
+
+    The Company also produces its own digital content, which can be costly to produce due to intense and increasing competition for talent, content and subscribers, and may fail to appeal to the Company’s customers.
+
+    The Company’s success depends largely on the talents and efforts of its team members, the continued service and availability of highly skilled employees, including key personnel, and the Company’s ability to nurture its distinctive and inclusive culture.'
+  ticker: AAPL
+c8828:
+  accession: 0000320193-26-000026
+  chunk_id: 8828
+  form_type: 10-K
+  section: Risk Factors
+  text: 'ctions; anti–money laundering; foreign ownership and investment; national security; tax; and environmental, health and safety, including electronic waste, recycling, product design and climate change.
+
+    Compliance with these laws and regulations is onerous and expensive. New and changing laws, regulations, executive orders, court orders, directives, and enforcement priorities can adversely affect the Company’s business by increasing the Company’s costs, limiting the Company’s ability to offer, market or sell a product, service or feature to customers, imposing changes to the design of the Company’s products and services, impacting customer demand for the Company’s products and services, and requiring changes to the Company’s business or supply chain. They can also create uncertainty about how such laws and regulations will be interpreted and applied, and compliance is made more challenging by the divergence, and at times direct conflict, between requirements across jurisdictions. If the Company is found to have violated such laws and regulations, such violations could result in penalties, fines and other legal liability.'
+  ticker: AAPL
+c9129:
+  accession: 0000320193-26-000013
+  chunk_id: 9129
+  form_type: 10-Q
+  section: Financial Statements
+  text: 's: Current portion of intangible assets, net | ( 4,463 ) | ( 2,208 )
+
+    Non-current portion of intangible assets, net | $21,334 | $11,093
+
+    Apple Inc. | Q2 2026 Form 10-Q | 9
+
+    Note 6 –
+
+    Debt
+
+    Commercial Paper
+
+    The Company issues unsecured short-term promissory notes pursuant to a commercial paper program. The Company uses net proceeds from the commercial paper program for general corporate purposes, including dividends and share repurchases. As of March 28, 2026 and September 27, 2025, the Company had $
+
+    2.0
+
+    billion and $
+
+    8.0
+
+    billion of commercial paper outstanding, respectively.
+
+    The following table provides a summary of cash flows associated with commercial paper for the six months ended March 28, 2026 and March 29, 2025 (in millions):
+
+    Six Months Ended
+
+    March 28, 2026 | March 29, 2025
+
+    Maturities 90 days or less:
+
+    Repayments of commercial paper, net | $( 2,123 ) | $( 3,968 )
+
+    Maturities greater than 90 days:
+
+    Repayments of commercial paper | ( 3,788 ) | —
+
+    Total repayments of commercial paper, net | $( 5,911 ) | $( 3,968 )
+
+    Term Debt
+
+    As of March 28, 2026 and September 27, 2025, the Company had outstanding fixed-rate notes with varying maturities for an aggregate carrying amount of $
+
+    82.7
+
+    billion'
+  ticker: AAPL
+c9231:
+  accession: 0000320193-25-000079
+  chunk_id: 9231
+  form_type: 10-K
+  section: Business
+  text: '’s products and services. The Company believes the duration of its intellectual property rights is adequate relative to the expected lives of its products and services.
+
+    Apple Inc. | 2025 Form 10-K | 3
+
+    In addition to Company-owned intellectual property, many of the Company’s products and services include technology or intellectual property that must be licensed from third parties. It may be necessary in the future to seek or renew licenses relating to various aspects of the Company’s products, processes and services. While the Company has generally been able to obtain such licenses on commercially reasonable terms in the past, there is no guarantee that such licenses could be obtained in the future on reasonable terms or at all.
+
+    Business Seasonality and Product Introductions'
+  ticker: AAPL
+c9388:
+  accession: 0000320193-25-000079
+  chunk_id: 9388
+  form_type: 10-K
+  section: Financial Statements
+  text: 'ates.
+
+    All derivative instruments are recorded in the Consolidated Balance Sheets at fair value. The accounting treatment for derivative gains and losses is based on intended use and hedge designation.
+
+    Gains and losses arising from amounts that are included in the assessment of cash flow hedge effectiveness are initially deferred in accumulated other comprehensive income/(loss) and subsequently reclassified into earnings when the hedged transaction affects earnings, and in the same line item in the Consolidated Statements of Operations. Gains and losses arising from amounts that are included in the assessment of fair value hedge effectiveness are recognized in the Consolidated Statements of Operations line item to which the hedge relates along with offsetting losses and gains related to the change in value of the hedged item.'
+  ticker: AAPL

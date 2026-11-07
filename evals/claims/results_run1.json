@@ -1,0 +1,454 @@
+{
+ "rows": [
+  {
+   "id": "f01",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.269,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f02",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.081,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f03",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.014,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f04",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.01,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f05",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.041,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f06",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.013,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f07",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.284,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f08",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.009,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f09",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.008,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f10",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": false,
+   "combined": false,
+   "entailment": 0.835,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f11",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.013,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f12",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.004,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f13",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.011,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f14",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.101,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f15",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.329,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f16",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.04,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f17",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.261,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "f18",
+   "kind": "faithful",
+   "label": "supported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.019,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "n01",
+   "kind": "number",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.167,
+   "missing_numbers": [
+    "3.5"
+   ],
+   "missing_companies": []
+  },
+  {
+   "id": "n02",
+   "kind": "number",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.022,
+   "missing_numbers": [
+    "94"
+   ],
+   "missing_companies": []
+  },
+  {
+   "id": "n03",
+   "kind": "number",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.014,
+   "missing_numbers": [
+    "2.8"
+   ],
+   "missing_companies": []
+  },
+  {
+   "id": "n04",
+   "kind": "number",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.01,
+   "missing_numbers": [
+    "64"
+   ],
+   "missing_companies": []
+  },
+  {
+   "id": "e01",
+   "kind": "entity",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.004,
+   "missing_numbers": [],
+   "missing_companies": [
+    "AAPL"
+   ]
+  },
+  {
+   "id": "e02",
+   "kind": "entity",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.005,
+   "missing_numbers": [],
+   "missing_companies": [
+    "JPM"
+   ]
+  },
+  {
+   "id": "e03",
+   "kind": "entity",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.003,
+   "missing_numbers": [],
+   "missing_companies": [
+    "AAPL"
+   ]
+  },
+  {
+   "id": "e04",
+   "kind": "entity",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.076,
+   "missing_numbers": [],
+   "missing_companies": [
+    "NVDA"
+   ]
+  },
+  {
+   "id": "x01",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.003,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "x02",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.002,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "x03",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.014,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "x04",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.001,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "d01",
+   "kind": "direction",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.001,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "d02",
+   "kind": "direction",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.004,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "d03",
+   "kind": "direction",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.003,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "w01",
+   "kind": "wrong_passage",
+   "label": "unsupported",
+   "l1": true,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.012,
+   "missing_numbers": [
+    "2114"
+   ],
+   "missing_companies": []
+  },
+  {
+   "id": "w02",
+   "kind": "wrong_passage",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.004,
+   "missing_numbers": [],
+   "missing_companies": []
+  },
+  {
+   "id": "w03",
+   "kind": "wrong_passage",
+   "label": "unsupported",
+   "l1": false,
+   "l2": true,
+   "combined": true,
+   "entailment": 0.006,
+   "missing_numbers": [],
+   "missing_companies": []
+  }
+ ],
+ "summary": {
+  "l1": {
+   "false_flag": 0.0,
+   "detect": 0.5,
+   "per_kind": {
+    "number": 1.0,
+    "entity": 1.0,
+    "extrapolation": 0.0,
+    "direction": 0.0,
+    "wrong_passage": 0.3333333333333333
+   }
+  },
+  "l2": {
+   "false_flag": 0.9444444444444444,
+   "detect": 1.0,
+   "per_kind": {
+    "number": 1.0,
+    "entity": 1.0,
+    "extrapolation": 1.0,
+    "direction": 1.0,
+    "wrong_passage": 1.0
+   }
+  },
+  "combined": {
+   "false_flag": 0.9444444444444444,
+   "detect": 1.0,
+   "per_kind": {
+    "number": 1.0,
+    "entity": 1.0,
+    "extrapolation": 1.0,
+    "direction": 1.0,
+    "wrong_passage": 1.0
+   }
+  }
+ },
+ "mode": "enforce L1 only"
+}

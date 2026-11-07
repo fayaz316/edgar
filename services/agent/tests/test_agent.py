@@ -178,3 +178,51 @@ def test_to_contents_groups_consecutive_tool_results_into_one_turn() -> None:
     )
     assert [c.role for c in contents] == ["user", "model", "user"]
     assert len(contents[1].parts) == 2 and len(contents[2].parts) == 2
+
+
+def _numeric_retriever() -> FakeRetriever:
+    class R(FakeRetriever):
+        def retrieve(self, query: str, **_: Any) -> list[RetrievedChunk]:
+            return [
+                _chunk(21, text="NVIDIA revenue was $12.5 billion, up 30% from a year earlier.")
+            ]
+
+    return R()
+
+
+def test_l1_rejects_a_figure_the_cited_passage_does_not_contain_then_repairs() -> None:
+    llm = ScriptedLLM(
+        [
+            _search(),
+            ModelTurn(text="NVIDIA revenue was $13.5 billion [1]."),
+            ModelTurn(text="NVIDIA revenue was $12.5 billion [1]."),
+        ]
+    )
+    r = run_agent("q", llm, _registry(_numeric_retriever()))
+    assert not r.refused and r.repairs == 1 and "12.5" in r.answer
+    rejected = [e for e in r.trace if e.kind == "verify" and e.detail.startswith("rejected")]
+    assert "13.5" in rejected[0].detail
+
+
+def test_l1_rejects_a_company_that_is_not_among_the_cited_passages() -> None:
+    llm = ScriptedLLM(
+        [
+            _search(),
+            ModelTurn(text="Apple revenue was $12.5 billion [1]."),
+            ModelTurn(text="NVIDIA revenue was $12.5 billion [1]."),
+        ]
+    )
+    r = run_agent("q", llm, _registry(_numeric_retriever()))
+    assert not r.refused and r.repairs == 1
+
+
+def test_l1_gives_up_after_the_repair_limit() -> None:
+    bad = ModelTurn(text="NVIDIA revenue was $99 billion [1].")
+    r = run_agent("q", ScriptedLLM([_search(), bad, bad, bad]), _registry(_numeric_retriever()))
+    assert r.refused and "could not be grounded" in r.answer and r.repairs == 2
+
+
+def test_claim_check_off_keeps_the_old_behaviour() -> None:
+    llm = ScriptedLLM([_search(), ModelTurn(text="NVIDIA revenue was $13.5 billion [1].")])
+    r = run_agent("q", llm, _registry(_numeric_retriever()), claim_check="off")
+    assert not r.refused and r.repairs == 0
