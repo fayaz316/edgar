@@ -78,7 +78,7 @@ def store_filing(cur: psycopg.Cursor, filing: Filing, html: str) -> tuple[int, i
 
     cur.execute("DELETE FROM chunks WHERE document_id = %s", (doc_id,))
 
-    rows, n_reused = plan_chunk_rows(doc_id, parse_filing(html), reusable)
+    rows, n_reused = plan_chunk_rows(doc_id, parse_filing(html, filing.form), reusable)
     cur.executemany(
         """
         INSERT INTO chunks (document_id, section, seq, text, embedding)
