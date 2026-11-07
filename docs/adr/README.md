@@ -51,3 +51,4 @@ Status: Proposed | Accepted | Superseded by ADR XXXX · Date: YYYY-MM-DD
 | 0003 | Hybrid retrieval: Postgres FTS + pgvector fused with RRF | Accepted (retroactive) |
 | 0004 | Cite-or-refuse: unverifiable answers are suppressed | Accepted (retroactive) |
 | 0005 | Section-aware chunking of 10-K/10-Q | Accepted — under revision (retroactive) |
+| 0006 | Switchable embedder; local Hugging Face model as default | Accepted |
