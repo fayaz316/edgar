@@ -1,0 +1,264 @@
+{
+  "k": 8,
+  "embedder": "BAAI/bge-base-en-v1.5@a5beb1e3",
+  "corpus": {
+    "embedded": 4867,
+    "total": 4867
+  },
+  "overall": {
+    "hit@1": 0.25,
+    "hit@3": 0.4583333333333333,
+    "hit@5": 0.5416666666666666,
+    "hit@8": 0.625,
+    "mrr": 0.3722718253968254
+  },
+  "overall_lenient": {
+    "hit@1": 0.375,
+    "hit@3": 0.5416666666666666,
+    "hit@5": 0.625,
+    "hit@8": 0.6666666666666666,
+    "mrr": 0.4781746031746032
+  },
+  "rows": [
+    {
+      "id": "nvda-10q-001",
+      "answer_type": "numeric",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "nvda-10q-002",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "nvda-10q-003",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 2,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": false
+    },
+    {
+      "id": "nvda-10q-004",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "nvda-10q-005",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": 2,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "nvda-10k-006",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "nvda-10k-007",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 3,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": false
+    },
+    {
+      "id": "nvda-10q-009",
+      "answer_type": "comparative",
+      "difficulty": "hard",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "aapl-10k-001",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 8,
+      "rank_lenient": 4,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": false
+    },
+    {
+      "id": "aapl-10k-002",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 4,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "aapl-10k-003",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "aapl-10k-004",
+      "answer_type": "numeric",
+      "difficulty": "hard",
+      "rank": 2,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "aapl-10k-005",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 2,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": false
+    },
+    {
+      "id": "aapl-10k-006",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 3,
+      "rank_lenient": 3,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "aapl-10k-008",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "jpm-10q-001",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "jpm-10k-002",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 4,
+      "rank_lenient": 4,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "jpm-10k-003",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "jpm-10k-004",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "jpm-10q-005",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 7,
+      "rank_lenient": 7,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "jpm-10q-006",
+      "answer_type": "grounded",
+      "difficulty": "hard",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "nvda-10q-010",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "x-001",
+      "answer_type": "comparative",
+      "difficulty": "hard",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 2,
+      "section_agrees": null
+    },
+    {
+      "id": "x-003",
+      "answer_type": "comparative",
+      "difficulty": "hard",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "k": 8,
+  "embedder": "BAAI/bge-base-en-v1.5@a5beb1e3",
+  "corpus": {
+    "embedded": 4867,
+    "total": 4867
+  },
+  "overall": {
+    "hit@1": 0.3684210526315789,
+    "hit@3": 0.631578947368421,
+    "hit@5": 0.6842105263157895,
+    "hit@8": 0.7894736842105263,
+    "mrr": 0.5180451127819549
+  },
+  "overall_lenient": {
+    "hit@1": 0.5789473684210527,
+    "hit@3": 0.6842105263157895,
+    "hit@5": 0.7894736842105263,
+    "hit@8": 0.8421052631578947,
+    "mrr": 0.662781954887218
+  },
+  "rows": [
+    {
+      "id": "h-aapl-10k-001",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-aapl-10q-001",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 3,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-aapl-10q-002",
+      "answer_type": "numeric",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-aapl-10q-003",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 6,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-aapl-10q-004",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 7,
+      "rank_lenient": 7,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-jpm-10k-001",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 2,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": false
+    },
+    {
+      "id": "h-jpm-10k-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-jpm-10k-003",
+      "answer_type": "grounded",
+      "difficulty": "hard",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "h-jpm-10k-004",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "h-jpm-10q-001",
+      "answer_type": "numeric",
+      "difficulty": "medium",
+      "rank": 5,
+      "rank_lenient": 5,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-jpm-10q-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": 4,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "h-jpm-10q-003",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 2,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-nvda-10k-001",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-nvda-10k-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 2,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-nvda-10k-003",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 2,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-nvda-10q-001",
+      "answer_type": "numeric",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-nvda-10q-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "h-nvda-10q-003",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "h-nvda-10q-004",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    }
+  ]
+}

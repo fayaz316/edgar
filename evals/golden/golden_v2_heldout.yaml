@@ -1,0 +1,210 @@
+# Held-out set v2 — FROZEN after the control run. See HELDOUT_PROTOCOL.md, Addendum B.
+# Sampled with: ORDER BY md5(c.id::text || 'heldout-v2'), 4 chunks per (ticker, form_type),
+# length 500-1500 chars, excluding the 24 chunks sampled for v1. Questions written from the chunk
+# text WITHOUT running any search, paraphrased (no 4-word run shared with the anchor snippet).
+#
+# Skipped candidates (chunk ids), each with its stated reason:
+#   9454  AAPL 10-K   boilerplate      (exhibit index)
+#   9458  AAPL 10-K   boilerplate      (exhibit index)
+#   9110  AAPL 10-Q   table-fragment   (balance sheet rows)
+#   9008  AAPL 10-Q   table-fragment   (income statement rows)
+#   8385  JPM  10-K   table-fragment   (loan table; only a one-line definition is readable)
+#   6898  JPM  10-Q   table-fragment   (fair-value hierarchy table)
+# Everything else in the sample is included below (18 questions).
+- id: hb-aapl-10k-001
+  question: What security steps does Apple take to guard customer accounts against fraud?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: Risk Factors
+      snippet_hint: "deploys and makes available technologies like multifactor authentication"
+  must_not_appear: []
+  tags: [aapl, risk-factors, heldout2]
+  difficulty: medium
+
+- id: hb-aapl-10k-002
+  question: What could happen if Apple falls short of its own values-related goals or of what stakeholders expect?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: Risk Factors
+      snippet_hint: "adverse reactions by regulators, consumers and other stakeholders"
+  must_not_appear: []
+  tags: [aapl, risk-factors, heldout2]
+  difficulty: hard
+
+- id: hb-aapl-10q-001
+  question: In its latest 10-Q, how does Apple account for any tariff refunds it receives?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: MD&A
+      snippet_hint: "recognized any refunds received as a reduction of products cost of sales"
+  must_not_appear: []
+  tags: [aapl, tariffs, heldout2]
+  difficulty: medium
+
+- id: hb-aapl-10q-002
+  question: According to Apple's 10-Q, what do competition laws abroad demand of large tech companies?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000013"
+      section: Risk Factors
+      snippet_hint: "imposing wide-ranging obligations on technology companies and significant limitations on businesses"
+  must_not_appear: []
+  tags: [aapl, regulation, heldout2]
+  difficulty: medium
+
+- id: hb-jpm-10k-001
+  question: Which kinds of structured instruments did JPMorgan elect to measure at fair value?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "Structured notes and other hybrid instruments, which are predominantly financial instruments that contain embedded derivatives"
+  must_not_appear: []
+  tags: [jpm, fair-value, heldout2]
+  difficulty: hard
+
+- id: hb-jpm-10k-002
+  question: What training does JPMorgan offer employees to build their skills?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Business
+      snippet_hint: "The Firm offers voluntary training programs and educational resources to all employees"
+  must_not_appear: []
+  tags: [jpm, employees, heldout2]
+  difficulty: easy
+
+- id: hb-jpm-10k-003
+  question: How does JPMorgan define credit risk?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Annual Report Body
+      snippet_hint: "Credit risk is the risk associated with the default or change in credit profile of a client, counterparty or customer"
+  must_not_appear: []
+  tags: [jpm, credit, heldout2]
+  difficulty: easy
+
+- id: hb-jpm-10q-001
+  question: How does JPMorgan describe its Retail mortgage origination channel?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: Financial Statements
+      snippet_hint: "Borrowers who buy or refinance a home through direct contact with a mortgage banker"
+  must_not_appear: []
+  tags: [jpm, mortgage, heldout2]
+  difficulty: medium
+
+- id: hb-jpm-10q-002
+  question: How large is the interest-only part of JPMorgan's retained residential mortgage book as of June 30, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: MD&A
+      snippet_hint: "retained interest-only residential mortgage loans was $89.1 billion and $88.8 billion"
+  must_not_appear: []
+  tags: [jpm, mortgage, numeric, heldout2]
+  difficulty: medium
+
+- id: hb-jpm-10q-003
+  question: How much did JPMorgan book from its Visa stake in the period ended June 30, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: MD&A
+      snippet_hint: "the $4.6 billion net gain related to Visa shares in Corporate"
+  must_not_appear: []
+  tags: [jpm, visa, numeric, heldout2]
+  difficulty: medium
+
+- id: hb-nvda-10k-001
+  question: How could new export controls on NVIDIA's networking products affect its competitive position?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: Risk Factors
+      snippet_hint: "would likely have a disproportionate impact on NVIDIA and may disadvantage us against certain of our competitors"
+  must_not_appear: []
+  tags: [nvda, export-controls, heldout2]
+  difficulty: medium
+
+- id: hb-nvda-10k-002
+  question: What happened to NVIDIA's business in Russia after the war in Ukraine?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Risk Factors
+      snippet_hint: "In fiscal year 2023, we stopped direct sales to Russia and closed business operations in Russia"
+  must_not_appear: []
+  tags: [nvda, sanctions, heldout2]
+  difficulty: easy
+
+- id: hb-nvda-10k-003
+  question: How does NVIDIA estimate its allowance for product returns?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: MD&A
+      snippet_hint: "we record a reduction to revenue by establishing a sales return allowance for estimated product returns"
+  must_not_appear: []
+  tags: [nvda, revenue-recognition, heldout2]
+  difficulty: medium
+
+- id: hb-nvda-10k-004
+  question: What did China's antitrust regulators conclude about NVIDIA's Mellanox acquisition commitments?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Risk Factors
+      snippet_hint: "preliminary finding that our compliance with applicable U.S. export controls"
+  must_not_appear: []
+  tags: [nvda, china, heldout2]
+  difficulty: medium
+
+- id: hb-nvda-10q-001
+  question: In its latest 10-Q, how large were NVIDIA's unrecognized tax benefits as of July 26, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "Unrecognized tax benefits were $5.0 billion, which included related interest and penalties of $503 million"
+  must_not_appear: []
+  tags: [nvda, tax, numeric, heldout2]
+  difficulty: easy
+
+- id: hb-nvda-10q-002
+  question: Is NVIDIA's current fiscal year longer than the last one?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000052"
+      section: Financial Statements
+      snippet_hint: "Fiscal year 2027 is a 53-week year and fiscal year 2026 was a 52-week year"
+  must_not_appear: []
+  tags: [nvda, fiscal-calendar, heldout2]
+  difficulty: medium
+
+- id: hb-nvda-10q-003
+  question: What was behind the bigger outflow from financing at NVIDIA in Q1 of fiscal 2027?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000052"
+      section: MD&A
+      snippet_hint: "financing activities increased in the first quarter of fiscal year 2027 compared to the first quarter of fiscal year 2026, mainly due to higher share repurchases"
+  must_not_appear: []
+  tags: [nvda, cash-flow, heldout2]
+  difficulty: medium
+
+- id: hb-nvda-10q-004
+  question: In NVIDIA's most recent quarterly report, how do customer financing arrangements with extended payment terms affect operating cash flows?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "will continue to affect the timing of our operating cash flows"
+  must_not_appear: []
+  tags: [nvda, cash-flow, heldout2]
+  difficulty: hard

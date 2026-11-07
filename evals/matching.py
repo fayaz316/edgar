@@ -9,7 +9,7 @@ labels do. Section agreement is reported separately as a diagnostic.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 
 from evals.schema import EvidenceAnchor
 
@@ -20,15 +20,28 @@ def normalize(text: str) -> str:
     return " ".join(text.lower().split())
 
 
-def anchor_matches(chunk: RankedChunk, anchor: EvidenceAnchor) -> bool:
+# accession -> accessions accepted as equivalent evidence (the same company's filings)
+Equivalents = Mapping[str, frozenset[str]]
+
+
+def anchor_matches(
+    chunk: RankedChunk, anchor: EvidenceAnchor, equivalents: Equivalents | None = None
+) -> bool:
+    """Strict (default): the anchor's own filing. With `equivalents` (lenient): any filing the
+    mapping lists for the anchor's accession, i.e. the same wording from a sibling filing."""
     accession, _section, text = chunk
-    return accession == anchor.accession and normalize(anchor.snippet_hint) in normalize(text)
+    accepted = (equivalents or {}).get(anchor.accession, frozenset()) | {anchor.accession}
+    return accession in accepted and normalize(anchor.snippet_hint) in normalize(text)
 
 
-def first_hit_rank(chunks: Sequence[RankedChunk], anchors: Sequence[EvidenceAnchor]) -> int | None:
+def first_hit_rank(
+    chunks: Sequence[RankedChunk],
+    anchors: Sequence[EvidenceAnchor],
+    equivalents: Equivalents | None = None,
+) -> int | None:
     """1-based rank of the first chunk matching ANY anchor; None = miss."""
     for rank, chunk in enumerate(chunks, start=1):
-        if any(anchor_matches(chunk, a) for a in anchors):
+        if any(anchor_matches(chunk, a, equivalents) for a in anchors):
             return rank
     return None
 

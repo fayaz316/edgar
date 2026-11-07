@@ -9,7 +9,7 @@ Layers, all fast-failing with named errors:
                   would silently cap recall; a hint under another section means the
                   anchor and the corpus disagree)
 
-Usage: uv run python -m evals.validate_golden [--skip-db]
+Usage: uv run python -m evals.validate_golden [--skip-db] [--golden PATH]
 """
 
 from __future__ import annotations
@@ -30,9 +30,9 @@ load_dotenv(".env")
 GOLDEN_PATH = "evals/golden/golden_v0.yaml"
 
 
-def load_items() -> tuple[list[GoldenItem], list[str]]:
+def load_items(path: str = GOLDEN_PATH) -> tuple[list[GoldenItem], list[str]]:
     errors: list[str] = []
-    with open(GOLDEN_PATH) as f:
+    with open(path) as f:
         raw = yaml.safe_load(f)
     items: list[GoldenItem] = []
     ids: Counter[str] = Counter()
@@ -96,7 +96,9 @@ def check_db_refs(items: list[GoldenItem]) -> list[str]:
 
 def main() -> int:
     skip_db = "--skip-db" in sys.argv
-    items, errors = load_items()
+    argv = sys.argv
+    path = argv[argv.index("--golden") + 1] if "--golden" in argv[:-1] else GOLDEN_PATH
+    items, errors = load_items(path)
     if not errors and not skip_db:
         errors = check_db_refs(items)
 

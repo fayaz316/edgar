@@ -1,0 +1,219 @@
+# Held-out set v1 — FROZEN. See HELDOUT_PROTOCOL.md (written before sampling).
+# Sampled with: ORDER BY md5(c.id::text || 'heldout-v1'), 4 chunks per (ticker, form_type),
+# chunk length 500-1500 chars. Questions were written from the chunk text WITHOUT running any search.
+#
+# Skipped candidates (chunk ids), each with its stated reason:
+#   9447  AAPL 10-K   boilerplate        (exhibit index)
+#   9453  AAPL 10-K   boilerplate        (exhibit index)
+#   8959  AAPL 10-K   table-fragment     (segment operating-income table, no readable sentence)
+#   7062  JPM  10-Q   table-fragment     (auto-loan delinquency table)
+#   5247  NVDA 10-K   table-fragment     (equity / cash-flow statement rows)
+# Everything else in the sample is included below (19 questions).
+- id: h-aapl-10k-001
+  question: What drove the increase in Apple's Greater China net sales in fiscal 2026?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: MD&A
+      snippet_hint: "Greater China net sales increased during 2026 compared to 2025 primarily due to higher net sales of iPhone and Mac"
+  must_not_appear: []
+  tags: [aapl, mda, heldout]
+  difficulty: medium
+
+- id: h-aapl-10q-001
+  question: What does Apple say about China's data localization rules?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000013"
+      section: Risk Factors
+      snippet_hint: "China has regulatory requirements relating to data processing and localization"
+  must_not_appear: []
+  tags: [aapl, risk-factors, heldout]
+  difficulty: medium
+
+- id: h-aapl-10q-002
+  question: How much of Apple's total deferred revenue was expected to be realized in less than a year as of March 28, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-26-000013"
+      section: Financial Statements
+      snippet_hint: "expects 64 % of total deferred revenue to be realized in less than a year"
+  must_not_appear: []
+  tags: [aapl, deferred-revenue, numeric, heldout]
+  difficulty: medium
+
+- id: h-aapl-10q-003
+  question: When will ASU 2025-06 become effective for Apple?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: MD&A
+      snippet_hint: "ASU 2025-06 will be effective for the Company in its first quarter of 2029"
+  must_not_appear: []
+  tags: [aapl, accounting, heldout]
+  difficulty: easy
+
+- id: h-aapl-10q-004
+  question: How much was left under Apple's May 2025 share repurchase program as of June 27, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: Unregistered Sales of Equity Securities
+      snippet_hint: "remaining availability under the May 2025 program was $38.0 billion"
+  must_not_appear: []
+  tags: [aapl, buybacks, numeric, heldout]
+  difficulty: easy
+
+- id: h-jpm-10k-001
+  question: What share repurchase program did JPMorgan's board authorize in July 2025?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Annual Report Body
+      snippet_hint: "authorized a new $50 billion common share repurchase program"
+  must_not_appear: []
+  tags: [jpm, buybacks, numeric, heldout]
+  difficulty: easy
+
+- id: h-jpm-10k-002
+  question: What jurisdiction does the CFPB have over JPMorgan's small business lending?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Business
+      snippet_hint: "The CFPB also has jurisdiction over small business lending activities"
+  must_not_appear: []
+  tags: [jpm, regulation, heldout]
+  difficulty: medium
+
+- id: h-jpm-10k-003
+  question: Under what conditions does JPMorgan consolidate its firm-sponsored asset management funds that are VIEs?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "consolidates the funds if the Firm is the general partner or managing member"
+  must_not_appear: []
+  tags: [jpm, accounting, heldout]
+  difficulty: hard
+
+- id: h-jpm-10k-004
+  question: What was the aggregate liquidation value of JPMorgan's preferred stock at December 31, 2025?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "The aggregate liquidation value was $ 20.1 billion at December 31, 2025"
+  must_not_appear: []
+  tags: [jpm, preferred-stock, numeric, heldout]
+  difficulty: easy
+
+- id: h-jpm-10q-001
+  question: How much cash collateral was netted against JPMorgan's net derivatives receivable at June 30, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: MD&A
+      snippet_hint: "Net derivatives receivable included cash collateral netted of $ 55.2 billion"
+  must_not_appear: []
+  tags: [jpm, derivatives, numeric, heldout]
+  difficulty: medium
+
+- id: h-jpm-10q-002
+  question: Why did JPMorgan's long-term debt increase?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: MD&A
+      snippet_hint: "net issuances of structured notes in Markets due to client demand"
+  must_not_appear: []
+  tags: [jpm, balance-sheet, heldout]
+  difficulty: medium
+
+- id: h-jpm-10q-003
+  question: How does JPMorgan define earnings-at-risk?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: MD&A
+      snippet_hint: "Earnings-at-risk estimates the Firm’s interest rate exposure for a given interest rate scenario"
+  must_not_appear: []
+  tags: [jpm, interest-rate-risk, heldout]
+  difficulty: medium
+
+- id: h-nvda-10k-001
+  question: What did the January 2025 AI Diffusion rule require for shipments of NVIDIA's covered products?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: Business
+      snippet_hint: "impose a worldwide licensing requirement on all products classified under Export Control Classification Numbers"
+  must_not_appear: []
+  tags: [nvda, export-controls, heldout]
+  difficulty: medium
+
+- id: h-nvda-10k-002
+  question: What did the plaintiffs allege in the NVIDIA securities class action filed in 2018?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: Financial Statements
+      snippet_hint: "related to channel inventory and the impact of cryptocurrency mining on GPU demand"
+  must_not_appear: []
+  tags: [nvda, litigation, heldout]
+  difficulty: medium
+
+- id: h-nvda-10k-003
+  question: Where did Ajay Puri work before joining NVIDIA?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Business
+      snippet_hint: "over a 22-year career at Sun Microsystems"
+  must_not_appear: []
+  tags: [nvda, executives, heldout]
+  difficulty: easy
+
+- id: h-nvda-10q-001
+  question: What cloud service commitments did NVIDIA make to its AI cloud partners?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "Our commitments, which are typically six years in duration, totaled $36 billion"
+  must_not_appear: []
+  tags: [nvda, ai-cloud, numeric, heldout]
+  difficulty: medium
+
+- id: h-nvda-10q-002
+  question: How could open-source foundation models affect demand for NVIDIA's products?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "platforms, they could reduce demand for our offerings"
+  must_not_appear: []
+  tags: [nvda, competition, heldout]
+  difficulty: medium
+
+- id: h-nvda-10q-003
+  question: What were NVIDIA's total investment commitments as of April 26, 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000052"
+      section: Financial Statements
+      snippet_hint: "Total Investment commitments were $ 27 billion as of April 26, 2026"
+  must_not_appear: []
+  tags: [nvda, investments, numeric, heldout]
+  difficulty: easy
+
+- id: h-nvda-10q-004
+  question: What drove Compute & Networking revenue growth in the second quarter and first half of fiscal 2027?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "was driven by the ramp of our Blackwell Ultra infrastructure"
+  must_not_appear: []
+  tags: [nvda, revenue, heldout]
+  difficulty: medium

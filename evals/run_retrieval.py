@@ -21,18 +21,31 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
+from typing import Literal
 
 from dotenv import load_dotenv
 from psycopg_pool import ConnectionPool
 
-from evals.matching import RankedChunk, anchors_covered, first_hit_rank, section_agrees, summarize
+from evals.matching import (
+    Equivalents,
+    RankedChunk,
+    anchors_covered,
+    first_hit_rank,
+    section_agrees,
+    summarize,
+)
 from evals.schema import GoldenItem
-from evals.validate_golden import load_items
+from evals.validate_golden import GOLDEN_PATH, load_items
 from services.db import MIGRATE_HINT, has_embedding_model_column
 from services.embeddings import MODEL_IDS, EmbeddingError, make_embedder
 from services.gateway.retrieval import Retriever
 
 load_dotenv(".env")
+KEYWORD_MODES: dict[str, Literal["and", "or", "bm25"]] = {
+    "all": "and",
+    "any": "or",
+    "bm25": "bm25",
+}
 PAUSE_S = 0.8  # stay far below the 100 RPM embedding quota
 QUOTA_WAIT_S = 65.0
 
@@ -46,10 +59,22 @@ def embedded_coverage(pool: ConnectionPool, model_id: str) -> tuple[int, int]:
     return (int(row[0]), int(row[1])) if row else (0, 0)
 
 
-def retrieve_ranked(retriever: Retriever, item: GoldenItem, k: int) -> list[RankedChunk]:
+def company_equivalents(pool: ConnectionPool) -> Equivalents:
+    """accession -> every accession of the same ticker (lenient scoring: same company's text)."""
+    with pool.connection() as conn:
+        rows = conn.execute("SELECT ticker, accession FROM documents").fetchall()
+    by_ticker: dict[str, set[str]] = defaultdict(set)
+    for ticker, accession in rows:
+        by_ticker[str(ticker)].add(str(accession))
+    return {acc: frozenset(accs) for accs in by_ticker.values() for acc in accs}
+
+
+def retrieve_ranked(
+    retriever: Retriever, item: GoldenItem, k: int, infer_filing: bool = True
+) -> list[RankedChunk]:
     for attempt in range(3):
         try:
-            got = retriever.retrieve(item.question, top_k=k)
+            got = retriever.retrieve(item.question, top_k=k, infer_filing=infer_filing)
             return [(c.accession, c.section, c.text) for c in got]
         except EmbeddingError as exc:
             if attempt == 2:
@@ -62,9 +87,21 @@ def retrieve_ranked(retriever: Retriever, item: GoldenItem, k: int) -> list[Rank
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--k", type=int, default=8)
+    ap.add_argument("--golden", default=GOLDEN_PATH, help="golden YAML to score")
     ap.add_argument("--out", default="evals/results/latest.json")
     ap.add_argument(
         "--embedder", choices=sorted(MODEL_IDS), default=os.environ.get("EA_EMBEDDER", "local")
+    )
+    ap.add_argument(
+        "--lexical",
+        choices=tuple(KEYWORD_MODES),
+        default="bm25",
+        help="keyword leg: bm25 (default, ADR 0010) | all = old AND leg | any = OR (rejected, ADR 0009)",
+    )
+    ap.add_argument(
+        "--no-filing-hints",
+        action="store_true",
+        help="do not read form type / 'latest' from the question (for before/after comparison)",
     )
     ap.add_argument(
         "--allow-partial", action="store_true", help="run even if embeddings incomplete"
@@ -77,7 +114,7 @@ def main() -> int:
         return 1
     embedder = make_embedder(args.embedder, api_key=os.environ.get("GEMINI_API_KEY"))
 
-    items, errors = load_items()
+    items, errors = load_items(args.golden)
     if errors:
         print("golden set invalid — run evals.validate_golden first", file=sys.stderr)
         return 1
@@ -106,14 +143,18 @@ def main() -> int:
             )
             return 2
 
-        retriever = Retriever(pool, embedder)
+        retriever = Retriever(pool, embedder, keyword=KEYWORD_MODES[args.lexical])
+        equivalents = company_equivalents(pool)
         rows: list[dict[str, object]] = []
         ranks: list[int | None] = []
+        lenient_ranks: list[int | None] = []
         types: list[str] = []
         for n, item in enumerate(scored, start=1):
-            ranked = retrieve_ranked(retriever, item, args.k)
+            ranked = retrieve_ranked(retriever, item, args.k, not args.no_filing_hints)
             rank = first_hit_rank(ranked, item.expected_evidence)
             ranks.append(rank)
+            lenient = first_hit_rank(ranked, item.expected_evidence, equivalents)
+            lenient_ranks.append(lenient)
             types.append(item.answer_type)
             found, need = anchors_covered(ranked, item.expected_evidence, args.k)
             rows.append(
@@ -122,6 +163,7 @@ def main() -> int:
                     "answer_type": item.answer_type,
                     "difficulty": item.difficulty,
                     "rank": rank,
+                    "rank_lenient": lenient,
                     "anchors_found": found,
                     "anchors_needed": need,
                     "section_agrees": section_agrees(ranked, item.expected_evidence),
@@ -130,13 +172,20 @@ def main() -> int:
             print(f"[{n:>2}/{len(scored)}] {item.id:<16} rank={rank}  anchors={found}/{need}")
             time.sleep(PAUSE_S)
 
-    overall = summarize(ranks, ks=tuple(k for k in (1, 3, 5, 8) if k <= args.k))
+    ks = tuple(k for k in (1, 3, 5, 8) if k <= args.k)
+    overall = summarize(ranks, ks=ks)
+    overall_lenient = summarize(lenient_ranks, ks=ks)
     by_type: dict[str, list[int | None]] = defaultdict(list)
     for t, r in zip(types, ranks, strict=True):
         by_type[t].append(r)
 
     print(f"\n=== retrieval recall over {len(rows)} answerable questions (k={args.k}) ===")
-    print("overall :", {m: round(v, 3) for m, v in overall.items()})
+    print("overall :", {m: round(v, 3) for m, v in overall.items()}, " (strict: exact filing)")
+    print(
+        "lenient :",
+        {m: round(v, 3) for m, v in overall_lenient.items()},
+        " (same company, any filing)",
+    )
     for t, rs in sorted(by_type.items()):
         print(f"{t:<11}:", {m: round(v, 3) for m, v in summarize(rs, ks=(1, args.k)).items()})
     misses = [str(r["id"]) for r in rows if r["rank"] is None]
@@ -153,6 +202,7 @@ def main() -> int:
                 "embedder": embedder.model_id,
                 "corpus": {"embedded": embedded, "total": total},
                 "overall": overall,
+                "overall_lenient": overall_lenient,
                 "rows": rows,
             },
             indent=2,

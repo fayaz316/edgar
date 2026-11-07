@@ -76,3 +76,20 @@ def test_summarize_hit_at_k_and_mrr() -> None:
     assert s["hit@8"] == 0.75
     assert abs(s["mrr"] - (1 + 1 / 3 + 1 / 8) / 4) < 1e-9
     assert summarize([]) == {}
+
+
+def test_lenient_match_accepts_sibling_filing_of_same_company() -> None:
+    sibling = "0001045810-26-000052"
+    equivalents = {ACC: frozenset({ACC, sibling}), sibling: frozenset({ACC, sibling})}
+    chunk = _chunk("customers were 16%, 15%, and 13%", acc=sibling)
+    assert not anchor_matches(chunk, _anchor())  # strict: wrong filing
+    assert anchor_matches(chunk, _anchor(), equivalents)  # lenient: same company
+
+
+def test_lenient_match_rejects_other_company_and_missing_text() -> None:
+    equivalents = {ACC: frozenset({ACC, "0001045810-26-000052"})}
+    other_company = _chunk("customers were 16%, 15%, and 13%", acc="0000320193-26-000026")
+    assert not anchor_matches(other_company, _anchor(), equivalents)
+    assert not anchor_matches(
+        _chunk("unrelated", acc="0001045810-26-000052"), _anchor(), equivalents
+    )
