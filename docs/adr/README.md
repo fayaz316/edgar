@@ -59,3 +59,4 @@ Status: Proposed | Accepted | Superseded by ADR XXXX · Date: YYYY-MM-DD
 | 0011 | Cross-encoder reranker: built, measured, not adopted | Accepted (not adopted) |
 | 0012 | One tool registry exposed over MCP (Phase 2, first slice) | Accepted |
 | 0013 | Bounded plan/act/verify agent loop (LangGraph) over the tool registry | Accepted |
+| 0014 | Claim-level support checking: only the deterministic layer is enforced | Accepted |
