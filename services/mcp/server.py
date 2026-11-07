@@ -8,7 +8,6 @@ below only give the MCP SDK typed signatures to build schemas from; a test fails
 
 from __future__ import annotations
 
-import os
 from typing import Any, Literal
 
 from mcp.server.mcpserver import MCPServer
@@ -45,24 +44,9 @@ def build_server(registry: ToolRegistry) -> MCPServer:
 
 
 def main() -> None:
-    # Imports kept local: building the real context loads the embedding model (seconds).
-    from dotenv import load_dotenv
-    from psycopg_pool import ConnectionPool
+    from services.tools.bootstrap import registry_from_env  # loads the embedding model: seconds
 
-    from services.embeddings import make_embedder
-    from services.gateway.retrieval import Retriever
-    from services.tools.filings import ToolContext, build_registry
-
-    load_dotenv(".env")
-    dsn = os.environ.get("DATABASE_URL") or os.environ.get("EA_DATABASE_URL")
-    if not dsn:
-        raise SystemExit("DATABASE_URL missing (check .env)")
-    embedder = make_embedder(
-        os.environ.get("EA_EMBEDDER", "local"), api_key=os.environ.get("GEMINI_API_KEY")
-    )
-    pool = ConnectionPool(dsn, min_size=1, max_size=3, kwargs={"autocommit": True}, open=True)
-    registry = build_registry(ToolContext(retriever=Retriever(pool, embedder), pool=pool))
-    build_server(registry).run("stdio")
+    build_server(registry_from_env()).run("stdio")
 
 
 if __name__ == "__main__":
