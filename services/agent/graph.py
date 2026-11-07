@@ -14,6 +14,7 @@ Every step is recorded in `trace` (the thing a user should be able to inspect).
 from __future__ import annotations
 
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from typing import Any, Literal, TypedDict
 
@@ -252,7 +253,7 @@ def _number_passages(result: dict[str, Any], evidence: list[dict[str, Any]]) -> 
     return {"passages": numbered, "note": "cite a passage as [n] using its 'passage' number"}
 
 
-def run_agent(
+def stream_agent(
     question: str,
     llm: LLM,
     registry: ToolRegistry,
@@ -261,7 +262,8 @@ def run_agent(
     max_tool_calls: int = 8,
     max_repairs: int = 2,
     claim_check: Literal["off", "l1"] = "l1",
-) -> AgentResult:
+) -> Iterator[TraceEvent | AgentResult]:
+    """Run the agent, yielding each TraceEvent as soon as it happens, then the AgentResult last."""
     graph = build_graph(
         llm,
         registry,
@@ -283,14 +285,23 @@ def run_agent(
         "cited": [],
         "done": False,
     }
-    final: AgentState = graph.invoke(
-        initial, {"recursion_limit": 4 * (max_steps + max_repairs) + 10}
-    )
+    seen = 0
+    final = initial
+    config = {"recursion_limit": 4 * (max_steps + max_repairs) + 10}
+    for state in graph.stream(initial, config, stream_mode="values"):
+        final = state
+        yield from state["trace"][seen:]
+        seen = len(state["trace"])
+    yield _to_result(final)
+
+
+def _to_result(final: AgentState) -> AgentResult:
     citations = [
         {
             "passage": n,
             **{k: v for k, v in final["evidence"][n - 1].items() if k != "text"},
             "excerpt": final["evidence"][n - 1]["text"][:200],
+            "text": final["evidence"][n - 1]["text"],
         }
         for n in final["cited"]
     ]
@@ -303,3 +314,29 @@ def run_agent(
         tool_calls=final["tool_calls"],
         repairs=final["repairs"],
     )
+
+
+def run_agent(
+    question: str,
+    llm: LLM,
+    registry: ToolRegistry,
+    *,
+    max_steps: int = 8,
+    max_tool_calls: int = 8,
+    max_repairs: int = 2,
+    claim_check: Literal["off", "l1"] = "l1",
+) -> AgentResult:
+    result: AgentResult | None = None
+    for item in stream_agent(
+        question,
+        llm,
+        registry,
+        max_steps=max_steps,
+        max_tool_calls=max_tool_calls,
+        max_repairs=max_repairs,
+        claim_check=claim_check,
+    ):
+        if isinstance(item, AgentResult):
+            result = item
+    assert result is not None  # stream_agent always ends with the result
+    return result

@@ -22,9 +22,12 @@ from psycopg_pool import ConnectionPool
 from pydantic import AliasChoices, BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from services.agent.llm import GeminiLLM
 from services.embeddings import EmbeddingError, make_embedder
+from services.gateway.agent_api import router as agent_router
 from services.gateway.answer import SYSTEM_PROMPT, GroundedAnswer, build_passages, validate_answer
 from services.gateway.retrieval import Retriever
+from services.tools.filings import ToolContext, build_registry
 
 load_dotenv()  # shared repo .env; Settings picks only its aliased keys
 
@@ -98,6 +101,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
             f"no chunks embedded with {embedder.model_id}: run `make embed` or set EA_EMBEDDER"
         )
     app.state.retriever = Retriever(pool, embedder)
+    app.state.registry = build_registry(ToolContext(retriever=app.state.retriever, pool=pool))
+    app.state.agent_llm = GeminiLLM(settings.gemini_api_key)
     log.info(
         "startup",
         environment=settings.environment,
@@ -109,7 +114,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     log.info("shutdown")
 
 
-app = FastAPI(title="Edgar Analyst Gateway", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="Edgar Analyst Gateway", version="0.3.0", lifespan=lifespan)
+app.include_router(agent_router)
 
 
 @app.middleware("http")

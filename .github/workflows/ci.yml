@@ -23,8 +23,21 @@ jobs:
         run: uv run mypy
       - name: Tests
         run: uv run pytest
-      - name: Golden set schema + semantics
-        run: uv run python -m evals.validate_golden --skip-db
+      - name: Golden sets schema + semantics (all sets)
+        run: |
+          for f in evals/golden/golden_v0.yaml evals/golden/golden_v1_heldout.yaml \
+                   evals/golden/golden_v2_heldout.yaml evals/golden/golden_v3_heldout.yaml; do
+            uv run python -m evals.validate_golden --skip-db --golden "$f"
+          done
       - name: Terraform validate
         run: cd infra && terraform init -backend=false && terraform validate
         continue-on-error: true  # remove once CI gets GCP creds (Phase 1)
+
+  image:
+    # The container once drifted from the code (missing modules); build it and import the app.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f services/gateway/Dockerfile -t edgar-gateway:ci .
+      - name: App imports resolve inside the image
+        run: docker run --rm --entrypoint python edgar-gateway:ci -c "import services.gateway.main"
