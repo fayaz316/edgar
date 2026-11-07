@@ -48,7 +48,11 @@ Status: Proposed | Accepted | Superseded by ADR XXXX · Date: YYYY-MM-DD
 |---|---|---|
 | 0001 | Serverless-first on GCP; K8s only as a proven evening | Accepted (decision #2 superseded by 0002) |
 | 0002 | Local-first Postgres (Docker pgvector) → Cloud SQL for the demo | Accepted |
-| 0003 | Hybrid retrieval: Postgres FTS + pgvector fused with RRF | Accepted (retroactive) |
+| 0003 | Hybrid retrieval: Postgres FTS + pgvector fused with RRF | Accepted (retroactive) — keyword leg replaced by 0010 |
 | 0004 | Cite-or-refuse: unverifiable answers are suppressed | Accepted (retroactive) |
-| 0005 | Section-aware chunking of 10-K/10-Q | Accepted — under revision (retroactive) |
+| 0005 | Section-aware chunking of 10-K/10-Q | Superseded by 0007 (retroactive) |
 | 0006 | Switchable embedder; local Hugging Face model as default | Accepted |
+| 0007 | Parser v2: form-aware sections, tables kept (labels fixed; recall flat) | Accepted |
+| 0008 | Filing-aware retrieval (form type, "latest") + strict/lenient eval | Accepted — weakly evidenced |
+| 0009 | OR-ing the keyword leg: bug found, fix rejected by pre-registered guard | Accepted (not adopted) |
+| 0010 | BM25 keyword leg (pre-registered guard passed) | Accepted |

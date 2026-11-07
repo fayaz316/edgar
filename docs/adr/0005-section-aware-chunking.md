@@ -1,5 +1,5 @@
 # ADR 0005 — Section-aware chunking of 10-K / 10-Q filings
-Status: Accepted — **under revision** (defects found in the 2026-11-07 review; see below) · Retroactive · Date: 2026-11-07
+Status: Superseded by ADR 0007 (parser v2) · Retroactive · Date: 2026-11-07
 
 ## Context
 Chunking sets a ceiling on RAG quality: retrieval can only return what the chunks contain.

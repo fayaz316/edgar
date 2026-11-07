@@ -1,5 +1,5 @@
 # ADR 0003 — Hybrid retrieval: Postgres full-text + pgvector, fused with RRF
-Status: Accepted (retroactive — written after the code; decision made in Phase 1) · Date: 2026-11-07
+Status: Accepted (retroactive — written after the code; decision made in Phase 1) · Date: 2026-11-07 — **keyword leg found ineffective on natural-language questions; see ADR 0009; keyword leg replaced by BM25 in ADR 0010**
 
 ## Context
 Analysts ask two kinds of questions. Some hinge on **exact terms** ("Item 1A", a product
