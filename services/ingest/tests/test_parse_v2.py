@@ -6,6 +6,8 @@ Synthetic fixtures mimic real EDGAR quirks. Real-HTML behaviour is checked separ
 
 from __future__ import annotations
 
+import itertools
+
 from services.ingest.parse import (
     PART_LINE,
     html_to_text,
@@ -152,3 +154,66 @@ def test_unique_section_seq_with_repeated_headings_10q() -> None:
     )
     keys = [(c.section, c.seq) for c in parse_filing(html, "10-Q")]
     assert len(keys) == len(set(keys))
+
+
+# --- big Item 15 / MD&A spans that contain the real financial statements -----------------
+BODY_LINE = "x" * 99  # one 100-char line (with newline)
+
+
+def _item15(
+    head_lines: int, fs_lines: int, with_exhibits: bool = True, with_fs: bool = True
+) -> str:
+    parts = ["Item 15. Exhibits, Financial Statement Schedules."]
+    parts += [BODY_LINE] * head_lines
+    if with_fs:
+        parts += ["Report of Independent Registered Public Accounting Firm"]
+        parts += [BODY_LINE] * fs_lines
+    if with_exhibits:
+        parts += ["Exhibit Index", "Exhibit No. | Description | Form"] + [BODY_LINE] * 5
+    return "\n".join(parts)
+
+
+def test_item15_index_then_statements_then_exhibits_is_split_in_three() -> None:
+    spans = split_sections(_item15(head_lines=15, fs_lines=300), "10-K")
+    assert _names(spans) == [
+        "Front Matter",
+        "Exhibits and Financial Statement Schedules",
+        "Financial Statements",
+        "Exhibits and Financial Statement Schedules",
+    ]
+
+
+def test_cross_reference_filer_big_head_becomes_annual_report_body() -> None:
+    spans = split_sections(_item15(head_lines=400, fs_lines=300, with_exhibits=False), "10-K")
+    assert _names(spans)[1:] == ["Annual Report Body", "Financial Statements"]
+
+
+def test_item15_without_statement_markers_is_unchanged() -> None:
+    spans = split_sections(_item15(head_lines=400, fs_lines=0, with_fs=False), "10-K")
+    assert _names(spans)[1:] == ["Exhibits and Financial Statement Schedules"]
+
+
+def test_small_item15_with_marker_is_left_alone() -> None:
+    spans = split_sections(_item15(head_lines=2, fs_lines=3), "10-K")
+    assert _names(spans)[1:] == ["Exhibits and Financial Statement Schedules"]
+
+
+def test_10q_mdna_containing_statements_is_split() -> None:
+    body = "\n".join(
+        [
+            "PART I. FINANCIAL INFORMATION",
+            "Item 2. Management's Discussion and Analysis",
+            *[BODY_LINE] * 250,
+            "Consolidated balance sheets",
+            *[BODY_LINE] * 100,
+        ]
+    )
+    assert _names(split_sections(body, "10-Q"))[1:] == ["MD&A", "Financial Statements"]
+
+
+def test_spans_stay_contiguous_after_refinement() -> None:
+    text = _item15(head_lines=400, fs_lines=300)
+    spans = split_sections(text, "10-K")
+    for (_, _s1, e1), (_, s2, _e2) in itertools.pairwise(spans):
+        assert e1 == s2
+    assert spans[-1][2] == len(text)

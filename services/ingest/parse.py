@@ -83,6 +83,24 @@ PART_LINE = re.compile(
 TOC_ENTRY = re.compile(r"[\s|]\d{1,3}\s*$")  # heading line ending in a page number
 MAX_HEADING_LINE = 200
 
+# --- refining big spans: financial statements that live *inside* Item 15 / MD&A ---------
+# Many filers (NVDA) put the real statements after the Item 15 index; cross-reference filers
+# (JPM) put the whole annual report there while Items 7/8 are one-paragraph pointers. Left
+# alone, 30-85% of a filing would be labeled "Exhibits". We split at standalone markers.
+EXHIBITS = "Exhibits and Financial Statement Schedules"
+REFINABLE = {EXHIBITS, "MD&A"}
+MIN_REFINE_CHARS = 20_000
+HEAD_INDEX_MAX = 20_000  # an Item-15 head longer than this is report body, not an index
+FS_START = re.compile(
+    r"^(report of independent registered public accounting firm"
+    r"|consolidated (balance sheets?|statements? of [a-z ,&]+))\s*$",
+    re.IGNORECASE,
+)
+TAIL_START = re.compile(
+    r"^(exhibit index|index to exhibits|exhibit (no\.?|number)\b.*|signatures?)\s*$",
+    re.IGNORECASE,
+)
+
 MAX_CHUNK_CHARS = 1200
 OVERLAP_CHARS = 200
 MIN_SECTION_CHARS = 200  # skip ToC ghosts and fragments
@@ -182,8 +200,34 @@ def split_sections(text: str, form: str = "10-K") -> list[tuple[str, int, int]]:
     spans: list[tuple[str, int, int]] = [("Front Matter", 0, marks[0][1])]
     for i, (section, start) in enumerate(marks):
         end = marks[i + 1][1] if i + 1 < len(marks) else len(text)
-        spans.append((section, start, end))
+        spans.extend(_refine_span(text, (section, start, end)))
     return spans
+
+
+def _refine_span(text: str, span: tuple[str, int, int]) -> list[tuple[str, int, int]]:
+    """Split one big Item-15 / MD&A span around the financial statements it contains."""
+    name, start, end = span
+    if name not in REFINABLE or end - start < MIN_REFINE_CHARS:
+        return [span]
+    fs_abs: int | None = None
+    tail_abs: int | None = None
+    offset = start
+    for line in text[start:end].split("\n"):
+        if fs_abs is None:
+            if FS_START.match(line):
+                fs_abs = offset
+        elif name == EXHIBITS and tail_abs is None and len(line) <= 100 and TAIL_START.match(line):
+            tail_abs = offset
+        offset += len(line) + 1
+    if fs_abs is None:
+        return [span]
+    head_label = (
+        name if name == "MD&A" or fs_abs - start <= HEAD_INDEX_MAX else "Annual Report Body"
+    )
+    parts = [(head_label, start, fs_abs), ("Financial Statements", fs_abs, tail_abs or end)]
+    if tail_abs:
+        parts.append((name, tail_abs, end))
+    return [p for p in parts if p[2] > p[1]]
 
 
 # --- chunking -----------------------------------------------------------------------------
