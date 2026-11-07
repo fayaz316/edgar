@@ -25,6 +25,10 @@ FROZEN = [
     "claims/PROTOCOL.md",
     "injection/PROTOCOL.md",
     "injection/attacks.py",
+    "judge/PROTOCOL.md",
+    "judge/questions.py",
+    "judge/judge.py",
+    "judge/calibration.py",
 ]
 
 
