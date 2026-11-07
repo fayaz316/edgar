@@ -91,6 +91,13 @@ def main() -> int:
                 print(MIGRATE_HINT, file=sys.stderr)
                 return 3
         embedded, total = embedded_coverage(pool, embedder.model_id)
+        if total == 0:
+            print(
+                "REFUSING: the chunks table is empty (DB wiped?). Rebuild it: "
+                "`make reingest` (offline, from data/raw) then `make embed`.",
+                file=sys.stderr,
+            )
+            return 2
         if embedded < total and not args.allow_partial:
             print(
                 f"REFUSING: only {embedded}/{total} chunks embedded with {embedder.model_id} — recall on a partial corpus "
