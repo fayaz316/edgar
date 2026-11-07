@@ -23,6 +23,8 @@ FROZEN = [
     "claims/claims_v1.yaml",
     "claims/passages_v1.yaml",
     "claims/PROTOCOL.md",
+    "injection/PROTOCOL.md",
+    "injection/attacks.py",
 ]
 
 

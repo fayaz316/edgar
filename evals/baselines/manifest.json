@@ -6,5 +6,7 @@
  "golden/golden_v0.yaml": "746dfe3576a47339178a0efd40a9238649ecb622c81243179c6c6e1dae8f60ca",
  "golden/golden_v1_heldout.yaml": "4b3a20b40a2d20541fd832d94d7bba7908ec6a208526911ecba9e5a210e32623",
  "golden/golden_v2_heldout.yaml": "f7eaad0dad4795fa815b5d91e26b57574ed5d375d8f014d5cac843f6ff28e6c0",
- "golden/golden_v3_heldout.yaml": "47823d4d8f6ee0e0358ac4cbf5d1b4a2e7422303222d018dd0645e412d83a99f"
+ "golden/golden_v3_heldout.yaml": "47823d4d8f6ee0e0358ac4cbf5d1b4a2e7422303222d018dd0645e412d83a99f",
+ "injection/PROTOCOL.md": "989828d274f7f1d6fa425bec66a5e6c787123a80eb1c1e42013d71b4f776ecfe",
+ "injection/attacks.py": "4443f0168f57a6387b89d32506ff42c5d05fb73d0b185ddec88d9793c39c6100"
 }

@@ -247,3 +247,31 @@ def test_wall_clock_deadline_stops_a_slow_run_between_steps() -> None:
 def test_no_deadline_by_default() -> None:
     r = run_agent("q", _llm([_search(), ModelTurn(text="ok [1].")]), _registry())
     assert not r.refused
+
+
+class RecordingLLM(ScriptedLLM):
+    def __init__(self, turns: list[ModelTurn]) -> None:
+        super().__init__(turns)
+        self.systems: list[str] = []
+
+    def generate(
+        self, system: str, messages: list[Message], tools: list[dict[str, Any]]
+    ) -> ModelTurn:
+        self.systems.append(system)
+        return super().generate(system, messages, tools)
+
+
+def test_default_prompt_carries_the_security_rules_and_v0_does_not() -> None:
+    llm = RecordingLLM([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
+    run_agent("q", llm, _registry())
+    assert "Security rules" in llm.systems[0] and "untrusted" in llm.systems[0]
+    old = RecordingLLM([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
+    run_agent("q", old, _registry(), prompt_variant="v0")
+    assert "Security rules" not in old.systems[0]
+
+
+def test_tool_results_label_passages_as_untrusted_in_the_default_variant() -> None:
+    llm = RecordingLLM([_search(), ModelTurn(text="ok [1].")])
+    run_agent("q", llm, _registry())
+    tool_msg = next(m for m in llm.seen[1] if m.role == "tool")
+    assert "UNTRUSTED" in tool_msg.result["note"]
