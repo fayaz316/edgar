@@ -193,7 +193,9 @@ class ScriptedPool(RecordingPool):
 
 
 def test_bm25_ranks_by_idf_and_applies_the_scope_filters_afterwards() -> None:
-    meta = lambda cid: (cid, "NVDA", "10-Q", "2026-08-26", "MD&A", f"text {cid}", f"acc-{cid}")  # noqa: E731
+    def meta(cid: int) -> tuple[Any, ...]:
+        return (cid, "NVDA", "10-Q", "2026-08-26", "MD&A", f"text {cid}", f"acc-{cid}")
+
     script: list[list[tuple[Any, ...]]] = [
         [("export",), ("licens",)],  # 1. query lexemes
         # 2. (chunk, lexeme, tf, dl): chunk 10 has the rare term, chunk 20 only the common one

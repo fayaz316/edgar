@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 import time
 from collections import defaultdict
@@ -38,6 +39,7 @@ from evals.schema import GoldenItem
 from evals.validate_golden import GOLDEN_PATH, load_items
 from services.db import MIGRATE_HINT, has_embedding_model_column
 from services.embeddings import MODEL_IDS, EmbeddingError, make_embedder
+from services.gateway.rerank import CrossEncoderReranker
 from services.gateway.retrieval import Retriever
 
 load_dotenv(".env")
@@ -104,6 +106,11 @@ def main() -> int:
         help="do not read form type / 'latest' from the question (for before/after comparison)",
     )
     ap.add_argument(
+        "--rerank",
+        action="store_true",
+        help="rescore the top 30 fused chunks with the cross-encoder (Addendum G; off by default)",
+    )
+    ap.add_argument(
         "--allow-partial", action="store_true", help="run even if embeddings incomplete"
     )
     args = ap.parse_args()
@@ -143,7 +150,10 @@ def main() -> int:
             )
             return 2
 
-        retriever = Retriever(pool, embedder, keyword=KEYWORD_MODES[args.lexical])
+        reranker = CrossEncoderReranker() if args.rerank else None
+        retriever = Retriever(
+            pool, embedder, keyword=KEYWORD_MODES[args.lexical], reranker=reranker
+        )
         equivalents = company_equivalents(pool)
         rows: list[dict[str, object]] = []
         ranks: list[int | None] = []
@@ -203,6 +213,11 @@ def main() -> int:
                 "corpus": {"embedded": embedded, "total": total},
                 "overall": overall,
                 "overall_lenient": overall_lenient,
+                "rerank_seconds_median": (
+                    round(statistics.median(reranker.timings), 3)
+                    if reranker and reranker.timings
+                    else None
+                ),
                 "rows": rows,
             },
             indent=2,

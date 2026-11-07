@@ -131,3 +131,57 @@ Descriptive only: among the 34 questions whose rank changed, 24 improved (sign t
 p about 0.02). v1, the set with echoed wording, is the one set that did not improve.
 Consumed: golden_v0, v1 and v2 have now all informed decisions. The next retrieval change needs a
 new unseen set (v3, new seed, same rules) written BEFORE the change is run.
+
+## Addendum F — held-out v3 (written BEFORE sampling; golden_v3_heldout.yaml)
+Why: v0, v1 and v2 have all informed decisions (Addenda A-E). The reranker is judged partly on v3.
+Rules identical to Addendum B (paraphrase rule checked mechanically, 4-word runs; skips only for
+boilerplate / table-fragment / no-standalone-question, each listed), with:
+1. Seed `md5(c.id::text || 'heldout-v3')`, 4 chunks per (ticker, form_type), length 500-1500.
+2. Excluded: every chunk sampled for v1 and v2 (used or skipped), so no set shares a source chunk.
+3. After freezing, run the CURRENT default (BM25 keyword leg, hints ON, no reranker) once on v3 as
+   the control. v3 misses are not diagnosed.
+
+## Addendum G — Variant R: cross-encoder reranker. SPECIFICATION AND GUARD (written before any code)
+**Why.** Phase 1 of the blueprint requires "hybrid search + rerank". Hybrid fusion orders chunks by
+rank position only; a cross-encoder reads (question, chunk) together and can judge relevance
+directly. It can only help targets that are already in the candidate pool.
+
+**What changes (only this).** After RRF fusion, take the top 30 fused chunks, score each with the
+cross-encoder on `(question, chunk text)`, reorder by that score (ties keep the fused order),
+return the top k. Everything else - embedder, both legs, hints, pool sizes, k=8, scoring - is
+unchanged. Model: `cross-encoder/ms-marco-MiniLM-L-6-v2` (Hugging Face, ~90 MB, Apache-2.0, runs
+on CPU), chosen in advance for size and latency. If it fails the guard the conclusion is about THIS
+model, not about rerankers in general; a larger model would need its own written spec.
+
+**Fixed now, not to be tuned:** model, rerank pool = 30, text-only input (no section/ticker prefix),
+default max length, no score blending with RRF.
+
+**Measurement.** Control = current default. Variant R = control + `--rerank`. Each run ONCE on
+golden_v0 (24), v1 (19), v2 (18), v3 (new). Control results for v0-v2 already exist
+(bm25-*.json); v3's is recorded first. Strict metrics primary.
+
+**Guard (all must hold to adopt R as default):**
+ (i)   combined (all four sets) strict MRR improves by at least +0.03;
+ (ii)  no single set loses more than 2 strict hit@8 questions or more than 0.05 MRR;
+ (iii) combined strict hit@8 count is not lower;
+ (iv)  on v3 alone (never seen by any decision) strict MRR is not lower than control by more
+       than 0.02;
+ (v)   added latency: median rerank time per question under 1.5 s on this Mac's CPU.
+Otherwise R stays an opt-in flag, off by default. "Inconclusive" means not adopted. Either outcome
+is recorded in ADR 0011.
+
+**Reported, not decisive:** per-question wins/losses; lenient scores; how often the target was in
+the 30-candidate pool but outside the top 8 (the ceiling for any reranker).
+
+## Addendum H — Variant R result (each run once; guard applied by script)
+| Set | hit@8 control -> R | MRR control -> R | better / worse |
+|---|---|---|---|
+| golden_v0 (24) | 17 -> 14 | 0.447 -> 0.440 | 6 / 5 |
+| held-out v1 (19) | 17 -> 17 | 0.634 -> 0.709 | 5 / 4 |
+| held-out v2 (18) | 16 -> 14 | 0.446 -> 0.539 | 5 / 5 |
+| held-out v3 (17) | 12 -> 14 | 0.430 -> 0.492 | 5 / 4 |
+| combined (78) | 62 -> 59 | 0.489 -> 0.540 (+0.051) | 21 / 18 |
+Median rerank time per question: 0.17-0.21 s.
+Guard: (i) PASS (+0.051); (ii) FAIL (golden_v0 lost 3 hit@8 questions, limit 2); (iii) FAIL (62 -> 59);
+(iv) PASS (v3 MRR +0.062); (v) PASS. => NOT ADOPTED. Stays an opt-in flag (--rerank). ADR 0011.
+No miss was diagnosed. v3 is now consumed; the next change needs v4.

@@ -1,0 +1,200 @@
+# Held-out set v3 — FROZEN after the control run. See HELDOUT_PROTOCOL.md, Addendum F.
+# Sampled with: ORDER BY md5(c.id::text || 'heldout-v3'), 4 chunks per (ticker, form_type),
+# length 500-1500 chars, excluding every chunk sampled for v1 and v2. Questions written from the chunk
+# text WITHOUT running any search, paraphrased (no 4-word run shared with the anchor snippet).
+#
+# Skipped candidates (chunk ids), each with its stated reason:
+#   9037  AAPL 10-Q   boilerplate      (forward-looking-statements preamble)
+#   9021  AAPL 10-Q   table-fragment   (marketable securities table)
+#   7537  JPM  10-K   boilerplate      (introduction / forward-looking statements)
+#   8388  JPM  10-K   table-fragment   (loan delinquency / nonaccrual tables)
+#   7522  JPM  10-K   boilerplate      (exhibit index)
+#   6929  JPM  10-Q   table-fragment   (fair value level 3 roll-forward)
+#   5780  NVDA 10-K   boilerplate      (exhibit index)
+# Everything else in the sample is included below (17 questions).
+- id: hc-aapl-10k-001
+  question: How does Apple say artificial intelligence changes its cyber risk?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: Risk Factors
+      snippet_hint: "use of artificial intelligence by the Company, its employees and its suppliers exposes the Company to additional vulnerabilities and attacks"
+  must_not_appear: []
+  tags: [aapl, risk-factors, heldout3]
+  difficulty: medium
+
+- id: hc-aapl-10k-002
+  question: Has the European Commission accepted Apple's approach to complying with the DMA?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: Risk Factors
+      snippet_hint: "it has been challenged by the Commission and may be challenged further by private litigants"
+  must_not_appear: []
+  tags: [aapl, regulation, heldout3]
+  difficulty: medium
+
+- id: hc-aapl-10k-003
+  question: What U.S. antitrust lawsuits about smartphones is Apple facing, according to its fiscal 2025 annual report?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-25-000079"
+      section: Risk Factors
+      snippet_hint: "alleging monopolization or attempted monopolization in the markets for “performance smartphones” and “smartphones” generally"
+  must_not_appear: []
+  tags: [aapl, litigation, heldout3]
+  difficulty: medium
+
+- id: hc-aapl-10k-004
+  question: How much commercial paper did Apple have outstanding at the end of fiscal 2025?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-25-000079"
+      section: Financial Statements
+      snippet_hint: "the Company had $ 8.0 billion and $ 10.0 billion of commercial paper outstanding"
+  must_not_appear: []
+  tags: [aapl, debt, numeric, heldout3]
+  difficulty: easy
+
+- id: hc-aapl-10q-001
+  question: What explains the rise in Apple's tax rate for the June 2026 quarter versus the prior-year quarter?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: MD&A
+      snippet_hint: "was higher compared to the third quarter of 2025 primarily due to a higher effective tax rate on foreign earnings"
+  must_not_appear: []
+  tags: [aapl, tax, heldout3]
+  difficulty: medium
+
+- id: hc-aapl-10q-002
+  question: What did the court order Apple to stop doing about commissions on purchases made outside its apps?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: Legal Proceedings
+      snippet_hint: "enjoined the Company from imposing any commission or any fee on purchases that consumers make outside an app"
+  must_not_appear: []
+  tags: [aapl, litigation, heldout3]
+  difficulty: medium
+
+- id: hc-jpm-10k-001
+  question: Why doesn't JPMorgan treat the total size of its loan commitments as its expected credit exposure?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "is not, in the Firm’s view, representative of its expected future credit exposure or funding requirements"
+  must_not_appear: []
+  tags: [jpm, commitments, heldout3]
+  difficulty: hard
+
+- id: hc-jpm-10q-001
+  question: What was the total amount of credit JPMorgan provided and capital it raised in the first six months of 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: MD&A
+      snippet_hint: "$1.9 trillion | Total credit provided and capital raised (including loans and commitments)"
+  must_not_appear: []
+  tags: [jpm, credit, numeric, heldout3]
+  difficulty: medium
+
+- id: hc-jpm-10q-002
+  question: What does JPMorgan mean by retained loans?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: Financial Statements
+      snippet_hint: "Retained loans: Loans that are held-for-investment"
+  must_not_appear: []
+  tags: [jpm, glossary, heldout3]
+  difficulty: easy
+
+- id: hc-jpm-10q-003
+  question: In JPMorgan's latest 10-Q, how many Visa Class B-2 shares did it tender in the exchange offer?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: MD&A
+      snippet_hint: "Visa accepted the Firm’s tender of its 18.6 million Visa Class B-2 common shares"
+  must_not_appear: []
+  tags: [jpm, visa, numeric, heldout3]
+  difficulty: easy
+
+- id: hc-nvda-10k-001
+  question: What is NVLink Fusion meant to let customers do?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Business
+      snippet_hint: "NVIDIA NVLink Fusion to enable hyperscalers and custom ASIC designers to integrate custom CPUs and XPUs with our platform"
+  must_not_appear: []
+  tags: [nvda, products, heldout3]
+  difficulty: easy
+
+- id: hc-nvda-10k-002
+  question: Why does NVIDIA's reported revenue from Singapore not reflect where products are shipped?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: Financial Statements
+      snippet_hint: "Customers use Singapore to centralize invoicing while our products are almost always shipped elsewhere"
+  must_not_appear: []
+  tags: [nvda, revenue, heldout3]
+  difficulty: medium
+
+- id: hc-nvda-10k-003
+  question: When does NVIDIA plan to adopt the November 2024 FASB standard on expense detail?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: Financial Statements
+      snippet_hint: "We expect to adopt this standard in our fiscal year 2028 annual report"
+  must_not_appear: []
+  tags: [nvda, accounting, heldout3]
+  difficulty: medium
+
+- id: hc-nvda-10q-001
+  question: In NVIDIA's most recent quarterly report, how many shares went to key employees in its May 2026 acquisition?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: Unregistered Sales of Equity Securities
+      snippet_hint: "we acquired a company and issued to key employees a total of 926,447 shares of our common stock"
+  must_not_appear: []
+  tags: [nvda, acquisitions, numeric, heldout3]
+  difficulty: easy
+
+- id: hc-nvda-10q-002
+  question: What is the purpose of the 8 million share trading arrangement an NVIDIA director adopted in March 2026?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000052"
+      section: Other Information
+      snippet_hint: "is solely for gifts to charitable donor-advised funds"
+  must_not_appear: []
+  tags: [nvda, insiders, heldout3]
+  difficulty: medium
+
+- id: hc-nvda-10q-003
+  question: How could export controls hurt demand for NVIDIA's products and help its rivals?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: Risk Factors
+      snippet_hint: "benefiting competitors that offer alternatives less likely to be restricted by further controls"
+  must_not_appear: []
+  tags: [nvda, export-controls, heldout3]
+  difficulty: medium
+
+- id: hc-nvda-10q-004
+  question: How many shares did NVIDIA withhold for taxes on employee equity awards in Q1 of fiscal 2027?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000052"
+      section: Unregistered Sales of Equity Securities
+      snippet_hint: "we withheld approximately 12 million shares, for a total value of $2.1 billion through net share settlements"
+  must_not_appear: []
+  tags: [nvda, equity-awards, numeric, heldout3]
+  difficulty: easy

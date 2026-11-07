@@ -1,0 +1,195 @@
+{
+  "k": 8,
+  "embedder": "BAAI/bge-base-en-v1.5@a5beb1e3",
+  "corpus": {
+    "embedded": 4867,
+    "total": 4867
+  },
+  "overall": {
+    "hit@1": 0.35294117647058826,
+    "hit@3": 0.5882352941176471,
+    "hit@5": 0.6470588235294118,
+    "hit@8": 0.8235294117647058,
+    "mrr": 0.492296918767507
+  },
+  "overall_lenient": {
+    "hit@1": 0.47058823529411764,
+    "hit@3": 0.7647058823529411,
+    "hit@5": 0.8235294117647058,
+    "hit@8": 0.8823529411764706,
+    "mrr": 0.6225490196078431
+  },
+  "rerank_seconds_median": 0.205,
+  "rows": [
+    {
+      "id": "hc-aapl-10k-001",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 2,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-aapl-10k-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 3,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-aapl-10k-003",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 6,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-aapl-10k-004",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "hc-aapl-10q-001",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 4,
+      "rank_lenient": 4,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-aapl-10q-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": null,
+      "rank_lenient": 6,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "hc-jpm-10k-001",
+      "answer_type": "grounded",
+      "difficulty": "hard",
+      "rank": 7,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-jpm-10q-001",
+      "answer_type": "numeric",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-jpm-10q-002",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": null,
+      "rank_lenient": null,
+      "anchors_found": 0,
+      "anchors_needed": 1,
+      "section_agrees": null
+    },
+    {
+      "id": "hc-jpm-10q-003",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10k-001",
+      "answer_type": "grounded",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10k-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10k-003",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 3,
+      "rank_lenient": 3,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10q-001",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10q-002",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 2,
+      "rank_lenient": 2,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10q-003",
+      "answer_type": "grounded",
+      "difficulty": "medium",
+      "rank": 7,
+      "rank_lenient": 3,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    },
+    {
+      "id": "hc-nvda-10q-004",
+      "answer_type": "numeric",
+      "difficulty": "easy",
+      "rank": 1,
+      "rank_lenient": 1,
+      "anchors_found": 1,
+      "anchors_needed": 1,
+      "section_agrees": true
+    }
+  ]
+}

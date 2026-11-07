@@ -17,6 +17,7 @@ from psycopg_pool import ConnectionPool
 from services.embeddings import Embedder
 from services.gateway.bm25 import TermRow, bm25_rank
 from services.gateway.filing_hints import FilingHints, parse_filing_hints
+from services.gateway.rerank import RERANK_POOL, Reranker, reorder
 
 RRF_K = 60  # standard constant from the original RRF paper; dampens rank position
 POOL_PER_LEG = 30  # candidates fetched per leg before fusion
@@ -34,6 +35,7 @@ class RetrievedChunk:
     lexical_rank: int | None  # 1-based rank in lexical leg; None = not found there
     semantic_rank: int | None
     accession: str  # SEC accession number — lets evals match chunks to golden anchors
+    rerank_score: float | None = None  # cross-encoder score when a reranker is configured
 
 
 def rrf_fuse(
@@ -76,10 +78,14 @@ class Retriever:
         embedder: Embedder,
         *,
         keyword: Literal["and", "or", "bm25"] = "bm25",
+        reranker: Reranker | None = None,
+        rerank_pool: int = RERANK_POOL,
     ) -> None:
         self._pool = pool
         self._embedder = embedder
         self._keyword = keyword
+        self._reranker = reranker  # off by default: see ADR 0011
+        self._rerank_pool = rerank_pool
         self._corpus: tuple[int, float] | None = None  # (chunk count, mean chunk length)
 
     def retrieve(
@@ -109,7 +115,14 @@ class Retriever:
         by_id, fused = self._search(query, qvec, ticker, sections, scope)
         if not fused and scope.active:
             by_id, fused = self._search(query, qvec, ticker, sections, FilingHints())
-        ranked = sorted(fused.items(), key=lambda kv: kv[1][0], reverse=True)[:top_k]
+        ranked = sorted(fused.items(), key=lambda kv: kv[1][0], reverse=True)
+        rerank_scores: dict[int, float] = {}
+        if self._reranker is not None and ranked:
+            pool = ranked[: max(self._rerank_pool, top_k)]
+            scores = self._reranker.score(query, [by_id[cid][4] for cid, _ in pool])
+            rerank_scores = {cid: scores[i] for i, (cid, _) in enumerate(pool)}
+            ranked = [pool[i] for i in reorder(scores)]
+        ranked = ranked[:top_k]
 
         out: list[RetrievedChunk] = []
         for cid, (score, lex_rank, sem_rank) in ranked:
@@ -126,6 +139,7 @@ class Retriever:
                     lexical_rank=lex_rank,
                     semantic_rank=sem_rank,
                     accession=accession,
+                    rerank_score=rerank_scores.get(cid),
                 )
             )
         return out
