@@ -25,6 +25,7 @@ uv run ruff check . && uv run mypy
 make help                          # all targets, incl. infra lifecycle (bootstrap/plan/apply/teardown)
 
 # data + evals loop
+bash scripts/switch-to-local-embeddings.sh   # one shot: migrate + local embeddings + BEFORE baseline (add --through-reingest for AFTER)
 make db-up && make db-migrate     # local pgvector (+ one-time migration: vectors tagged by model)
 make embed                         # embed with the local HF model (free; EMBEDDER=gemini for the API)
 make fetch                         # cache raw filing HTML (SEC only, no DB)
