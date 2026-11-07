@@ -26,6 +26,9 @@ dev = [
   "mypy>=1.13",
   "types-pyyaml>=6.0.12.20261103",
 ]
+local-embed = [
+    "sentence-transformers>=3",
+]
 
 [tool.ruff]
 line-length = 100
@@ -41,11 +44,11 @@ strict = true
 files = ["services/gateway", "services/ingest", "evals"]
 
 [[tool.mypy.overrides]]
-module = "bs4.*"
+module = ["bs4.*", "sentence_transformers.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["services/gateway/tests", "services/ingest/tests", "evals/tests"]
+testpaths = ["services/tests", "services/gateway/tests", "services/ingest/tests", "evals/tests"]
 addopts = "-q"
 
 [tool.uv]

@@ -22,8 +22,9 @@ from psycopg_pool import ConnectionPool
 from pydantic import AliasChoices, BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from services.embeddings import EmbeddingError, make_embedder
 from services.gateway.answer import SYSTEM_PROMPT, GroundedAnswer, build_passages, validate_answer
-from services.gateway.retrieval import EmbeddingError, Retriever
+from services.gateway.retrieval import Retriever
 
 load_dotenv()  # shared repo .env; Settings picks only its aliased keys
 
@@ -42,6 +43,7 @@ class Settings(BaseSettings):
 
     environment: str = "dev"  # dev | prod — drives log verbosity and feature gates
     log_level: str = "INFO"
+    embedder: str = "local"  # local | gemini — must match the model the corpus was embedded with
     database_url: str = Field(
         default="", validation_alias=AliasChoices("EA_DATABASE_URL", "DATABASE_URL")
     )
@@ -85,8 +87,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     genai_client = genai.Client(api_key=settings.gemini_api_key)
     app.state.pool = pool
     app.state.genai = genai_client
-    app.state.retriever = Retriever(pool, genai_client)
-    log.info("startup", environment=settings.environment, generation_model=GENERATION_MODEL)
+    embedder = make_embedder(settings.embedder, api_key=settings.gemini_api_key)
+    # fail fast on a model/corpus mismatch: otherwise every /ask silently finds nothing
+    with pool.connection() as conn:
+        row = conn.execute(
+            "SELECT count(*) FROM chunks WHERE embedding_model = %s", (embedder.model_id,)
+        ).fetchone()
+    if not row or row[0] == 0:
+        raise RuntimeError(
+            f"no chunks embedded with {embedder.model_id}: run `make embed` or set EA_EMBEDDER"
+        )
+    app.state.retriever = Retriever(pool, embedder)
+    log.info(
+        "startup",
+        environment=settings.environment,
+        generation_model=GENERATION_MODEL,
+        embedding_model=embedder.model_id,
+    )
     yield
     pool.close()
     log.info("shutdown")

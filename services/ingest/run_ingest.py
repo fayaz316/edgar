@@ -23,6 +23,8 @@ import sys
 import psycopg
 from dotenv import load_dotenv
 
+from services.db import MIGRATE_HINT, has_embedding_model_column
+from services.embeddings import MODEL_IDS, model_id_for
 from services.ingest import raw_cache
 from services.ingest.edgar_client import EdgarClient, Filing
 from services.ingest.parse import Chunk, parse_filing
@@ -33,18 +35,32 @@ FORMS = frozenset({"10-K", "10-Q"})
 
 
 def plan_chunk_rows(
-    doc_id: int, chunks: list[Chunk], reusable: dict[str, str]
-) -> tuple[list[tuple[int, str, int, str, str | None]], int]:
+    doc_id: int, chunks: list[Chunk], reusable: dict[str, str], model_id: str
+) -> tuple[list[tuple[int, str, int, str, str | None, str | None]], int]:
     """Rows to INSERT for a document, plus how many reuse an existing embedding.
 
-    An embedding is a pure function of the chunk text, so a chunk whose text is
-    unchanged keeps its old vector even if its section label or seq changed.
+    An embedding is a pure function of (model, chunk text), so a chunk whose text is
+    unchanged keeps its old vector even if its section label or seq changed. `reusable`
+    must only hold vectors made by `model_id`; the model tag is stored only with a vector
+    (the table CHECK constraint requires vector and tag to be present together).
     """
-    rows = [(doc_id, c.section, c.seq, c.text, reusable.get(c.text)) for c in chunks]
+    rows = [
+        (
+            doc_id,
+            c.section,
+            c.seq,
+            c.text,
+            reusable.get(c.text),
+            model_id if c.text in reusable else None,
+        )
+        for c in chunks
+    ]
     return rows, sum(1 for r in rows if r[4] is not None)
 
 
-def store_filing(cur: psycopg.Cursor, filing: Filing, html: str) -> tuple[int, int, int]:
+def store_filing(
+    cur: psycopg.Cursor, filing: Filing, html: str, model_id: str
+) -> tuple[int, int, int]:
     """Upsert the document row, refresh its chunks.
     Returns (doc_id, n_chunks, n_embeddings_reused)."""
     cur.execute(
@@ -69,20 +85,23 @@ def store_filing(cur: psycopg.Cursor, filing: Filing, html: str) -> tuple[int, i
     )
     doc_id: int = cur.fetchone()[0]  # type: ignore[index]
 
-    # Remember embeddings by text before replacing the chunks.
+    # Remember embeddings (made by the ACTIVE model only) by text before replacing the chunks.
     cur.execute(
-        "SELECT text, embedding::text FROM chunks WHERE document_id = %s AND embedding IS NOT NULL",
-        (doc_id,),
+        """
+        SELECT text, embedding::text FROM chunks
+        WHERE document_id = %s AND embedding IS NOT NULL AND embedding_model = %s
+        """,
+        (doc_id, model_id),
     )
     reusable: dict[str, str] = {text: emb for text, emb in cur.fetchall()}
 
     cur.execute("DELETE FROM chunks WHERE document_id = %s", (doc_id,))
 
-    rows, n_reused = plan_chunk_rows(doc_id, parse_filing(html, filing.form), reusable)
+    rows, n_reused = plan_chunk_rows(doc_id, parse_filing(html, filing.form), reusable, model_id)
     cur.executemany(
         """
-        INSERT INTO chunks (document_id, section, seq, text, embedding)
-        VALUES (%s, %s, %s, %s, %s::vector)
+        INSERT INTO chunks (document_id, section, seq, text, embedding, embedding_model)
+        VALUES (%s, %s, %s, %s, %s::vector, %s)
         """,
         rows,
     )
@@ -97,6 +116,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--offline", action="store_true", help="use only cached filings (no network)")
     ap.add_argument("--refresh", action="store_true", help="re-download even if cached")
+    ap.add_argument(
+        "--embedder",
+        choices=sorted(MODEL_IDS),
+        default=os.environ.get("EA_EMBEDDER", "local"),
+        help="whose existing embeddings may be reused (default: $EA_EMBEDDER or local)",
+    )
     args = ap.parse_args(argv)
 
     if not args.offline and not args.tickers:
@@ -136,11 +161,16 @@ def main(argv: list[str] | None = None) -> int:
 
     # 2) store
     assert database_url is not None
+    model_id = model_id_for(args.embedder)
     total_chunks = total_reused = 0
     with psycopg.connect(database_url) as conn:
+        if not has_embedding_model_column(conn):
+            print(MIGRATE_HINT, file=sys.stderr)
+            return 3
+        conn.commit()
         for filing, html in pairs:
             with conn.cursor() as cur:
-                doc_id, n, reused = store_filing(cur, filing, html)
+                doc_id, n, reused = store_filing(cur, filing, html, model_id)
             conn.commit()
             total_chunks += n
             total_reused += reused

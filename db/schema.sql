@@ -31,10 +31,13 @@ CREATE TABLE IF NOT EXISTS chunks (
     text        TEXT NOT NULL,
     tsv         TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', text)) STORED,
     embedding   vector(768),
-    UNIQUE (document_id, section, seq)
+    embedding_model TEXT,  -- which model made `embedding`; vectors from different models are not comparable
+    UNIQUE (document_id, section, seq),
+    CONSTRAINT chunks_vector_has_model CHECK ((embedding IS NULL) = (embedding_model IS NULL))
 );
 
 CREATE INDEX IF NOT EXISTS chunks_tsv_idx       ON chunks USING GIN (tsv);
 CREATE INDEX IF NOT EXISTS chunks_embedding_idx ON chunks USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS chunks_doc_idx       ON chunks (document_id);
+CREATE INDEX IF NOT EXISTS chunks_model_idx     ON chunks (embedding_model);
 CREATE INDEX IF NOT EXISTS documents_ticker_idx ON documents (ticker, filed_at DESC);

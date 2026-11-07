@@ -5,9 +5,12 @@ SHELL := /bin/bash
 PROJECT ?= $(shell gcloud config get-value project 2>/dev/null)
 REGION ?= europe-west1
 TF_DIR := infra
+# which embedding model to use: local (free, on this Mac) | gemini (API, quota-limited). Override: make embed EMBEDDER=gemini
+EMBEDDER ?= local
+UV_EMB = uv run $(if $(filter local,$(EMBEDDER)),--group local-embed,)
 TFVARS := $(TF_DIR)/terraform.tfvars
 
-.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline
+.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline db-migrate
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -52,18 +55,24 @@ db-up: ## Start local dev database (Docker)
 	@until [ "$$(docker inspect --format='{{.State.Health.Status}}' edgar-pg 2>/dev/null)" = "healthy" ]; do sleep 2; done
 	@echo "db ready on :5433"
 
-embed: ## Resume embedding backfill (idempotent, ctrl-C safe)
-	uv run python -m services.ingest.embed_backfill
+embed: ## Embed every chunk not yet embedded by $(EMBEDDER) (resumable, ctrl-C safe)
+	$(UV_EMB) python -m services.ingest.embed_backfill --embedder $(EMBEDDER)
 
-embed-status: ## How many chunks have embeddings
-	docker exec edgar-pg psql -U edgar -d edgar -tc \
+embed-status: ## Chunks per embedding model (falls back to the old count before `make db-migrate`)
+	@docker exec edgar-pg psql -U edgar -d edgar -c \
+		"SELECT coalesce(embedding_model,'(not embedded)') AS model, count(*) FROM chunks GROUP BY 1 ORDER BY 2 DESC" 2>/dev/null \
+	|| docker exec edgar-pg psql -U edgar -d edgar -tc \
 		"SELECT count(*) FILTER (WHERE embedding IS NOT NULL) || ' / ' || count(*) FROM chunks"
+
+db-migrate: ## Apply db/migrations/*.sql (idempotent). Stop any running `make embed` first!
+	@for f in db/migrations/*.sql; do echo "applying $$f"; \
+		docker exec -i edgar-pg psql -U edgar -d edgar -v ON_ERROR_STOP=1 < $$f || exit 1; done
 
 fetch: ## Download + cache raw filing HTML (SEC only, no database)
 	uv run python -m services.ingest.run_ingest NVDA AAPL JPM --fetch-only
 
-reingest: ## Re-parse CACHED filings into Postgres (offline; reuses unchanged embeddings; not while `make embed` runs)
-	uv run python -m services.ingest.run_ingest --offline
+reingest: ## Re-parse CACHED filings into Postgres (offline; reuses unchanged $(EMBEDDER) embeddings; not while `make embed` runs)
+	uv run python -m services.ingest.run_ingest --offline --embedder $(EMBEDDER)
 
 parse-report: ## Per-filing parser diagnostics over cached HTML (offline; flags suspicious parses)
 	uv run python -m services.ingest.parse_report
@@ -74,8 +83,8 @@ golden-offline: ## Which golden anchors break under the CURRENT parser? (cached 
 golden: ## Validate golden set against schema + live corpus (needs db-up)
 	uv run python -m evals.validate_golden
 
-eval-retrieval: ## Retrieval recall over the golden set (needs full embeddings; no generation cost)
-	uv run python -m evals.run_retrieval
+eval-retrieval: ## Retrieval recall over the golden set with $(EMBEDDER) (needs full embeddings; no generation cost)
+	$(UV_EMB) python -m evals.run_retrieval --embedder $(EMBEDDER)
 
 lint: ## Same checks as CI (lint, format, strict types)
 	uv run ruff check . && uv run ruff format --check . && uv run mypy

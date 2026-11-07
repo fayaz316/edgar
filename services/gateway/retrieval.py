@@ -10,18 +10,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from google import genai
-from google.genai import types
 from psycopg_pool import ConnectionPool
 
-EMBED_MODEL = "gemini-embedding-001"
+from services.embeddings import Embedder
+
 RRF_K = 60  # standard constant from the original RRF paper; dampens rank position
 POOL_PER_LEG = 30  # candidates fetched per leg before fusion
-
-
-class EmbeddingError(RuntimeError):
-    """Query embedding failed (quota, network, bad response) — distinct from DB errors
-    so the API can map it to 502 (upstream) instead of 500 (our bug)."""
 
 
 @dataclass(frozen=True)
@@ -61,27 +55,15 @@ def rrf_fuse(
 
 class Retriever:
     """Hybrid retriever. Borrows a pooled autocommit connection per call, so one
-    failed query can never poison a shared transaction for the next request."""
+    failed query can never poison a shared transaction for the next request.
 
-    def __init__(self, pool: ConnectionPool, genai_client: genai.Client) -> None:
+    Only vectors tagged with the ACTIVE embedder's model_id are searched: vectors from
+    different models are not comparable, and mixing them returns plausible-looking nonsense.
+    """
+
+    def __init__(self, pool: ConnectionPool, embedder: Embedder) -> None:
         self._pool = pool
-        self._genai = genai_client
-
-    def _embed_query(self, query: str) -> list[float]:
-        try:
-            resp = self._genai.models.embed_content(
-                model=EMBED_MODEL,
-                contents=query,
-                config=types.EmbedContentConfig(
-                    task_type="RETRIEVAL_QUERY",
-                    output_dimensionality=768,
-                ),
-            )
-        except Exception as exc:  # SDK raises many types; all mean "upstream failed"
-            raise EmbeddingError(f"query embedding failed: {str(exc)[:150]}") from exc
-        if resp.embeddings is None or not resp.embeddings or resp.embeddings[0].values is None:
-            raise EmbeddingError("query embedding returned no vector")
-        return list(resp.embeddings[0].values)
+        self._embedder = embedder
 
     def retrieve(
         self,
@@ -91,10 +73,10 @@ class Retriever:
         sections: list[str] | None = None,
     ) -> list[RetrievedChunk]:
         """Hybrid retrieve. Filters compose with AND; None = no filter."""
-        qvec = "[" + ",".join(f"{v:.6f}" for v in self._embed_query(query)) + "]"
+        qvec = "[" + ",".join(f"{v:.6f}" for v in self._embedder.embed_query(query)) + "]"
 
-        where = ["c.embedding IS NOT NULL"]
-        params: list[str | list[str]] = []
+        where = ["c.embedding IS NOT NULL", "c.embedding_model = %s"]
+        params: list[str | list[str]] = [self._embedder.model_id]
         if ticker:
             where.append("d.ticker = %s")
             params.append(ticker.upper())

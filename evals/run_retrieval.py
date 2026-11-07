@@ -23,23 +23,25 @@ from collections import defaultdict
 from pathlib import Path
 
 from dotenv import load_dotenv
-from google import genai
 from psycopg_pool import ConnectionPool
 
 from evals.matching import RankedChunk, anchors_covered, first_hit_rank, section_agrees, summarize
 from evals.schema import GoldenItem
 from evals.validate_golden import load_items
-from services.gateway.retrieval import EmbeddingError, Retriever
+from services.db import MIGRATE_HINT, has_embedding_model_column
+from services.embeddings import MODEL_IDS, EmbeddingError, make_embedder
+from services.gateway.retrieval import Retriever
 
 load_dotenv(".env")
 PAUSE_S = 0.8  # stay far below the 100 RPM embedding quota
 QUOTA_WAIT_S = 65.0
 
 
-def embedded_coverage(pool: ConnectionPool) -> tuple[int, int]:
+def embedded_coverage(pool: ConnectionPool, model_id: str) -> tuple[int, int]:
+    """(chunks embedded by THIS model, all chunks)."""
     with pool.connection() as conn:
         row = conn.execute(
-            "SELECT count(*) FILTER (WHERE embedding IS NOT NULL), count(*) FROM chunks"
+            "SELECT count(*) FILTER (WHERE embedding_model = %s), count(*) FROM chunks", (model_id,)
         ).fetchone()
     return (int(row[0]), int(row[1])) if row else (0, 0)
 
@@ -62,14 +64,18 @@ def main() -> int:
     ap.add_argument("--k", type=int, default=8)
     ap.add_argument("--out", default="evals/results/latest.json")
     ap.add_argument(
+        "--embedder", choices=sorted(MODEL_IDS), default=os.environ.get("EA_EMBEDDER", "local")
+    )
+    ap.add_argument(
         "--allow-partial", action="store_true", help="run even if embeddings incomplete"
     )
     args = ap.parse_args()
 
-    dsn, key = os.environ.get("DATABASE_URL"), os.environ.get("GEMINI_API_KEY")
-    if not dsn or not key:
-        print("DATABASE_URL / GEMINI_API_KEY missing (check .env)", file=sys.stderr)
+    dsn = os.environ.get("DATABASE_URL")
+    if not dsn:
+        print("DATABASE_URL missing (check .env)", file=sys.stderr)
         return 1
+    embedder = make_embedder(args.embedder, api_key=os.environ.get("GEMINI_API_KEY"))
 
     items, errors = load_items()
     if errors:
@@ -80,16 +86,20 @@ def main() -> int:
     with ConnectionPool(
         dsn, min_size=1, max_size=2, kwargs={"autocommit": True}, open=True
     ) as pool:
-        embedded, total = embedded_coverage(pool)
+        with pool.connection() as _c:
+            if not has_embedding_model_column(_c):
+                print(MIGRATE_HINT, file=sys.stderr)
+                return 3
+        embedded, total = embedded_coverage(pool, embedder.model_id)
         if embedded < total and not args.allow_partial:
             print(
-                f"REFUSING: only {embedded}/{total} chunks embedded — recall on a partial corpus "
+                f"REFUSING: only {embedded}/{total} chunks embedded with {embedder.model_id} — recall on a partial corpus "
                 "is meaningless. Finish `make embed` (or pass --allow-partial).",
                 file=sys.stderr,
             )
             return 2
 
-        retriever = Retriever(pool, genai.Client(api_key=key))
+        retriever = Retriever(pool, embedder)
         rows: list[dict[str, object]] = []
         ranks: list[int | None] = []
         types: list[str] = []
@@ -133,6 +143,7 @@ def main() -> int:
         json.dumps(
             {
                 "k": args.k,
+                "embedder": embedder.model_id,
                 "corpus": {"embedded": embedded, "total": total},
                 "overall": overall,
                 "rows": rows,

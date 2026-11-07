@@ -1,17 +1,19 @@
-"""Embedding backfill: chunks.embedding <- gemini-embedding-001 (768d).
+"""Embedding backfill: chunks.embedding <- the ACTIVE embedder (gemini | local).
 
-Free-tier quota is the design constraint (100 RPM / 30K TPM / 1K RPD):
-  * start at 50 chunks/batch (~worst-case 20K tokens — token estimates are
-    estimates; quota is enforced server-side, so stay conservative)
-  * 429 means "the minute window is spent" -> wait >=65s, never fast-retry
-  * persistent 429 -> halve batch size (floor 10) and continue
-  * resumable: only NULL-embedding rows selected; commit per batch
+Selects every chunk whose vector is missing OR was made by a different model than the
+active one, embeds it, and stores vector + model tag together. So:
+  * resumable and ctrl-C safe (commit per batch; reruns pick up where it stopped)
+  * switching providers = rerun with the other one; nothing is ever mixed
+  * quota pain is handled by the provider (gemini: waits out per-minute windows) plus an
+    adaptive batch size here (halve on persistent failure, floor 10)
 
-Usage: uv run python -m services.ingest.embed_backfill   (ctrl-C safe)
+Usage: uv run python -m services.ingest.embed_backfill [--embedder gemini|local]
+       (local needs:  uv sync --group local-embed)
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 import time
@@ -19,108 +21,81 @@ import time
 import psycopg
 import structlog
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+
+from services.db import MIGRATE_HINT, has_embedding_model_column
+from services.embeddings import MODEL_IDS, EmbeddingError, make_embedder
 
 load_dotenv(".env")
 log = structlog.get_logger()
 
-MODEL = "gemini-embedding-001"
-DIMS = 768
-BATCH_START = 50
 BATCH_MIN = 10
-SECONDS_BETWEEN_BATCHES = 62
-MAX_ATTEMPTS = 6
+PENDING = "(embedding IS NULL OR embedding_model IS DISTINCT FROM %s)"
 
 
-class QuotaExceeded(RuntimeError):
-    pass
+def to_pgvector(vec: list[float]) -> str:
+    return "[" + ",".join(f"{v:.6f}" for v in vec) + "]"
 
 
-def embed_batch(client: genai.Client, texts: list[str]) -> list[list[float]]:
-    last_error: Exception | None = None
-    for attempt in range(MAX_ATTEMPTS):
-        try:
-            resp = client.models.embed_content(
-                model=MODEL,
-                contents=texts,
-                config=types.EmbedContentConfig(
-                    task_type="RETRIEVAL_DOCUMENT",
-                    output_dimensionality=DIMS,
-                ),
-            )
-            if resp.embeddings is None or len(resp.embeddings) != len(texts):
-                raise RuntimeError(
-                    f"embedding count mismatch: {len(resp.embeddings or [])} vs {len(texts)}"
-                )
-            out: list[list[float]] = []
-            for e in resp.embeddings:
-                if e.values is None:
-                    raise RuntimeError("embedding vector is None")
-                out.append(list(e.values))
-            return out
-        except Exception as exc:  # classified below: quota vs transient, distinct waits
-            last_error = exc
-            msg = str(exc)
-            if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
-                # per-minute quota: any wait < 60s is wasted retry
-                wait = 65.0
-                log.warning("quota_429", attempt=attempt + 1, wait_s=wait, batch=len(texts))
-            else:
-                wait = min(2.0**attempt * 2, 60)
-                log.warning("embed_retry", attempt=attempt + 1, wait_s=wait, error=msg[:160])
-            time.sleep(wait)
-    raise QuotaExceeded(f"embedding failed after {MAX_ATTEMPTS} attempts: {str(last_error)[:200]}")
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--embedder", choices=sorted(MODEL_IDS), default=os.environ.get("EA_EMBEDDER", "local")
+    )
+    args = ap.parse_args(argv)
 
-
-def main() -> int:
     database_url = os.environ.get("DATABASE_URL")
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not database_url or not api_key:
-        print("DATABASE_URL / GEMINI_API_KEY missing (check .env)", file=sys.stderr)
+    if not database_url:
+        print("DATABASE_URL missing (check .env)", file=sys.stderr)
         return 1
+    embedder = make_embedder(args.embedder, api_key=os.environ.get("GEMINI_API_KEY"))
+    model_id = embedder.model_id
+    batch_size = embedder.batch_size
+    log.info("backfill_start", embedder=args.embedder, model=model_id, batch_size=batch_size)
 
-    client = genai.Client(api_key=api_key)
-    batch_size = BATCH_START
     done = 0
     with psycopg.connect(database_url) as conn:
+        if not has_embedding_model_column(conn):
+            print(MIGRATE_HINT, file=sys.stderr)
+            return 3
+        conn.commit()
         while True:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT id, text FROM chunks WHERE embedding IS NULL ORDER BY id LIMIT %s",
-                    (batch_size,),
+                    f"SELECT id, text FROM chunks WHERE {PENDING} ORDER BY id LIMIT %s",
+                    (model_id, batch_size),
                 )
                 rows = cur.fetchall()
+            conn.commit()
             if not rows:
-                log.info("backfill_complete", total_embedded=done)
+                log.info("backfill_complete", total_embedded=done, model=model_id)
                 return 0
 
             ids, texts = [r[0] for r in rows], [r[1] for r in rows]
             t0 = time.monotonic()
             try:
-                vectors = embed_batch(client, texts)
-            except QuotaExceeded:
+                vectors = embedder.embed_documents(texts)
+            except EmbeddingError as exc:
                 if batch_size > BATCH_MIN:
                     batch_size = max(batch_size // 2, BATCH_MIN)
-                    log.warning("batch_reduced", new_batch_size=batch_size)
+                    log.warning("batch_reduced", new_batch_size=batch_size, error=str(exc)[:120])
                     continue
-                log.error("backfill_stalled", hint="daily quota may be exhausted; rerun later")
+                log.error(
+                    "backfill_stalled",
+                    hint="quota or model problem; rerun later",
+                    error=str(exc)[:200],
+                )
                 return 2
 
             with conn.cursor() as cur:
                 cur.executemany(
-                    "UPDATE chunks SET embedding = %s::vector WHERE id = %s",
-                    [
-                        ("[" + ",".join(f"{v:.6f}" for v in vec) + "]", cid)
-                        for vec, cid in zip(vectors, ids, strict=True)
-                    ],
+                    "UPDATE chunks SET embedding = %s::vector, embedding_model = %s WHERE id = %s",
+                    [(to_pgvector(v), model_id, cid) for v, cid in zip(vectors, ids, strict=True)],
                 )
-            conn.commit()
-            done += len(ids)
-            with conn.cursor() as cur:
-                cur.execute("SELECT count(*) FROM chunks WHERE embedding IS NULL")
+                cur.execute(f"SELECT count(*) FROM chunks WHERE {PENDING}", (model_id,))
                 row = cur.fetchone()
-                remaining = int(row[0]) if row else 0
+            conn.commit()
+            remaining = int(row[0]) if row else 0
+            done += len(ids)
             log.info(
                 "batch_ok",
                 embedded=done,
@@ -128,7 +103,8 @@ def main() -> int:
                 batch_size=len(ids),
                 embed_s=round(time.monotonic() - t0, 1),
             )
-            time.sleep(SECONDS_BETWEEN_BATCHES)
+            if remaining and embedder.pause_s:
+                time.sleep(embedder.pause_s)
 
 
 if __name__ == "__main__":

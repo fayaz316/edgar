@@ -14,8 +14,9 @@ import psycopg
 import pytest
 from fastapi.testclient import TestClient
 
+from services.embeddings import EmbeddingError
 from services.gateway.main import app
-from services.gateway.retrieval import EmbeddingError, RetrievedChunk
+from services.gateway.retrieval import RetrievedChunk
 
 client = TestClient(app)
 QUESTION = "What share of revenue came from the three largest customers?"
