@@ -12,7 +12,7 @@
   answer_type: numeric
   expected_evidence:
     - accession: "0001045810-26-000075"
-      section: "Business"
+      section: "MD&A"
       snippet_hint: "three direct customers represented 16%, 15%, and 13%"
   must_not_appear: ["percentages for fiscal 2026 presented as current-year figures"]
   tags: [nvda, customer-concentration, numeric]
@@ -23,7 +23,7 @@
   answer_type: numeric
   expected_evidence:
     - accession: "0001045810-26-000075"
-      section: "Business"
+      section: "Financial Statements"
       snippet_hint: "stock for $ 19.7 billion and $ 9.7 billion during the second quarter"
   must_not_appear: ["full-year repurchase totals presented as quarterly figures"]
   tags: [nvda, buybacks, numeric]
@@ -34,7 +34,7 @@
   answer_type: grounded
   expected_evidence:
     - accession: "0001045810-26-000075"
-      section: "Business"
+      section: "Financial Statements"
       snippet_hint: "primarily attributable to the Compute & Networking segment"
   must_not_appear: []
   tags: [nvda, customer-concentration]
@@ -68,7 +68,7 @@
   expected_evidence:
     - accession: "0001045810-26-000021"
       section: "MD&A"
-      snippet_hint: "Gaming segment revenue and operating income"
+      snippet_hint: "Gaming revenue for fiscal year 2026 was up 41% from a year ago"
   must_not_appear: []
   tags: [nvda, gaming, segments]
   difficulty: medium
@@ -97,7 +97,7 @@
   answer_type: comparative
   expected_evidence:
     - accession: "0001045810-26-000075"
-      section: "Business"
+      section: "MD&A"
       snippet_hint: "of total revenue for the second quarter and first half"
   must_not_appear: []
   tags: [nvda, customer-concentration, comparative]
@@ -143,7 +143,7 @@
   expected_evidence:
     - accession: "0000320193-25-000079"
       section: "MD&A"
-      snippet_hint: "Tax Cuts and Jobs Act of 2017 (TCJA) was $8.8 billion"
+      snippet_hint: "was $8.8 billion, which was payable within 12 months"
   must_not_appear: []
   tags: [aapl, tax, numeric]
   difficulty: hard
@@ -203,8 +203,8 @@
   answer_type: numeric
   expected_evidence:
     - accession: "0001628280-26-069523"
-      section: "Front Matter"
-      snippet_hint: "Net interest income of $27.0 billion, up 13%"
+      section: "MD&A"
+      snippet_hint: "of $27.0 billion, up 13%, driven by higher markets net interest income"
   must_not_appear: []
   tags: [jpm, nii, numeric]
   difficulty: easy
@@ -250,7 +250,7 @@
     # this filing). Anchor reflects corpus reality until parser handles table
     # headings; eval gate keeps this visible.
     - accession: "0001628280-26-069523"
-      section: "Front Matter"
+      section: "MD&A"
       snippet_hint: "provision for credit losses"
   must_not_appear: []
   tags: [jpm, credit]
@@ -261,8 +261,8 @@
   answer_type: grounded
   expected_evidence:
     - accession: "0001628280-26-069523"
-      section: "Front Matter"
-      snippet_hint: "BaselIII"
+      section: "MD&A"
+      snippet_hint: "The capital rules under Basel III establish minimum capital ratios"
   must_not_appear: []
   tags: [jpm, basel, capital]
   difficulty: hard
@@ -288,7 +288,7 @@
   answer_type: grounded
   expected_evidence:
     - accession: "0001045810-26-000075"
-      section: "Business"
+      section: "MD&A"
       snippet_hint: "Graphics segment operating income in the second quarter"
   must_not_appear: []
   tags: [nvda, graphics, segments]

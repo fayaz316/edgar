@@ -7,7 +7,7 @@ REGION ?= europe-west1
 TF_DIR := infra
 TFVARS := $(TF_DIR)/terraform.tfvars
 
-.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report
+.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -67,6 +67,9 @@ reingest: ## Re-parse CACHED filings into Postgres (offline; reuses unchanged em
 
 parse-report: ## Per-filing parser diagnostics over cached HTML (offline; flags suspicious parses)
 	uv run python -m services.ingest.parse_report
+
+golden-offline: ## Which golden anchors break under the CURRENT parser? (cached HTML; no DB)
+	uv run python -m evals.check_golden_offline
 
 golden: ## Validate golden set against schema + live corpus (needs db-up)
 	uv run python -m evals.validate_golden
