@@ -22,7 +22,14 @@ scoped system → production rollout → eval gates → handover artifacts.
 uv sync
 uv run pytest                      # tests
 uv run ruff check . && uv run mypy
-make help                          # infra lifecycle (bootstrap/plan/apply/teardown)
+make help                          # all targets, incl. infra lifecycle (bootstrap/plan/apply/teardown)
+
+# data + evals loop
+make db-up && make embed           # local pgvector + embedding backfill (resumable)
+make fetch                         # cache raw filing HTML (SEC only, no DB)
+make reingest                      # re-parse cached HTML -> Postgres, reusing unchanged embeddings
+make golden                        # validate golden set vs the live corpus
+make eval-retrieval                # retrieval recall (hit@k, MRR) — run before/after any parser change
 ```
 
 Cost stance: scale-to-zero everywhere, `make teardown` is the panic button. Budget alarms at €5/€25/€100.

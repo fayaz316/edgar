@@ -1,6 +1,6 @@
 # ADR 0001 — Serverless-first on GCP; Kubernetes only as a proven evening
 
-Status: Accepted · Context: a small fixed cloud-credit budget, one operator.
+Status: Accepted (decision #2 superseded by ADR 0002) · Context: a small fixed cloud-credit budget, one operator.
 
 ## Context
 The system must run for near-€0 while idle, survive a solo dev's irregular cadence, and still
