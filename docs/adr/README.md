@@ -61,3 +61,4 @@ Status: Proposed | Accepted | Superseded by ADR XXXX · Date: YYYY-MM-DD
 | 0013 | Bounded plan/act/verify agent loop (LangGraph) over the tool registry | Accepted |
 | 0014 | Claim-level support checking: only the deterministic layer is enforced | Accepted |
 | 0015 | Agent over HTTP with a streamed trace, and a single-file UI | Accepted |
+| 0016 | Two-layer eval gate: offline in CI, full retrieval gate locally | Accepted |

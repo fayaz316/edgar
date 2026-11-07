@@ -16,3 +16,9 @@ numbers are still reported, but a new change needs a fresh set.
 Status: golden_v0 and v1 are retired as guards. v2 has 2 uses (one more allowed), v3 has 1.
 Rule for new retrieval changes: write a new held-out set (v4, new seed) first.
 Seen/unseen for a decision = sets that shaped the design vs sets that did not.
+
+## Regression gate (ADR 0016)
+Runs of `make eval-gate` over all four sets are regression checks, not design decisions, so they do not count as
+uses above. The baseline (`evals/baselines/retrieval_baseline.json`) was generated 2026-11-08 from the product defaults
+(BM25 keyword leg, filing hints on, no reranker). Regenerating it needs an entry here.
+
