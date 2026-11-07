@@ -57,7 +57,9 @@ def extract_citations(answer: str) -> list[int]:
 def validate_answer(answer: str, n_passages: int) -> GroundedAnswer:
     """Enforce the grounding contract post-hoc. Dangling citation -> refusal."""
     if answer.strip().upper().startswith("INSUFFICIENT_CONTEXT"):
-        return GroundedAnswer(answer=answer.strip(), refused=True, cited_passages=[], dangling_citations=[])
+        return GroundedAnswer(
+            answer=answer.strip(), refused=True, cited_passages=[], dangling_citations=[]
+        )
     cited = extract_citations(answer)
     valid = [n for n in cited if 1 <= n <= n_passages]
     dangling = [n for n in cited if n not in valid]
@@ -67,11 +69,17 @@ def validate_answer(answer: str, n_passages: int) -> GroundedAnswer:
             "INSUFFICIENT_CONTEXT — the model cited passages outside the provided "
             f"evidence set ({dangling}); answer suppressed for safety."
         )
-        return GroundedAnswer(answer=refusal, refused=True, cited_passages=[], dangling_citations=dangling)
+        return GroundedAnswer(
+            answer=refusal, refused=True, cited_passages=[], dangling_citations=dangling
+        )
     if not valid:
         refusal = (
             "INSUFFICIENT_CONTEXT — the model produced no valid passage citations; "
             "answer suppressed for safety."
         )
-        return GroundedAnswer(answer=refusal, refused=True, cited_passages=[], dangling_citations=[])
-    return GroundedAnswer(answer=answer.strip(), refused=False, cited_passages=valid, dangling_citations=[])
+        return GroundedAnswer(
+            answer=refusal, refused=True, cited_passages=[], dangling_citations=[]
+        )
+    return GroundedAnswer(
+        answer=answer.strip(), refused=False, cited_passages=valid, dangling_citations=[]
+    )

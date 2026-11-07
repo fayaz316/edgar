@@ -16,12 +16,14 @@ import psycopg
 import structlog
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from google import genai
+from psycopg_pool import ConnectionPool
 from pydantic import AliasChoices, BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from services.gateway.answer import SYSTEM_PROMPT, GroundedAnswer, build_passages, validate_answer
-from services.gateway.retrieval import Retriever
+from services.gateway.retrieval import EmbeddingError, Retriever
 
 load_dotenv()  # shared repo .env; Settings picks only its aliased keys
 
@@ -40,8 +42,12 @@ class Settings(BaseSettings):
 
     environment: str = "dev"  # dev | prod — drives log verbosity and feature gates
     log_level: str = "INFO"
-    database_url: str = Field(default="", validation_alias=AliasChoices("EA_DATABASE_URL", "DATABASE_URL"))
-    gemini_api_key: str = Field(default="", validation_alias=AliasChoices("EA_GEMINI_API_KEY", "GEMINI_API_KEY"))
+    database_url: str = Field(
+        default="", validation_alias=AliasChoices("EA_DATABASE_URL", "DATABASE_URL")
+    )
+    gemini_api_key: str = Field(
+        default="", validation_alias=AliasChoices("EA_GEMINI_API_KEY", "GEMINI_API_KEY")
+    )
 
 
 settings = Settings()
@@ -64,14 +70,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Open expensive clients once; close cleanly on shutdown."""
     if not settings.database_url or not settings.gemini_api_key:
         raise RuntimeError("EA_DATABASE_URL / GEMINI_API_KEY required")
-    conn = psycopg.connect(settings.database_url)
+    # Pooled + autocommit: each request borrows its own connection, and a failed
+    # statement can't leave a shared connection stuck in an aborted transaction
+    # (which a single long-lived non-autocommit connection would, until restart).
+    pool = ConnectionPool(
+        settings.database_url,
+        min_size=1,
+        max_size=5,
+        kwargs={"autocommit": True},
+        timeout=10,  # max wait for a free connection; PoolTimeout -> 503 instead of a 30s hang
+        open=False,
+    )
+    pool.open(wait=True, timeout=15)
     genai_client = genai.Client(api_key=settings.gemini_api_key)
-    app.state.conn = conn
+    app.state.pool = pool
     app.state.genai = genai_client
-    app.state.retriever = Retriever(conn, genai_client)
+    app.state.retriever = Retriever(pool, genai_client)
     log.info("startup", environment=settings.environment, generation_model=GENERATION_MODEL)
     yield
-    conn.close()
+    pool.close()
     log.info("shutdown")
 
 
@@ -84,6 +101,7 @@ async def observability(
 ) -> Response:
     """Attach request id + emit one structured access line per request."""
     request_id = request.headers.get("x-request-id", str(uuid.uuid4()))
+    structlog.contextvars.clear_contextvars()  # no request_id bleed between requests
     structlog.contextvars.bind_contextvars(request_id=request_id)
     start = time.perf_counter()
     response = await call_next(request)
@@ -130,17 +148,35 @@ async def healthz() -> dict[str, str]:
 
 
 @app.get("/readyz")
-async def readyz() -> dict[str, str]:
-    """Readiness: safe to receive traffic. Dependency checks grow here per phase."""
-    return {"status": "ready"}
+def readyz(request: Request) -> JSONResponse:
+    """Readiness: safe to receive traffic = the database answers. 503 otherwise, so a
+    load balancer stops routing here instead of serving 500s."""
+    pool: ConnectionPool | None = getattr(request.app.state, "pool", None)
+    if pool is None:
+        return JSONResponse({"status": "not_ready", "reason": "pool not initialised"}, 503)
+    try:
+        with pool.connection() as conn:
+            conn.execute("SELECT 1")
+    except psycopg.Error as exc:
+        log.warning("readyz_db_failed", error=str(exc)[:120])
+        return JSONResponse({"status": "not_ready", "reason": "database unavailable"}, 503)
+    return JSONResponse({"status": "ready"})
 
 
 @app.post("/ask", response_model=AskResponse)
-async def ask(req: AskRequest, request: Request) -> AskResponse:
+def ask(req: AskRequest, request: Request) -> AskResponse:
+    # Plain `def` on purpose: FastAPI runs it in a worker thread, so the blocking
+    # DB + Gemini calls below don't freeze the event loop for other requests.
     retriever: Retriever = request.app.state.retriever
     client: genai.Client = request.app.state.genai
 
-    chunks = retriever.retrieve(req.question, top_k=req.top_k, ticker=req.ticker)
+    try:
+        chunks = retriever.retrieve(req.question, top_k=req.top_k, ticker=req.ticker)
+    except EmbeddingError as exc:  # upstream embedding failure (e.g. 429) -> 502, not 500
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except psycopg.Error as exc:
+        log.error("retrieval_db_failed", error=str(exc)[:200])
+        raise HTTPException(status_code=503, detail="database unavailable") from exc
     if not chunks:
         return AskResponse(
             answer="INSUFFICIENT_CONTEXT — no passages retrieved for this query.",
@@ -186,6 +222,8 @@ async def ask(req: AskRequest, request: Request) -> AskResponse:
         answer=grounded.answer,
         refused=grounded.refused,
         citations=citations,
-        retrieval=[f"lex={c.lexical_rank} sem={c.semantic_rank} {c.ticker}/{c.section}" for c in chunks],
+        retrieval=[
+            f"lex={c.lexical_rank} sem={c.semantic_rank} {c.ticker}/{c.section}" for c in chunks
+        ],
         model=GENERATION_MODEL,
     )

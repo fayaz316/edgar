@@ -41,8 +41,6 @@ KNOWN_SECTIONS: dict[str, str] = {
     "16": "Form 10-K Summary",
 }
 
-ITEM_HEADING = re.compile(r"^\s*(?:<[^>]+>\s*)*Item\s+(\d{1,2})([A-C])?\.?\s", re.IGNORECASE)
-
 MAX_CHUNK_CHARS = 1200
 OVERLAP_CHARS = 200
 MIN_SECTION_CHARS = 200  # skip ToC ghosts and fragments

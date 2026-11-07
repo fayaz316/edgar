@@ -15,6 +15,7 @@ dependencies = [
   "python-dotenv>=1.0",
   "google-genai>=1.0",
   "pyyaml>=6.0",
+  "psycopg-pool>=3.3.3",
 ]
 
 [dependency-groups]
@@ -44,7 +45,7 @@ module = "bs4.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["services/gateway/tests", "services/ingest/tests"]
+testpaths = ["services/gateway/tests", "services/ingest/tests", "evals/tests"]
 addopts = "-q"
 
 [tool.uv]

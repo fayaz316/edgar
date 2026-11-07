@@ -10,13 +10,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-import psycopg
 from google import genai
 from google.genai import types
+from psycopg_pool import ConnectionPool
 
 EMBED_MODEL = "gemini-embedding-001"
 RRF_K = 60  # standard constant from the original RRF paper; dampens rank position
 POOL_PER_LEG = 30  # candidates fetched per leg before fusion
+
+
+class EmbeddingError(RuntimeError):
+    """Query embedding failed (quota, network, bad response) — distinct from DB errors
+    so the API can map it to 502 (upstream) instead of 500 (our bug)."""
 
 
 @dataclass(frozen=True)
@@ -30,6 +35,7 @@ class RetrievedChunk:
     rrf_score: float
     lexical_rank: int | None  # 1-based rank in lexical leg; None = not found there
     semantic_rank: int | None
+    accession: str  # SEC accession number — lets evals match chunks to golden anchors
 
 
 def rrf_fuse(
@@ -54,21 +60,27 @@ def rrf_fuse(
 
 
 class Retriever:
-    def __init__(self, conn: psycopg.Connection, genai_client: genai.Client) -> None:
-        self._conn = conn
+    """Hybrid retriever. Borrows a pooled autocommit connection per call, so one
+    failed query can never poison a shared transaction for the next request."""
+
+    def __init__(self, pool: ConnectionPool, genai_client: genai.Client) -> None:
+        self._pool = pool
         self._genai = genai_client
 
     def _embed_query(self, query: str) -> list[float]:
-        resp = self._genai.models.embed_content(
-            model=EMBED_MODEL,
-            contents=query,
-            config=types.EmbedContentConfig(
-                task_type="RETRIEVAL_QUERY",
-                output_dimensionality=768,
-            ),
-        )
+        try:
+            resp = self._genai.models.embed_content(
+                model=EMBED_MODEL,
+                contents=query,
+                config=types.EmbedContentConfig(
+                    task_type="RETRIEVAL_QUERY",
+                    output_dimensionality=768,
+                ),
+            )
+        except Exception as exc:  # SDK raises many types; all mean "upstream failed"
+            raise EmbeddingError(f"query embedding failed: {str(exc)[:150]}") from exc
         if resp.embeddings is None or not resp.embeddings or resp.embeddings[0].values is None:
-            raise RuntimeError("query embedding failed")
+            raise EmbeddingError("query embedding returned no vector")
         return list(resp.embeddings[0].values)
 
     def retrieve(
@@ -92,7 +104,7 @@ class Retriever:
         where_sql = " AND ".join(where)
 
         lexical_sql = f"""
-            SELECT c.id, d.ticker, d.form_type, d.filed_at::date::text, c.section, c.text
+            SELECT c.id, d.ticker, d.form_type, d.filed_at::date::text, c.section, c.text, d.accession
             FROM websearch_to_tsquery('english', %s) AS q(query),
                  chunks c JOIN documents d ON d.id = c.document_id
             WHERE {where_sql} AND c.tsv @@ q.query
@@ -100,28 +112,28 @@ class Retriever:
             LIMIT {POOL_PER_LEG}
         """
         semantic_sql = f"""
-            SELECT c.id, d.ticker, d.form_type, d.filed_at::date::text, c.section, c.text
+            SELECT c.id, d.ticker, d.form_type, d.filed_at::date::text, c.section, c.text, d.accession
             FROM chunks c JOIN documents d ON d.id = c.document_id
             WHERE {where_sql}
             ORDER BY c.embedding <=> %s::vector
             LIMIT {POOL_PER_LEG}
         """
 
-        with self._conn.cursor() as cur:
+        with self._pool.connection() as conn, conn.cursor() as cur:
             cur.execute(lexical_sql, [query, *params])
             lex_rows = cur.fetchall()
             cur.execute(semantic_sql, [*params, qvec])
             sem_rows = cur.fetchall()
 
-        by_id: dict[int, tuple[str, str, str, str, str]] = {
-            r[0]: (r[1], r[2], r[3], r[4], r[5]) for r in [*lex_rows, *sem_rows]
+        by_id: dict[int, tuple[str, str, str, str, str, str]] = {
+            r[0]: (r[1], r[2], r[3], r[4], r[5], r[6]) for r in [*lex_rows, *sem_rows]
         }
         fused = rrf_fuse([r[0] for r in lex_rows], [r[0] for r in sem_rows])
         ranked = sorted(fused.items(), key=lambda kv: kv[1][0], reverse=True)[:top_k]
 
         out: list[RetrievedChunk] = []
         for cid, (score, lex_rank, sem_rank) in ranked:
-            ticker_, form, filed, section, text = by_id[cid]
+            ticker_, form, filed, section, text, accession = by_id[cid]
             out.append(
                 RetrievedChunk(
                     chunk_id=cid,
@@ -133,6 +145,7 @@ class Retriever:
                     rrf_score=round(score, 6),
                     lexical_rank=lex_rank,
                     semantic_rank=sem_rank,
+                    accession=accession,
                 )
             )
         return out

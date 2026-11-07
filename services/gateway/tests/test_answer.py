@@ -22,6 +22,7 @@ def _chunk(cid: int, text: str = "passage body", section: str = "Risk Factors") 
         rrf_score=0.03,
         lexical_rank=1,
         semantic_rank=1,
+        accession="0001045810-26-000075",
     )
 
 

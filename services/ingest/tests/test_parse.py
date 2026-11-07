@@ -61,12 +61,15 @@ def test_chunk_is_frozen_dataclass() -> None:
 
 def test_duplicate_section_headings_stay_unique() -> None:
     """Real filings repeat 'Item 1.' in ToC and body — (section, seq) must not collide."""
-    dup = MINI_10K + """
+    dup = (
+        MINI_10K
+        + """
     <p>Item 1. Business (again, as filings love to do)</p>
     <p>Second Business passage with enough length to clear the fragment filter.
     More words about widgets, operations, strategy, customers, and competition
     so this section survives the minimum-length gate and produces chunks.</p>
     """
+    )
     chunks = parse_filing(dup)
     keys = [(c.section, c.seq) for c in chunks]
     assert len(keys) == len(set(keys)), "duplicate (section, seq) keys"

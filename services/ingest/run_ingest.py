@@ -1,29 +1,52 @@
-"""Ingest CLI: filings for tickers → local (later: cloud) Postgres.
+"""Ingest CLI: filings for tickers -> raw-HTML cache -> local (later: cloud) Postgres.
 
-Usage: uv run python -m services.ingest.run_ingest NVDA AAPL JPM
+Usage:
+  uv run python -m services.ingest.run_ingest NVDA AAPL JPM            # fetch (cache-first) + store
+  uv run python -m services.ingest.run_ingest NVDA AAPL JPM --fetch-only   # download only, no DB
+  uv run python -m services.ingest.run_ingest --offline [NVDA ...]    # re-parse cached HTML, no network
+  add --refresh to re-download even if cached
 
-Idempotent by design: upsert document on (ticker, accession); a refresh
-deletes that document's chunks and re-inserts. Rerun freely.
+Idempotent by design: upsert the document on (ticker, accession); a refresh replaces that
+document's chunks but REUSES the embedding of any chunk whose text is unchanged (an
+embedding depends only on its text) — so relabeling sections or re-running costs no quota,
+and only genuinely new text needs embedding.
+
+Do NOT run this while `make embed` is running — both write the chunks table.
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 
 import psycopg
 from dotenv import load_dotenv
 
+from services.ingest import raw_cache
 from services.ingest.edgar_client import EdgarClient, Filing
-from services.ingest.parse import parse_filing
+from services.ingest.parse import Chunk, parse_filing
 
 load_dotenv()  # .env at repo root: DATABASE_URL
 
 FORMS = frozenset({"10-K", "10-Q"})
 
 
-def store_filing(cur: psycopg.Cursor, filing: Filing, html: str) -> tuple[int, int]:
-    """Upsert the document row, refresh its chunks. Returns (doc_id, n_chunks)."""
+def plan_chunk_rows(
+    doc_id: int, chunks: list[Chunk], reusable: dict[str, str]
+) -> tuple[list[tuple[int, str, int, str, str | None]], int]:
+    """Rows to INSERT for a document, plus how many reuse an existing embedding.
+
+    An embedding is a pure function of the chunk text, so a chunk whose text is
+    unchanged keeps its old vector even if its section label or seq changed.
+    """
+    rows = [(doc_id, c.section, c.seq, c.text, reusable.get(c.text)) for c in chunks]
+    return rows, sum(1 for r in rows if r[4] is not None)
+
+
+def store_filing(cur: psycopg.Cursor, filing: Filing, html: str) -> tuple[int, int, int]:
+    """Upsert the document row, refresh its chunks.
+    Returns (doc_id, n_chunks, n_embeddings_reused)."""
     cur.execute(
         """
         INSERT INTO documents (ticker, form_type, accession, period_end, filed_at, uri)
@@ -46,44 +69,91 @@ def store_filing(cur: psycopg.Cursor, filing: Filing, html: str) -> tuple[int, i
     )
     doc_id: int = cur.fetchone()[0]  # type: ignore[index]
 
+    # Remember embeddings by text before replacing the chunks.
+    cur.execute(
+        "SELECT text, embedding::text FROM chunks WHERE document_id = %s AND embedding IS NOT NULL",
+        (doc_id,),
+    )
+    reusable: dict[str, str] = {text: emb for text, emb in cur.fetchall()}
+
     cur.execute("DELETE FROM chunks WHERE document_id = %s", (doc_id,))
 
-    chunks = parse_filing(html)
+    rows, n_reused = plan_chunk_rows(doc_id, parse_filing(html), reusable)
     cur.executemany(
         """
-        INSERT INTO chunks (document_id, section, seq, text)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO chunks (document_id, section, seq, text, embedding)
+        VALUES (%s, %s, %s, %s, %s::vector)
         """,
-        [(doc_id, c.section, c.seq, c.text) for c in chunks],
+        rows,
     )
-    return doc_id, len(chunks)
+    return doc_id, len(rows), n_reused
 
 
-def main(tickers: list[str]) -> int:
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    ap.add_argument("tickers", nargs="*", help="e.g. NVDA AAPL JPM")
+    ap.add_argument(
+        "--fetch-only", action="store_true", help="download + cache HTML, skip the database"
+    )
+    ap.add_argument("--offline", action="store_true", help="use only cached filings (no network)")
+    ap.add_argument("--refresh", action="store_true", help="re-download even if cached")
+    args = ap.parse_args(argv)
+
+    if not args.offline and not args.tickers:
+        ap.error("give tickers, or use --offline")
+    if args.offline and args.fetch_only:
+        ap.error("--offline and --fetch-only contradict each other")
+
     database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
+    if not args.fetch_only and not database_url:
         print("DATABASE_URL missing (check .env)", file=sys.stderr)
         return 1
 
-    client = EdgarClient()
-    total_chunks = 0
+    # 1) decide which (filing, html) pairs to process
+    pairs: list[tuple[Filing, str]] = []
+    if args.offline:
+        pairs = list(raw_cache.iter_cached(args.tickers or None))
+        print(f"offline: {len(pairs)} cached filings")
+    else:
+        client = EdgarClient()
+        try:
+            for ticker in args.tickers:
+                filings = client.recent_filings(ticker, FORMS)
+                print(f"{ticker}: {len(filings)} filings ({', '.join(f.form for f in filings)})")
+                for filing in filings:
+                    cached = raw_cache.load(filing) is not None and not args.refresh
+                    html = raw_cache.get_html(client, filing, refresh=args.refresh)
+                    print(
+                        f"  {filing.form} {filing.filed_at} {filing.accession}: {'cache' if cached else 'downloaded'}"
+                    )
+                    pairs.append((filing, html))
+        finally:
+            client.close()
+
+    if args.fetch_only:
+        print(f"fetched/cached {len(pairs)} filings under {raw_cache.RAW_DIR}/")
+        return 0
+
+    # 2) store
+    assert database_url is not None
+    total_chunks = total_reused = 0
     with psycopg.connect(database_url) as conn:
-        for ticker in tickers:
-            filings = client.recent_filings(ticker, FORMS)
-            print(f"{ticker}: {len(filings)} filings ({', '.join(f.form for f in filings)})")
-            for filing in filings:
-                html = client.filing_document(filing)
-                with conn.cursor() as cur:
-                    doc_id, n = store_filing(cur, filing, html)
-                conn.commit()
-                total_chunks += n
-                print(
-                    f"  {filing.form} {filing.filed_at} acc={filing.accession} -> doc {doc_id}, {n} chunks"
-                )
-    client.close()
-    print(f"TOTAL chunks ingested: {total_chunks}")
+        for filing, html in pairs:
+            with conn.cursor() as cur:
+                doc_id, n, reused = store_filing(cur, filing, html)
+            conn.commit()
+            total_chunks += n
+            total_reused += reused
+            print(
+                f"  {filing.ticker} {filing.form} {filing.filed_at} acc={filing.accession} "
+                f"-> doc {doc_id}, {n} chunks ({reused} embeddings reused)"
+            )
+    print(
+        f"TOTAL chunks: {total_chunks}  embeddings reused: {total_reused}  "
+        f"need embedding: {total_chunks - total_reused}"
+    )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())

@@ -14,8 +14,8 @@ from dataclasses import dataclass
 
 import httpx
 
-BASE_URL = "https://data.sec.gov"          # JSON APIs (submissions, xbrl)
-ARCHIVE_URL = "https://www.sec.gov"        # filing documents (/Archives/...)
+BASE_URL = "https://data.sec.gov"  # JSON APIs (submissions, xbrl)
+ARCHIVE_URL = "https://www.sec.gov"  # filing documents (/Archives/...)
 DEFAULT_USER_AGENT = "edgar-analyst dev (contact: you@example.com)"
 THROTTLE_SECONDS = 0.15
 
@@ -132,7 +132,7 @@ class EdgarClient:
 
     def filing_document(self, filing: Filing) -> str:
         """Raw HTML of the filing's primary document."""
-        return self._get(filing.document_url.removeprefix(BASE_URL)).text
+        return self._get(filing.document_url).text  # absolute URL: httpx ignores base_url
 
     def close(self) -> None:
         self._client.close()
