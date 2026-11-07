@@ -80,7 +80,8 @@ def test_stream_turns_an_unexpected_failure_into_an_error_event(
     monkeypatch.setattr(agent_api, "stream_agent", boom)
     r = client.post("/agent/stream", json={"question": QUESTION})
     [(name, data)] = _sse(r.text)
-    assert name == "error" and "database exploded" in data["detail"]
+    assert name == "error" and "database exploded" not in r.text  # details stay in the server log
+    assert "server log" in data["detail"]
 
 
 def test_questions_that_are_too_short_or_too_long_are_422(wire: Any) -> None:
@@ -91,14 +92,62 @@ def test_questions_that_are_too_short_or_too_long_are_422(wire: Any) -> None:
 
 def test_busy_agent_returns_429_and_releases_slots_afterwards(wire: Any) -> None:
     wire([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
-    held = [agent_api._slots.acquire(blocking=False) for _ in range(2)]
+    held = [agent_api._slots.acquire(ttl=60) for _ in range(2)]
     try:
         assert all(held)
         assert client.post("/agent", json={"question": QUESTION}).status_code == 429
     finally:
-        for _ in range(2):
-            agent_api._slots.release()
+        for token in held:
+            assert token is not None
+            agent_api._slots.release(token)
     assert client.post("/agent", json={"question": QUESTION}).status_code == 200  # slot freed
+
+
+def test_a_leaked_slot_heals_itself_after_its_lease_expires() -> None:
+    slots = agent_api.Slots(1)
+    assert slots.acquire(ttl=10, now=0.0) is not None  # taken, never released (the leak)
+    assert slots.acquire(ttl=10, now=5.0) is None  # still held
+    assert slots.acquire(ttl=10, now=11.0) is not None  # lease expired: capacity is back
+
+
+def test_release_is_idempotent_and_frees_one_slot() -> None:
+    slots = agent_api.Slots(1)
+    token = slots.acquire(ttl=60)
+    assert token is not None and slots.acquire(ttl=60) is None
+    slots.release(token)
+    slots.release(token)
+    assert slots.acquire(ttl=60) is not None
+
+
+def test_a_busy_rejection_does_not_burn_the_callers_quota(wire: Any) -> None:
+    from services.gateway.security import KeyStore, RateLimiter, Security, generate_key
+
+    wire([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
+    key, digest = generate_key()
+    sec = Security(KeyStore({digest: "alice"}), RateLimiter(per_minute=100, daily_cap=3))
+    app.state.security = sec
+    h = {"authorization": f"Bearer {key}"}
+    held = [agent_api._slots.acquire(ttl=60) for _ in range(2)]
+    try:
+        for _ in range(5):  # five refused-as-busy attempts must cost nothing
+            assert client.post("/agent", json={"question": QUESTION}, headers=h).status_code == 429
+    finally:
+        for token in held:
+            assert token is not None
+            agent_api._slots.release(token)
+    assert [
+        client.post("/agent", json={"question": QUESTION}, headers=h).status_code for _ in range(3)
+    ] == [200] * 3
+    assert (
+        client.post("/agent", json={"question": QUESTION}, headers=h).status_code == 429
+    )  # the cap itself still works
+
+
+def test_clients_cannot_raise_the_step_budget(wire: Any) -> None:
+    wire([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
+    r = client.post("/agent", json={"question": QUESTION, "max_steps": 12})
+    assert r.status_code == 200  # unknown field ignored; the server-side budget applies
+    assert "max_steps" not in agent_api.AgentRequest.model_fields
 
 
 def test_ui_is_served_and_its_script_never_uses_innerhtml() -> None:

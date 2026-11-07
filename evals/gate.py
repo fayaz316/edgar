@@ -96,6 +96,10 @@ def compare(
     for key in ("k", "embedder", "corpus_fingerprint", "golden_sha256"):
         if baseline.get(key) != candidate.get(key):
             problems.append(f"{key} differs from the baseline (not comparable)")
+    if baseline.get("config") != DEFAULT_CONFIG:
+        problems.append(
+            f"baseline was not built with the product defaults: {baseline.get('config')}"
+        )
     if candidate.get("config") != DEFAULT_CONFIG:
         problems.append(
             f"candidate was not run with the product defaults: {candidate.get('config')}"

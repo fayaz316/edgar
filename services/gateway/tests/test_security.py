@@ -67,3 +67,12 @@ def test_failed_auth_throttle_trips_after_ten_failures_and_expires() -> None:
     assert sec.note_failure("1.2.3.4", now=10.0) is True and sec.throttled("1.2.3.4", now=11.0)
     assert not sec.throttled("5.6.7.8", now=11.0)
     assert not sec.throttled("1.2.3.4", now=400.0)  # 5 minutes later it clears
+
+
+def test_refund_gives_back_one_counted_call_in_both_windows() -> None:
+    rl = RateLimiter(per_minute=1, daily_cap=1)
+    assert rl.check("a", now=0.0) == 0.0 and rl.take_daily("a", "d")
+    assert rl.check("a", now=1.0) > 0 and not rl.take_daily("a", "d")  # both exhausted
+    rl.refund("a", "d")
+    assert rl.check("a", now=2.0) == 0.0 and rl.take_daily("a", "d")
+    rl.refund("never-seen", "d")  # refunding an unknown caller is harmless

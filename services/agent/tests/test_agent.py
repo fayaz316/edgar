@@ -275,3 +275,28 @@ def test_tool_results_label_passages_as_untrusted_in_the_default_variant() -> No
     run_agent("q", llm, _registry())
     tool_msg = next(m for m in llm.seen[1] if m.role == "tool")
     assert "UNTRUSTED" in tool_msg.result["note"]
+
+
+class ExplodingRetriever(FakeRetriever):
+    def retrieve(self, query: str, **_: Any) -> list[RetrievedChunk]:
+        raise RuntimeError("password=hunter2 host=db.internal")
+
+
+def test_an_internal_tool_failure_is_an_observation_not_a_crash_and_does_not_leak() -> None:
+    llm = ScriptedLLM([_search(), ModelTurn(text="INSUFFICIENT_CONTEXT. The search failed.")])
+    r = run_agent("q", llm, _registry(ExplodingRetriever()))
+    assert r.refused and r.steps == 2  # the model got to see the failure and chose to refuse
+    tool_msg = next(m for m in llm.seen[1] if m.role == "tool")
+    assert (
+        "hunter2" not in repr(tool_msg.result) and "failed internally" in tool_msg.result["error"]
+    )
+    assert all("hunter2" not in e.detail for e in r.trace)
+
+
+def test_a_failing_model_call_does_not_leak_its_error_text() -> None:
+    class Leaky:
+        def generate(self, *a: Any, **k: Any) -> ModelTurn:
+            raise RuntimeError("project 123456789 quota exceeded")
+
+    r = run_agent("q", Leaky(), _registry())
+    assert r.refused and "123456789" not in r.answer and r.answer.endswith("the model call failed")

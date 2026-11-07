@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Iterator
 from typing import Any
 
 import pytest
 import structlog
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 from services.agent.llm import ModelTurn
 from services.agent.tests.test_agent import FakeRetriever, ScriptedLLM
@@ -150,7 +150,7 @@ def test_startup_refuses_unsafe_configurations(monkeypatch: pytest.MonkeyPatch) 
     assert main._build_security().auth_required is True
 
 
-def test_logging_config_does_not_hide_the_auth_failure_event() -> None:
-    assert (
-        logging.getLogger().handlers is not None
-    )  # guards the capture_logs test above against silent config
+def test_a_mistyped_environment_fails_at_startup_instead_of_failing_open() -> None:
+    with pytest.raises(ValidationError):
+        main.Settings(environment="production")  # type: ignore[arg-type]
+    assert main.Settings(environment="prod").environment == "prod"

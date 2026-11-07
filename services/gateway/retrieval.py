@@ -8,6 +8,7 @@ incompatible metrics (ts_rank vs cosine distance).
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Literal
@@ -19,6 +20,9 @@ from services.gateway.bm25 import TermRow, bm25_rank
 from services.gateway.filing_hints import FilingHints, parse_filing_hints
 from services.gateway.rerank import RERANK_POOL, Reranker, reorder
 
+_NEGATED_TERM = re.compile(
+    r"(?<![\w-])-\w+"
+)  # '-china' (hyphen at a word start), not 'export-control'
 RRF_K = 60  # standard constant from the original RRF paper; dampens rank position
 POOL_PER_LEG = 30  # candidates fetched per leg before fusion
 
@@ -228,15 +232,22 @@ class Retriever:
         df is counted per query from the chunks that contain a query term (so it is always
         fresh); chunk count and mean length are cached per Retriever (they move slowly).
         """
-        cur.execute("SELECT unnest(tsvector_to_array(to_tsvector('english', %s)))", [query])
+        # `-word` means "exclude" to websearch syntax, but this leg only ever adds terms: drop such words
+        # instead of scoring them positively (the semantic leg still sees the full question).
+        cleaned = _NEGATED_TERM.sub(" ", query)
+        cur.execute("SELECT unnest(tsvector_to_array(to_tsvector('english', %s)))", [cleaned])
         lexemes = [r[0] for r in cur.fetchall()]
         if not lexemes:
             return []
+        # OR of the lexemes themselves (no round trip through websearch syntax); quotes/backslashes made safe
+        any_term = " | ".join(
+            "'" + lex.replace("'", "''").replace("\\", "") + "'" for lex in lexemes
+        )
         cur.execute(
             """
             WITH cand AS (
                 SELECT c.id, c.tsv FROM chunks c
-                WHERE c.tsv @@ replace(websearch_to_tsquery('english', %s)::text, ' & ', ' | ')::tsquery
+                WHERE c.tsv @@ %s::tsquery
             ), dl AS (
                 SELECT cand.id, sum(array_length(u.positions, 1)) AS n
                 FROM cand, unnest(cand.tsv) u GROUP BY cand.id
@@ -245,7 +256,7 @@ class Retriever:
             FROM cand JOIN dl ON dl.id = cand.id, unnest(cand.tsv) u
             WHERE u.lexeme = ANY(%s)
             """,
-            [query, lexemes],
+            [any_term, lexemes],
         )
         rows: list[TermRow] = [(int(r[0]), str(r[1]), int(r[2]), int(r[3])) for r in cur.fetchall()]
         if not rows:

@@ -229,3 +229,22 @@ def test_product_defaults_are_what_the_eval_gate_protects() -> None:
     assert retriever._reranker is None and DEFAULT_CONFIG["rerank"] is False
     assert inspect.signature(Retriever.retrieve).parameters["infer_filing"].default is True
     assert DEFAULT_CONFIG["filing_hints"] is True
+
+
+def test_bm25_drops_negated_terms_and_ors_plain_lexemes() -> None:
+    script: list[list[tuple[Any, ...]]] = [
+        [("export",), ("control",)],  # lexemes Postgres returns for the cleaned question
+        [(10, "export", 1, 50)],
+        [(1000, 50.0)],
+        [],
+        [],
+    ]
+    pool, emb = ScriptedPool(script), FakeEmbedder(LOCAL_MODEL_ID)
+    Retriever(pool, emb).retrieve("export controls -china and export-control rules")  # type: ignore[arg-type]
+    first_sql, first_params = pool.log[0]
+    assert "tsvector_to_array" in first_sql
+    assert "-china" not in first_params[0] and "china" not in first_params[0]
+    assert "export-control" in first_params[0]  # a hyphenated word is not a negation
+    candidate_sql, candidate_params = pool.log[1]
+    assert "websearch_to_tsquery" not in candidate_sql  # no round trip through websearch syntax
+    assert candidate_params[0] == "'export' | 'control'"

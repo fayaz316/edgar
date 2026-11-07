@@ -92,6 +92,15 @@ class RateLimiter:
             window.append(now)
             return 0.0
 
+    def refund(self, caller: str, today: str | None = None) -> None:
+        """Give back one counted call (a request that was refused before doing any work)."""
+        today = today or datetime.now(UTC).strftime("%Y-%m-%d")
+        with self._lock:
+            if self._hits[caller]:
+                self._hits[caller].pop()
+            if self._daily[(caller, today)] > 0:
+                self._daily[(caller, today)] -= 1
+
     def take_daily(self, caller: str, today: str | None = None) -> bool:
         today = today or datetime.now(UTC).strftime("%Y-%m-%d")
         with self._lock:
@@ -184,6 +193,10 @@ def authenticated(request: Request) -> str:
             headers={"retry-after": str(int(wait) + 1)},
         )
     return caller
+
+
+def refund(request: Request, caller: str) -> None:
+    _security(request).limiter.refund(caller)
 
 
 def apply_daily_cap(request: Request, caller: str) -> None:

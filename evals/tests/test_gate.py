@@ -104,3 +104,11 @@ def test_frozen_evaluation_files_match_the_manifest() -> None:
     assert Path(freeze.MANIFEST).exists(), "run: python -m evals.freeze --update"
     assert freeze.mismatches() == []
     assert set(json.loads(freeze.MANIFEST.read_text())) == set(freeze.FROZEN)
+
+
+def test_a_baseline_built_with_weaker_settings_is_an_error_not_a_free_pass() -> None:
+    weak = {"lexical": "all", "rerank": False, "filing_hints": True}
+    r = compare(_doc(BASE, config=weak), _doc(BASE))
+    assert (
+        r.verdict == "ERROR" and "baseline was not built with the product defaults" in r.reasons[0]
+    )

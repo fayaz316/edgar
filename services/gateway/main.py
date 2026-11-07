@@ -57,7 +57,9 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="EA_", env_file=".env", extra="ignore")
 
-    environment: str = "dev"  # dev | prod — drives log verbosity and feature gates
+    environment: Literal["dev", "prod"] = (
+        "dev"  # a typo ("production") must fail at startup, not fail open
+    )
     log_level: str = "INFO"
     embedder: str = "local"  # local | gemini — must match the model the corpus was embedded with
     database_url: str = Field(
@@ -72,7 +74,12 @@ class Settings(BaseSettings):
     )
     auth: Literal["on", "off"] = "on"  # "off" is only accepted when environment == "dev"
     rate_per_min: int = Field(default=20, ge=1)  # calls per key per minute on spending endpoints
-    agent_daily_cap: int = Field(default=200, ge=1)  # agent runs per key per UTC day
+    agent_daily_cap: int = Field(
+        default=50, ge=1
+    )  # agent runs per key per UTC day (each is several model calls)
+    agent_max_steps: int = Field(
+        default=8, ge=2, le=12
+    )  # model turns per run; clients cannot raise it
     agent_max_seconds: float = Field(default=120.0, gt=0)  # wall-clock budget for one agent run
 
 
@@ -126,6 +133,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.registry = build_registry(ToolContext(retriever=app.state.retriever, pool=pool))
     app.state.agent_llm = GeminiLLM(settings.gemini_api_key)
     app.state.agent_max_seconds = settings.agent_max_seconds
+    app.state.agent_max_steps = settings.agent_max_steps
     log.info(
         "startup",
         environment=settings.environment,

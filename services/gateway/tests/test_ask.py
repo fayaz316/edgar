@@ -137,3 +137,19 @@ def test_database_failure_is_503(wire: Any) -> None:
 
 def test_short_question_rejected() -> None:
     assert client.post("/ask", json={"question": "hi"}).status_code == 422
+
+
+def test_ask_prompt_carries_the_injection_defence(wire: Any) -> None:
+    seen: dict[str, Any] = {}
+    fake = FakeGenai(text="Customers were 16%, 15% and 13% [1].")
+    original = fake.models.generate_content
+
+    def spy(**kwargs: Any) -> Any:
+        seen.update(kwargs)
+        return original(**kwargs)
+
+    fake.models.generate_content = spy
+    wire(FakeRetriever([_chunk(1)]), fake)
+    assert client.post("/ask", json={"question": QUESTION}).status_code == 200
+    system = seen["config"]["system_instruction"]
+    assert "Security rules" in system and "untrusted" in system
