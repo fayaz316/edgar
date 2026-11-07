@@ -10,7 +10,7 @@ EMBEDDER ?= local
 UV_EMB = uv run $(if $(filter local,$(EMBEDDER)),--group local-embed,)
 TFVARS := $(TF_DIR)/terraform.tfvars
 
-.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline db-migrate
+.PHONY: help bootstrap plan apply destroy teardown cost url init db-up embed embed-status fetch reingest golden eval-retrieval image test lint parse-report golden-offline db-migrate mcp
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -94,3 +94,6 @@ test: ## Unit tests
 
 image: ## Build the gateway image locally (context = repo root)
 	docker build -f services/gateway/Dockerfile -t edgar-gateway:dev .
+
+mcp: ## Run the MCP server over stdio (point Claude Desktop / an MCP client at this command)
+	$(UV_EMB) python -m services.mcp.server
