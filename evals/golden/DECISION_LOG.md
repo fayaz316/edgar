@@ -39,3 +39,7 @@ in the manifest. A new defence needs new attacks written before it is tried; reu
 - `uncited_labeled.yaml` (74 sentences) was used once (Evaluation A) and `uncited_questions.yaml` (8 comparative questions, OFF vs ON once each) once (Evaluation B), to decide whether the rule becomes the default. Consumed.
 - Afterwards two of those questions (uq5, x-001) were re-run with the rule ON and read by hand to understand the faithfulness change; that reading informed the ADR's risk section, not the adoption decision.
 
+## Inference-label experiment (ADR 0021)
+- `inference_questions.yaml` (8 comparative questions, v1 vs v2 once each) was used once. Consumed.
+- The frozen injection set (`evals/injection/attacks.py`) was run against prompt v2 as a regression check: a second use, not a new design choice (it can only block adoption, not select a variant).
+
