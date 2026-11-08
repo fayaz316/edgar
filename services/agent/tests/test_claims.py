@@ -103,3 +103,32 @@ def test_l1_applies_to_comma_form_citations_too() -> None:
     evidence = [{"ticker": "NVDA", "text": "NVIDIA revenue was $12.5 billion."}] * 2
     [c] = check_answer("NVIDIA revenue was $13.5 billion [1, 2].", evidence)
     assert c.cites == [1, 2] and c.missing_numbers == ["13.5"]
+
+
+def test_only_clearly_structural_uncited_text_is_exempt_from_needing_a_citation() -> None:
+    from services.agent.claims import needs_citation
+
+    for structural in (
+        "The contexts for each company are as follows:",
+        "Key points:",
+        "**NVIDIA**",
+        "In summary",
+        "Apple:",
+    ):
+        assert not needs_citation(structural)
+    for claim in (
+        "These controls have negatively impacted demand.",
+        "NVIDIA: AI is the central driver of their business.",
+        "**Geographic Concentration:** The significant majority of manufacturing is abroad.",
+    ):
+        assert needs_citation(claim)
+
+
+def test_uncited_substantive_finds_only_sentences_without_any_citation() -> None:
+    from services.agent.claims import uncited_substantive
+
+    answer = "Here is the comparison:\nApple grew [1]. NVIDIA also grew much faster.\n* Costs rose [2, 3]."
+    assert uncited_substantive(answer) == ["NVIDIA also grew much faster."]
+    assert (
+        uncited_substantive("NVIDIA also grew.") == []
+    )  # known limit: a 3-word claim is treated as structural

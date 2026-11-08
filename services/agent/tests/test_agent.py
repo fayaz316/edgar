@@ -300,3 +300,48 @@ def test_a_failing_model_call_does_not_leak_its_error_text() -> None:
 
     r = run_agent("q", Leaky(), _registry())
     assert r.refused and "123456789" not in r.answer and r.answer.endswith("the model call failed")
+
+
+def test_uncited_require_sends_a_loose_sentence_back_and_accepts_the_repaired_answer() -> None:
+    llm = ScriptedLLM(
+        [
+            _search(),
+            ModelTurn(text="Export controls hurt demand [1]. Competitors benefit as a result."),
+            ModelTurn(text="Export controls hurt demand [1]. Competitors benefit as a result [1]."),
+        ]
+    )
+    r = run_agent("q", llm, _registry(), uncited="require")
+    assert not r.refused and r.repairs == 1
+    assert "no citation" in next(e for e in r.trace if e.detail.startswith("rejected")).detail
+    feedback = [m for m in llm.seen[2] if m.role == "user"][-1].text
+    assert "Cite the passage(s)" in feedback
+
+
+def test_uncited_require_refuses_when_the_model_will_not_cite() -> None:
+    bad = ModelTurn(text="Export controls hurt demand [1]. Competitors benefit as a result.")
+    r = run_agent(
+        "q", ScriptedLLM([_search(), bad, bad, bad]), _registry(), uncited="require", max_repairs=2
+    )
+    assert r.refused and "could not be grounded" in r.answer and r.repairs == 2
+
+
+def test_uncited_sentences_are_required_to_be_cited_by_default_and_the_switch_opts_out() -> None:
+    loose = "Export controls hurt demand [1]. Competitors benefit as a result."
+    fixed = "Export controls hurt demand [1]. Competitors benefit as a result [1]."
+    default = run_agent(
+        "q", ScriptedLLM([_search(), ModelTurn(text=loose), ModelTurn(text=fixed)]), _registry()
+    )
+    assert not default.refused and default.repairs == 1  # ADR 0020: default is "require"
+    opted_out = run_agent(
+        "q", ScriptedLLM([_search(), ModelTurn(text=loose)]), _registry(), uncited="off"
+    )
+    assert not opted_out.refused and opted_out.repairs == 0
+
+
+def test_uncited_require_does_not_touch_an_honest_refusal_or_structural_headings() -> None:
+    llm = ScriptedLLM([_search(), ModelTurn(text="Comparison:\nExport controls hurt demand [1].")])
+    assert not run_agent("q", llm, _registry(), uncited="require").refused
+    refusal = ScriptedLLM(
+        [_search(), ModelTurn(text="INSUFFICIENT_CONTEXT. The filings do not say so.")]
+    )
+    assert run_agent("q", refusal, _registry(), uncited="require").refused

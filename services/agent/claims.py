@@ -236,6 +236,19 @@ def ground_claim(
     return missing_dates, sorted(set(missing_years) | (numbers_in(rest) - amounts))
 
 
+# ---- uncited sentences (spec: evals/claims/UNCITED.md) ----------------------------------------------------
+def needs_citation(sentence: str) -> bool:
+    """A sentence without a citation is exempt only if it is clearly structural: it ends with ':' or has at most 3 words.
+    Everything else is a claim and needs a citation (default: needs one; many real claims name no company)."""
+    text = strip_markup(sentence)
+    return not (text.endswith(":") or len(re.findall(r"[A-Za-z]+", text)) <= 3)
+
+
+def uncited_substantive(answer: str) -> list[str]:
+    """Sentences of an answer that carry no citation and are not structural."""
+    return [text for text, cites in split_claims(answer) if not cites and needs_citation(text)]
+
+
 def companies_in(text: str) -> set[str]:
     return {ticker for ticker, rx in _COMPANIES.items() if rx.search(text)}
 

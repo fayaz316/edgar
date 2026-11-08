@@ -1,0 +1,9 @@
+# Evaluation B questions (UNCITED.md): 6 new comparative questions + two known ones. Frozen before the run.
+- {id: uq1, question: "How do Apple's and JPMorgan's disclosures about regulation differ in emphasis?"}
+- {id: uq2, question: "Compare how NVIDIA and Apple describe risks from competition."}
+- {id: uq3, question: "How do NVIDIA, Apple and JPMorgan each describe their use of artificial intelligence?"}
+- {id: uq4, question: "Compare Apple's and NVIDIA's disclosures about share repurchases."}
+- {id: uq5, question: "How do JPMorgan and Apple describe their exposure to interest rate or foreign currency risk?"}
+- {id: uq6, question: "What do NVIDIA and JPMorgan say about legal proceedings, and how do they differ?"}
+- {id: x-001, question: "How do NVIDIA's and Apple's supply-chain risk disclosures differ in emphasis?"}
+- {id: x-003, question: "Which of the three companies in this corpus discuss artificial intelligence most centrally, and in what context?"}

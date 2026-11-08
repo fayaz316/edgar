@@ -21,7 +21,7 @@ from typing import Any, Literal, TypedDict
 import structlog
 from langgraph.graph import END, START, StateGraph
 
-from services.agent.claims import ClaimCheck, check_answer
+from services.agent.claims import ClaimCheck, check_answer, uncited_substantive
 from services.agent.llm import LLM, Message, ModelTurn
 from services.gateway.answer import SECURITY_RULES, validate_answer
 from services.tools.registry import ToolError, ToolRegistry
@@ -110,6 +110,7 @@ def build_graph(
     claim_check: Literal["off", "l1"] = "l1",
     max_seconds: float | None = None,
     prompt_variant: Literal["v0", "v1"] = "v1",
+    uncited: Literal["off", "require"] = "require",
 ) -> Any:
     system_prompt = (
         SYSTEM_PROMPT if prompt_variant == "v0" else f"{SYSTEM_PROMPT}\n\n{SECURITY_RULES}"
@@ -212,6 +213,10 @@ def build_graph(
             ]
             if bad:
                 return _reject(state, _l1_problem(bad), max_repairs)
+        if uncited == "require" and not model_refused and not checked.refused:
+            loose = uncited_substantive(text)
+            if loose:
+                return _reject(state, _uncited_problem(loose), max_repairs, UNCITED_ADVICE)
         if model_refused or not checked.refused:
             event = TraceEvent(
                 "verify",
@@ -264,12 +269,27 @@ def _l1_problem(bad: list[ClaimCheck]) -> str:
     return "some claims are not grounded in what they cite: " + " | ".join(parts)
 
 
-def _reject(state: AgentState, problem: str, max_repairs: int) -> AgentState:
+UNCITED_ADVICE = (
+    "Cite the passage(s) that support each such sentence with [n], or remove the sentence. "
+    "Every factual sentence needs a citation; only short headings ending in a colon may go without one."
+)
+
+
+def _uncited_problem(loose: list[str]) -> str:
+    shown = " | ".join(f'"{s[:70]}"' for s in loose[:3])
+    return f"{len(loose)} sentence(s) have no citation: {shown}"
+
+
+def _reject(
+    state: AgentState, problem: str, max_repairs: int, advice: str | None = None
+) -> AgentState:
     """Send a bad answer back to `plan` with feedback, or refuse once repairs are used up."""
     if state["repairs"] >= max_repairs:
         return _refuse(state, f"the answer could not be grounded ({problem})", "verify")
     feedback = (
-        f"Your answer was rejected: {problem}. State figures exactly as they appear in the "
+        f"Your answer was rejected: {problem}. {advice}"
+        if advice
+        else f"Your answer was rejected: {problem}. State figures exactly as they appear in the "
         "passages you cite (do not state computed or rounded values; a filing date may come from the "
         "metadata the tools returned), name only the company "
         "whose passage you cite, and cite only passage numbers the tools returned, as [n]. "
@@ -321,6 +341,7 @@ def stream_agent(
     claim_check: Literal["off", "l1"] = "l1",
     max_seconds: float | None = None,
     prompt_variant: Literal["v0", "v1"] = "v1",
+    uncited: Literal["off", "require"] = "require",
 ) -> Iterator[TraceEvent | AgentResult]:
     """Run the agent, yielding each TraceEvent as soon as it happens, then the AgentResult last."""
     graph = build_graph(
@@ -332,6 +353,7 @@ def stream_agent(
         claim_check=claim_check,
         max_seconds=max_seconds,
         prompt_variant=prompt_variant,
+        uncited=uncited,
     )
     initial: AgentState = {
         "question": question,
@@ -389,6 +411,7 @@ def run_agent(
     claim_check: Literal["off", "l1"] = "l1",
     max_seconds: float | None = None,
     prompt_variant: Literal["v0", "v1"] = "v1",
+    uncited: Literal["off", "require"] = "require",
 ) -> AgentResult:
     result: AgentResult | None = None
     for item in stream_agent(
@@ -401,6 +424,7 @@ def run_agent(
         claim_check=claim_check,
         max_seconds=max_seconds,
         prompt_variant=prompt_variant,
+        uncited=uncited,
     ):
         if isinstance(item, AgentResult):
             result = item
