@@ -7,6 +7,14 @@ A citation-grounded AI research analyst over SEC filings (10-K / 10-Q for Apple,
 run a multi-step agent whose every tool call and verification step is visible in a UI. Retrieval and agent changes are judged
 by pre-registered experiments and a regression gate, not by feel (see *How decisions are made*).
 
+## What it looks like
+| Answer with its trace | Checking a cited passage | Refusing an out-of-scope question |
+|---|---|---|
+| ![Answer with trace](docs/img/answer-with-trace.jpg) | ![Cited passage](docs/img/cited-passage.jpg) | ![Refusal](docs/img/refusal.jpg) |
+
+Every tool call and the verify step are shown as they happen; every `[n]` in the answer opens the exact filing passage it rests on;
+a question the filings cannot answer is refused instead of guessed. (Local run, `EA_GENAI_BACKEND=vertex`.)
+
 ## Status (honest)
 | Phase | State |
 |---|---|
