@@ -13,7 +13,7 @@ numbers are still reported, but a new change needs a fresh set.
 | held-out v3 (17) | 1 | reranker (0011) |
 | claims_v1 (36) | 1 | claim-level checker: L1 enforced, L2 rejected (ADR 0014). Consumed: a new checker variant needs claims_v2. |
 
-| held-out v4 (28) | 0 | fresh set for the embedder fine-tune (evals/finetune/PROTOCOL.md); control run recorded, not yet used for a decision |
+| held-out v4 (28) | 1 | embedder fine-tune adoption (ADR 0022). Consumed: a further embedder change needs a fresh set. |
 
 Status: golden_v0 and v1 are retired as guards. v2 has 2 uses (one more allowed), v3 has 1.
 Rule for new retrieval changes: write a new held-out set (v4, new seed) first.
@@ -48,3 +48,4 @@ in the manifest. A new defence needs new attacks written before it is tried; reu
 
 ## Embedder fine-tune (evals/finetune/PROTOCOL.md)
 - `golden_v4_heldout.yaml` (28 questions) was written and frozen BEFORE any training data existed; the control retriever was run on it once (hit@8 23/28, MRR 0.497). Frozen in the manifest on 2026-11-08. Uses for decisions: 0 so far.
+- Result (2026-11-08): the fine-tuned embedder passed the pre-registered rule (v4 hit@8 23 -> 26, MRR 0.497 -> 0.609; v0..v3 62 -> 66; 4 questions lost overall). Passed narrowly: hit@8 gain equals the +3 bar. v4 uses: 1. golden_v0..v3 served as the regression check (design-exposed). The base-model gate baseline is unchanged because the product default is unchanged.

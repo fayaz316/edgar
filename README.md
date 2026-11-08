@@ -15,9 +15,9 @@ by pre-registered experiments and a regression gate, not by feel (see *How decis
 | P2 agent + MCP | Tool registry, MCP server, LangGraph agent, streaming API, trace UI: **done and tested**. Missing: the contradiction-hunter sub-agent; Claude Desktop is not connected yet. |
 | P3 evals | 4 retrieval sets (78 questions), two claim sets (36 + 20 labeled claims), a two-layer regression gate, and a calibrated independent faithfulness judge with a first measurement (ADR 0018). Missing: ≥100 questions, the full gate in CI, an answer-quality gate, a human check of the judge. |
 | P4 hardening | API-key auth, rate limits, strict CSP, prompt-injection defence, threat model, clean dependency audit. Missing: Secret Manager/service accounts/IAP, shared rate-limit store, semantic cache, load test with SLOs. |
-| P5 fine-tuning | Not started. Planned: fine-tune the bge embedder on filing-derived pairs, judged by the regression gate (see `docs/STATUS.md`). |
+| P5 fine-tuning | **Done and measured** (ADR 0022): bge-base fine-tuned on 2,664 machine-written triples, leak-checked, one run on a spot GPU; passed the pre-registered rule narrowly (fresh set hit@8 23 -> 26, MRR 0.497 -> 0.609). Offered as an opt-in `finetuned` embedder; the default is unchanged because the weights are not in the repo. |
 | P6 UI + demo | A single-file UI exists. Screenshots are planned; the Next.js app and demo video are dropped. |
-| P7 wrapper | 21 ADRs and a threat model exist; runbook, postmortem and blog post do not. |
+| P7 wrapper | 22 ADRs and a threat model exist; runbook, postmortem and blog post do not. |
 
 Current status, open items and how to resume: [`docs/STATUS.md`](docs/STATUS.md). Decisions and their evidence: [`docs/adr/`](docs/adr/).
 
@@ -72,8 +72,8 @@ often it has informed a decision (`evals/golden/DECISION_LOG.md`), and frozen fi
 | `services/gateway/` | FastAPI: `/ask`, `/agent`, `/agent/stream`, UI, security, BM25 + vector hybrid retrieval |
 | `services/agent/` | LangGraph plan/act/verify loop, Gemini adapter, claim-level grounding check |
 | `services/tools/`, `services/mcp/` | one tool registry, exposed over MCP |
-| `evals/` | golden sets, claims set, injection set, runners, regression gate, frozen-file manifest |
-| `docs/adr/`, `docs/security/` | 21 decision records, the threat model |
+| `evals/` | golden sets, claims set, injection set, runners, regression gate, frozen-file manifest; `evals/finetune/` = the embedder fine-tune (protocol, leakage controls, data build, trainer, decision script, results) |
+| `docs/adr/`, `docs/security/` | 22 decision records, the threat model |
 | `infra/` | Terraform (state in GCS) |
 
 ## Known limits

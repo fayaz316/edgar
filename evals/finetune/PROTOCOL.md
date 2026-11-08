@@ -117,3 +117,12 @@ and 163 validation triples from 1,479 chunks (16 queries dropped for lack of a v
 negative, is in the eligible set (assertion passed; hashes in `eligible_manifest.json` and `pairs_manifest.json`).
 Observation, not acted on: restricted to the eligible chunks, the base model puts the question's own chunk in its top 8 for 47% of
 these machine-written questions (median rank 10), so the training questions are harder or noisier than the hand-written v4 set.
+
+## Addendum E — the single run and its result (2026-11-08; recorded whichever way it fell)
+- Training: one spot VM (g2-standard-4, 1x L4, europe-west4-a, auto-delete after 2 h), Python 3.10.12, torch 2.9.1+cu129, sentence-transformers
+  6.2.0, transformers 5.20.2 (local embedding used 5.22.2), datasets 5.1.0, accelerate 1.15.0. Input hash matched `pairs_manifest.json`.
+  84 steps, 69 s, loss 2.21 -> 0.79, validation loss 0.44. Weights tag `edgar-ft-bge-base@83a78fcb`. The VM and its disk were deleted (verified empty).
+  One install problem (an unused audio package) was fixed before training started; no training run was repeated.
+- Scoring: control on the main database, candidate on a scratch copy re-embedded with the fine-tuned model (same chunks, corpus fingerprint
+  compared), `scripts/finetune-eval.sh`, product defaults, k = 8. Raw per-question results are in `evals/finetune/results/`; the verdict in `decision.json`.
+- Verdict from `decide.py`: **ADOPT** (v4 hit@8 +3 = the bar, MRR +0.112; v0..v3 62 -> 66, MRR 0.491 -> 0.545; 4 negative flips <= 5). See ADR 0022 for the caveats.

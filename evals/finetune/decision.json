@@ -1,0 +1,110 @@
+{
+ "verdict": "ADOPT",
+ "reasons": [],
+ "v4": {
+  "n": 28,
+  "hit8": [
+   23,
+   26
+  ],
+  "mrr": [
+   0.4965,
+   0.6087
+  ],
+  "lost": [
+   "hd-aapl-10k-004"
+  ],
+  "gained": [
+   "hd-aapl-10k-001",
+   "hd-aapl-10q-005",
+   "hd-nvda-10k-004",
+   "hd-nvda-10k-006"
+  ]
+ },
+ "v0_v3": {
+  "combined_hit8": [
+   62,
+   66
+  ],
+  "combined_mrr": [
+   0.4913,
+   0.5449
+  ],
+  "sets": [
+   {
+    "name": "golden_v0",
+    "n": 24,
+    "hit8": [
+     17,
+     17
+    ],
+    "mrr": [
+     0.4473,
+     0.4948
+    ],
+    "lost": [
+     "aapl-10k-001"
+    ],
+    "gained": [
+     "nvda-10q-009"
+    ]
+   },
+   {
+    "name": "heldout_v1",
+    "n": 19,
+    "hit8": [
+     17,
+     18
+    ],
+    "mrr": [
+     0.6338,
+     0.6096
+    ],
+    "lost": [
+     "h-nvda-10q-001"
+    ],
+    "gained": [
+     "h-jpm-10k-003",
+     "h-jpm-10q-002"
+    ]
+   },
+   {
+    "name": "heldout_v2",
+    "n": 18,
+    "hit8": [
+     16,
+     16
+    ],
+    "mrr": [
+     0.4575,
+     0.5348
+    ],
+    "lost": [
+     "hb-jpm-10q-002"
+    ],
+    "gained": [
+     "hb-nvda-10q-003"
+    ]
+   },
+   {
+    "name": "heldout_v3",
+    "n": 17,
+    "hit8": [
+     12,
+     15
+    ],
+    "mrr": [
+     0.43,
+     0.554
+    ],
+    "lost": [],
+    "gained": [
+     "hc-aapl-10k-003",
+     "hc-aapl-10k-004",
+     "hc-nvda-10q-002"
+    ]
+   }
+  ]
+ },
+ "total_negative_flips": 4
+}
