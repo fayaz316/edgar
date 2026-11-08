@@ -26,3 +26,8 @@ uses above. The baseline (`evals/baselines/retrieval_baseline.json`) was generat
 `evals/injection/attacks.py` (8 attacks + criteria) was used ONCE per prompt variant to choose the default prompt (v1). It is frozen
 in the manifest. A new defence needs new attacks written before it is tried; reusing these would be adaptive reuse.
 
+## Judge (ADR 0018)
+- `claims_v1` (36 claims) was used a second time: to calibrate the judge, with the judge prompt and guard frozen before the run (a decision about the judge's validity). Uses: 2.
+- The 17 held-out v3 questions and 3 golden_v0 multi-step questions were used to MEASURE the agent's answer faithfulness; no design choice depends on picking among variants,
+  so this is a baseline measurement, not an adaptive decision. Any future change judged on these needs a fresh set.
+
