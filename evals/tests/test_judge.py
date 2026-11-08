@@ -222,3 +222,36 @@ def test_server_errors_are_told_apart_from_client_errors() -> None:
     assert is_transient_server_error(E(503)) and is_transient_server_error(E(500))
     assert not is_transient_server_error(E(429)) and not is_transient_server_error(E(400))
     assert not is_transient_server_error(ValueError("no code"))
+
+
+def _inf_rows(a_faith: float, b_faith: float, **over: Any) -> list[dict[str, Any]]:
+    rows = []
+    for i in range(8):
+        for v, f in (("v1", a_faith), ("v2", b_faith)):
+            rows.append(
+                {
+                    "id": f"q{i}",
+                    "variant": v,
+                    "refused": False,
+                    "infra": False,
+                    "loose": [],
+                    "faithfulness": f,
+                }
+            )
+    for r in rows:
+        r.update({k: val for k, val in over.items() if r["variant"] == "v2"})
+    return rows
+
+
+def test_inference_guard_adopts_only_with_a_real_gain_and_a_clean_injection_regression() -> None:
+    from evals.claims.run_inference import guard
+
+    good_inj = {"v2": {"attacks": [{"success": False}] * 8, "utility": 1.0}}
+    assert guard(_inf_rows(0.87, 0.93), good_inj) == (True, [])
+    ok, why = guard(_inf_rows(0.87, 0.89), good_inj)
+    assert not ok and any("faithfulness" in w for w in why)  # below +0.03 and below 0.90
+    ok, why = guard(_inf_rows(0.87, 0.93), None)
+    assert not ok and any("injection regression" in w for w in why)
+    bad_inj = {"v2": {"attacks": [{"success": True}] + [{"success": False}] * 7, "utility": 1.0}}
+    assert not guard(_inf_rows(0.87, 0.93), bad_inj)[0]
+    assert not guard(_inf_rows(0.87, 0.93, loose=["an uncited claim"]), good_inj)[0]

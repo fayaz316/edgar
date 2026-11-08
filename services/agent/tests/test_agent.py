@@ -345,3 +345,36 @@ def test_uncited_require_does_not_touch_an_honest_refusal_or_structural_headings
         [_search(), ModelTurn(text="INSUFFICIENT_CONTEXT. The filings do not say so.")]
     )
     assert run_agent("q", refusal, _registry(), uncited="require").refused
+
+
+def test_prompt_v2_adds_the_inference_rule_and_v1_stays_unchanged() -> None:
+    v2 = RecordingLLM([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
+    run_agent("q", v2, _registry(), prompt_variant="v2")
+    assert "Facts versus inference" in v2.systems[0] and "Security rules" in v2.systems[0]
+    v1 = RecordingLLM([ModelTurn(text="INSUFFICIENT_CONTEXT. none.")])
+    run_agent("q", v1, _registry())  # the default is still v1 until the guard passes
+    assert "Facts versus inference" not in v1.systems[0] and "Security rules" in v1.systems[0]
+
+
+def test_a_labelled_inference_after_cited_facts_is_accepted() -> None:
+    answer = "Export controls hurt demand [1]. Competitors gain from the controls [1]. Inference: the firm is exposed on both sides."
+    r = run_agent(
+        "q", ScriptedLLM([_search(), ModelTurn(text=answer)]), _registry(), prompt_variant="v2"
+    )
+    assert not r.refused and r.repairs == 0
+
+
+def test_an_inference_with_a_number_is_sent_back() -> None:
+    bad = "Export controls hurt demand [1]. Competitors gain from the controls [1]. Inference: the firm lost 30% of demand."
+    good = "Export controls hurt demand [1]. Competitors gain from the controls [1]. Inference: the firm is exposed on both sides."
+    r = run_agent(
+        "q",
+        ScriptedLLM([_search(), ModelTurn(text=bad), ModelTurn(text=good)]),
+        _registry(),
+        prompt_variant="v2",
+    )
+    assert not r.refused and r.repairs == 1
+    assert (
+        "number, date or quotation"
+        in next(e for e in r.trace if e.detail.startswith("rejected")).detail
+    )

@@ -34,9 +34,13 @@ function workingRow() { const li = el("li", "working", "working…"); li.id = "w
 
 function appendText(box, text) {
   // **bold** only; everything is built with DOM nodes, never parsed as HTML
-  text.split(/(\*\*[^*]+\*\*)/).forEach((part) => {
+  text.split(/(\*\*[^*]+\*\*|Inference:)/).forEach((part) => {
     if (/^\*\*[^*]+\*\*$/.test(part)) box.appendChild(el("strong", "", part.slice(2, -2)));
-    else box.appendChild(document.createTextNode(part));
+    else if (part === "Inference:") {
+      const b = el("span", "inference-label", "Inference");
+      b.title = "Not stated by any single passage: the model's own comparison or conclusion";
+      box.appendChild(b);
+    } else box.appendChild(document.createTextNode(part));
   });
 }
 function renderAnswer(text, hasCitations) {

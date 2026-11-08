@@ -25,6 +25,8 @@ FROZEN = [
     "claims/PROTOCOL.md",
     "claims/L1_DATES.md",
     "claims/UNCITED.md",
+    "claims/INFERENCE.md",
+    "claims/inference_questions.yaml",
     "claims/uncited_labeled.yaml",
     "claims/uncited_questions.yaml",
     "claims/claims_v2.yaml",

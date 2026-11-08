@@ -237,16 +237,48 @@ def ground_claim(
 
 
 # ---- uncited sentences (spec: evals/claims/UNCITED.md) ----------------------------------------------------
+INFERENCE_LABEL = "inference:"
+MAX_INFERENCE_SHARE = 0.4  # of the answer's non-structural sentences (evals/claims/INFERENCE.md)
+
+
+def is_inference(sentence: str) -> bool:
+    """A sentence the model labelled as its own inference: it starts with the exact label 'Inference:'."""
+    return strip_markup(sentence).lower().startswith(INFERENCE_LABEL)
+
+
 def needs_citation(sentence: str) -> bool:
     """A sentence without a citation is exempt only if it is clearly structural: it ends with ':' or has at most 3 words.
     Everything else is a claim and needs a citation (default: needs one; many real claims name no company)."""
     text = strip_markup(sentence)
+    if is_inference(text):
+        return False  # labelled inference: allowed uncited, but see inference_problems()
     return not (text.endswith(":") or len(re.findall(r"[A-Za-z]+", text)) <= 3)
 
 
 def uncited_substantive(answer: str) -> list[str]:
     """Sentences of an answer that carry no citation and are not structural."""
     return [text for text, cites in split_claims(answer) if not cites and needs_citation(text)]
+
+
+def inference_problems(answer: str) -> list[str]:
+    """Ways an answer misuses the 'Inference:' label (INFERENCE.md): a number, date or quotation inside an inference
+    sentence, or inference sentences making up more than 40% of the answer. Empty list = fine."""
+    sentences = [
+        t
+        for t, _ in split_claims(answer)
+        if not t.endswith(":") and len(re.findall(r"[A-Za-z]+", t)) > 3
+    ]
+    inferences = [t for t in sentences if is_inference(t)]
+    problems = [
+        f'an inference contains a number, date or quotation: "{t[:60]}"'
+        for t in inferences
+        if re.search(r"[0-9\"\u201c\u201d]", t)
+    ]
+    if inferences and len(inferences) > MAX_INFERENCE_SHARE * len(sentences):
+        problems.append(
+            f"{len(inferences)} of {len(sentences)} sentences are labelled inference (max {int(MAX_INFERENCE_SHARE * 100)}%)"
+        )
+    return problems
 
 
 def companies_in(text: str) -> set[str]:

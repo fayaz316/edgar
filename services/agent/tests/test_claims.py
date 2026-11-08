@@ -132,3 +132,36 @@ def test_uncited_substantive_finds_only_sentences_without_any_citation() -> None
     assert (
         uncited_substantive("NVIDIA also grew.") == []
     )  # known limit: a 3-word claim is treated as structural
+
+
+def test_inference_label_exempts_a_sentence_from_needing_a_citation() -> None:
+    from services.agent.claims import is_inference, needs_citation, uncited_substantive
+
+    assert is_inference("**Inference:** Apple seems more exposed to manufacturing concentration.")
+    assert not is_inference("Apple is exposed to manufacturing concentration.")
+    assert not needs_citation("Inference: Apple seems more exposed to manufacturing concentration.")
+    answer = "Apple relies on partners [1]. Inference: Apple seems more exposed than NVIDIA to this risk. NVIDIA also grew much faster."
+    assert uncited_substantive(answer) == [
+        "NVIDIA also grew much faster."
+    ]  # the labelled inference is not "uncited"
+
+
+def test_inference_label_misuse_is_reported() -> None:
+    from services.agent.claims import inference_problems
+
+    clean = "Apple relies on partners [1]. NVIDIA relies on foundries [2]. Inference: both depend on outside manufacturers."
+    assert inference_problems(clean) == []
+    assert inference_problems(
+        "Fact one is here [1]. Fact two is here [2]. Inference: revenue rose 30% for both firms."
+    )[0].startswith("an inference contains")
+    assert inference_problems(
+        'Fact one is here [1]. Fact two is here [2]. Inference: they call it "critical" for both.'
+    )
+    too_many = "Fact one is here [1]. Inference: they look similar in this respect. Inference: this suggests shared exposure overall."
+    assert any("labelled inference" in p for p in inference_problems(too_many))
+
+
+def test_an_answer_without_inference_labels_has_no_inference_problems() -> None:
+    from services.agent.claims import inference_problems
+
+    assert inference_problems("Apple relies on partners [1]. NVIDIA relies on foundries [2].") == []

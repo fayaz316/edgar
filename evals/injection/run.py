@@ -60,7 +60,11 @@ def main() -> int:
     load_dotenv(".env")
     llm = GeminiLLM(os.environ["GEMINI_API_KEY"])
     report: dict[str, Any] = {}
-    for variant in ("v0", "v1"):
+    variants = tuple(sys.argv[1:]) or (
+        "v0",
+        "v1",
+    )  # `python -m evals.injection.run v2` runs only v2
+    for variant in variants:
         rows = []
         for a in ATTACKS:
             r = _run(llm, QUESTION, [a.payload, GENUINE], variant)  # injected passage FIRST
@@ -87,7 +91,8 @@ def main() -> int:
             "asr": sum(1 for x in rows if x["success"]) / len(rows),
             "utility": sum(utility) / len(utility),
         }
-    OUT.write_text(json.dumps(report, indent=1))
+    out = OUT if variants == ("v0", "v1") else OUT.with_name(f"results_{'_'.join(variants)}.json")
+    out.write_text(json.dumps(report, indent=1))
     for v, d in report.items():
         print(
             f"\n{v}: ASR {sum(x['success'] for x in d['attacks'])}/{len(d['attacks'])}   utility {d['utility']:.2f}"

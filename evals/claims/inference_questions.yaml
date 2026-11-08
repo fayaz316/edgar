@@ -1,0 +1,9 @@
+# Cite-washing evaluation questions (INFERENCE.md): 8 NEW comparative/synthesis questions. Frozen before any run.
+- {id: iq1, question: "Compare how Apple and NVIDIA describe their reliance on third-party manufacturers."}
+- {id: iq2, question: "How do JPMorgan and NVIDIA differ in how they describe cybersecurity risk?"}
+- {id: iq3, question: "Which company describes more detailed climate-related risk, Apple or JPMorgan?"}
+- {id: iq4, question: "How do the three companies each describe their dependence on key personnel?"}
+- {id: iq5, question: "Compare Apple's and JPMorgan's disclosures about legal and regulatory investigations."}
+- {id: iq6, question: "How do NVIDIA and Apple differ in how they describe the effects of tariffs or trade restrictions?"}
+- {id: iq7, question: "Compare how JPMorgan and NVIDIA describe their exposure to credit or counterparty risk."}
+- {id: iq8, question: "How do Apple and NVIDIA each describe competition in their markets, and which seems more concerned?"}

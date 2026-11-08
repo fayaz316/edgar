@@ -83,3 +83,5 @@
   .keyrow { display: flex; gap: 8px; align-items: center; margin: 0 0 12px; font-size: 13px; color: var(--muted); }
   .keyrow input { flex: 1 1 240px; max-width: 360px; padding: 8px 10px; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
   .working-row { display: block !important; border: 0 !important; }
+
+  .inference-label { display: inline-block; padding: 0 6px; margin-right: 4px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: color-mix(in srgb, var(--verify) 22%, transparent); color: var(--verify); }
