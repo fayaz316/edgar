@@ -65,3 +65,4 @@ Status: Proposed | Accepted | Superseded by ADR XXXX · Date: YYYY-MM-DD
 | 0017 | Security hardening: API keys, limits, browser protections, injection defence | Accepted |
 | 0018 | Independent faithfulness judge, calibrated first; first measurement of the agent | Accepted |
 | 0019 | L1 grounds dates in filing metadata and stops dates from grounding amounts | Accepted |
+| 0020 | Every claim sentence must carry a citation (and the cite-washing risk it creates) | Accepted |

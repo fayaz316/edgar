@@ -35,3 +35,7 @@ in the manifest. A new defence needs new attacks written before it is tried; reu
 - `claims_v2` (20 claims, new passages) was used ONCE to decide whether the date-aware L1 may replace the old one (guard in `evals/claims/L1_DATES.md`). Uses: 1. Consumed.
 - The 20 answerable agent questions from the judge evaluation were re-run as a REGRESSION check (refusals and repairs before/after), not to choose between variants.
 
+## Uncited-sentence rule (ADR 0020)
+- `uncited_labeled.yaml` (74 sentences) was used once (Evaluation A) and `uncited_questions.yaml` (8 comparative questions, OFF vs ON once each) once (Evaluation B), to decide whether the rule becomes the default. Consumed.
+- Afterwards two of those questions (uq5, x-001) were re-run with the rule ON and read by hand to understand the faithfulness change; that reading informed the ADR's risk section, not the adoption decision.
+

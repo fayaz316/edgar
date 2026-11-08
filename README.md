@@ -17,7 +17,7 @@ by pre-registered experiments and a regression gate, not by feel (see *How decis
 | P4 hardening | API-key auth, rate limits, strict CSP, prompt-injection defence, threat model, clean dependency audit. Missing: Secret Manager/service accounts/IAP, shared rate-limit store, semantic cache, load test with SLOs. |
 | P5 fine-tuning | Not started. |
 | P6 UI + demo | A single-file UI exists; the Next.js app and the demo video do not. |
-| P7 wrapper | 19 ADRs and a threat model exist; runbook, postmortem and blog post do not. |
+| P7 wrapper | 20 ADRs and a threat model exist; runbook, postmortem and blog post do not. |
 
 Decisions and their evidence: `docs/adr/`.
 
@@ -73,7 +73,7 @@ often it has informed a decision (`evals/golden/DECISION_LOG.md`), and frozen fi
 | `services/agent/` | LangGraph plan/act/verify loop, Gemini adapter, claim-level grounding check |
 | `services/tools/`, `services/mcp/` | one tool registry, exposed over MCP |
 | `evals/` | golden sets, claims set, injection set, runners, regression gate, frozen-file manifest |
-| `docs/adr/`, `docs/security/` | 19 decision records, the threat model |
+| `docs/adr/`, `docs/security/` | 20 decision records, the threat model |
 | `infra/` | Terraform (state in GCS) |
 
 ## Known limits
@@ -81,6 +81,7 @@ often it has informed a decision (`evals/golden/DECISION_LOG.md`), and frozen fi
 - The claim check catches changed figures, wrong dates and wrong-company claims, not invented causes or flipped direction (ADR 0014, ADR 0019).
 - Prompt-injection defence: 0/8 attacks succeeded on a small hand-written set against the agent; `/ask` carries the same rules but
   was not separately measured (ADR 0017).
+- Every claim sentence must now carry a citation (ADR 0020), but a citation only makes a claim checkable, not true: comparison sentences can carry citations their passages do not support.
 - Rate limits live in process memory (per instance). No end-user identity beyond API keys.
 - The container image has no torch, so the local embedder cannot run in it; a deployed service needs torch in the image or a Gemini re-embed.
 - Nothing is deployed to GCP beyond the Phase 0 canary; deploying creates billable resources and needs an explicit go-ahead.
