@@ -19,6 +19,7 @@ FROZEN = [
     "golden/golden_v1_heldout.yaml",
     "golden/golden_v2_heldout.yaml",
     "golden/golden_v3_heldout.yaml",
+    "golden/golden_v4_heldout.yaml",
     "golden/HELDOUT_PROTOCOL.md",
     "claims/claims_v1.yaml",
     "claims/passages_v1.yaml",

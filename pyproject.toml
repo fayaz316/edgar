@@ -58,6 +58,7 @@ testpaths = [
   "services/mcp/tests",
   "services/agent/tests",
   "evals/tests",
+  "evals/finetune/tests",
 ]
 addopts = "-q"
 

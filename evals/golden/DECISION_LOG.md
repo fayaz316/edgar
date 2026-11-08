@@ -13,6 +13,8 @@ numbers are still reported, but a new change needs a fresh set.
 | held-out v3 (17) | 1 | reranker (0011) |
 | claims_v1 (36) | 1 | claim-level checker: L1 enforced, L2 rejected (ADR 0014). Consumed: a new checker variant needs claims_v2. |
 
+| held-out v4 (28) | 0 | fresh set for the embedder fine-tune (evals/finetune/PROTOCOL.md); control run recorded, not yet used for a decision |
+
 Status: golden_v0 and v1 are retired as guards. v2 has 2 uses (one more allowed), v3 has 1.
 Rule for new retrieval changes: write a new held-out set (v4, new seed) first.
 Seen/unseen for a decision = sets that shaped the design vs sets that did not.
@@ -43,3 +45,6 @@ in the manifest. A new defence needs new attacks written before it is tried; reu
 - `inference_questions.yaml` (8 comparative questions, v1 vs v2 once each) was used once. Consumed.
 - The frozen injection set (`evals/injection/attacks.py`) was run against prompt v2 as a regression check: a second use, not a new design choice (it can only block adoption, not select a variant).
 
+
+## Embedder fine-tune (evals/finetune/PROTOCOL.md)
+- `golden_v4_heldout.yaml` (28 questions) was written and frozen BEFORE any training data existed; the control retriever was run on it once (hit@8 23/28, MRR 0.497). Frozen in the manifest on 2026-11-08. Uses for decisions: 0 so far.

@@ -1,0 +1,323 @@
+# Held-out set v4 — FROZEN after the control run. See evals/finetune/PROTOCOL.md (written before this file).
+# Sampled with: ORDER BY md5(c.id::text || 'heldout-v4'), 6 chunks per (ticker, form_type), length 500-1500 chars,
+# excluding every evidence chunk of golden_v0..v3 and every skipped id listed in their headers (215 chunks).
+# Questions written from the chunk text WITHOUT running any search; checked mechanically for the anti-echo rule
+# (no 4-word run shared with the anchor snippet) before any retrieval was run.
+#
+# Skipped candidates (chunk ids), each with its stated reason:
+#   8724  AAPL 10-K   boilerplate      (table of contents)
+#   8943  AAPL 10-K   table-fragment   (lease assets / maturities table)
+#   9015  AAPL 10-Q   table-fragment   (cash flow statement)
+#   6550  JPM  10-Q   boilerplate      (cover page)
+#   6392  JPM  10-Q   table-fragment   (mortgage servicing rights roll-forward)
+#   6568  JPM  10-Q   table-fragment   (financial highlights table)
+#   4934  NVDA 10-Q   boilerplate      (exhibit contact details / signature)
+#   4597  NVDA 10-Q   boilerplate      (cover page)
+# Everything else in the sample is included below (28 questions).
+- id: hd-aapl-10k-001
+  question: As of October 17, 2025, how many shareholders of record did Apple have?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-25-000079"
+      section: Market for Common Equity
+      snippet_hint: "there were 22,429 shareholders of record"
+  must_not_appear: []
+  tags: [aapl, shareholders, heldout4]
+  difficulty: easy
+
+- id: hd-aapl-10k-002
+  question: What did the court rule in April 2025 about Apple's compliance with the earlier Epic Games injunction?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000026"
+      section: Legal Proceedings
+      snippet_hint: "found the Company to be in violation of the 2021 Injunction"
+  must_not_appear: []
+  tags: [aapl, litigation, heldout4]
+  difficulty: medium
+
+- id: hd-aapl-10k-003
+  question: When does control of Apple's Products net sales transfer to customers?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-25-000079"
+      section: Financial Statements
+      snippet_hint: "control transfers when products are shipped"
+  must_not_appear: []
+  tags: [aapl, revenue-recognition, heldout4]
+  difficulty: medium
+
+- id: hd-aapl-10k-004
+  question: Why do the Google antitrust rulings matter to Apple's licensing revenue?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-25-000079"
+      section: Risk Factors
+      snippet_hint: "earns revenue from licensing arrangements with Google LLC"
+  must_not_appear: []
+  tags: [aapl, antitrust, heldout4]
+  difficulty: medium
+
+- id: hd-aapl-10q-001
+  question: What new online safety obligations does Apple say could raise its compliance costs?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: Risk Factors
+      snippet_hint: "enhanced protections for minors and mandatory age verification requirements"
+  must_not_appear: []
+  tags: [aapl, regulation, heldout4]
+  difficulty: medium
+
+- id: hd-aapl-10q-002
+  question: What share of Apple's non-current mortgage- and asset-backed securities matures after more than ten years as of June 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: Financial Statements
+      snippet_hint: "65 % greater than 10 years"
+  must_not_appear: []
+  tags: [aapl, securities, heldout4]
+  difficulty: hard
+
+- id: hd-aapl-10q-003
+  question: How much commercial paper did Apple have outstanding at the end of March 2026 compared with September 2025?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0000320193-26-000013"
+      section: Financial Statements
+      snippet_hint: "had $ 2.0 billion and $ 8.0 billion of commercial paper outstanding"
+  must_not_appear: []
+  tags: [aapl, debt, heldout4]
+  difficulty: medium
+
+- id: hd-aapl-10q-004
+  question: What does Apple say its unconditional purchase obligations mainly consist of?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: Financial Statements
+      snippet_hint: "primarily consist of supplier arrangements, licensed intellectual property and content, and distribution rights"
+  must_not_appear: []
+  tags: [aapl, commitments, heldout4]
+  difficulty: easy
+
+- id: hd-aapl-10q-005
+  question: How could changes made to comply with new laws affect the reputation of Apple's products?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0000320193-26-000020"
+      section: Risk Factors
+      snippet_hint: "negatively impact the reputation of the Company’s products for privacy and security"
+  must_not_appear: []
+  tags: [aapl, regulation, heldout4]
+  difficulty: hard
+
+- id: hd-jpm-10k-001
+  question: How does the Firm use stress test results when setting its risk appetite?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Annual Report Body
+      snippet_hint: "uses stress testing to inform decisions on setting risk appetite"
+  must_not_appear: []
+  tags: [jpm, risk-management, heldout4]
+  difficulty: medium
+
+- id: hd-jpm-10k-002
+  question: What distinguishes a Level 3 fair value measurement under JPMorgan's accounting policy?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "inputs to the valuation methodology are unobservable and significant to the fair value measurement"
+  must_not_appear: []
+  tags: [jpm, fair-value, heldout4]
+  difficulty: medium
+
+- id: hd-jpm-10k-003
+  question: Who administers the supervisory stress tests that JPMorgan must go through as a large bank holding company?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Business
+      snippet_hint: "supervisory stress testing administered by the Federal Reserve"
+  must_not_appear: []
+  tags: [jpm, regulation, heldout4]
+  difficulty: easy
+
+- id: hd-jpm-10k-004
+  question: How much did JPMorgan reclassify from AOCI to other income and expense in 2025 and 2024 for sold or liquidated hedged entities?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "reclassified net pre-tax gains of $ 14 million and $ 89 million"
+  must_not_appear: []
+  tags: [jpm, hedging, heldout4]
+  difficulty: hard
+
+- id: hd-jpm-10k-005
+  question: How much did JPMorgan earn in brokerage commissions in 2025?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Financial Statements
+      snippet_hint: "Brokerage commissions | $3,726"
+  must_not_appear: []
+  tags: [jpm, fees, heldout4]
+  difficulty: medium
+
+- id: hd-jpm-10k-006
+  question: What one-time Visa-related gain from mid-2024 weighed on JPMorgan's year-over-year noninterest revenue comparison?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-008131"
+      section: Annual Report Body
+      snippet_hint: "the absence of the $7.9 billion net gain related to Visa shares"
+  must_not_appear: []
+  tags: [jpm, revenue, heldout4]
+  difficulty: medium
+
+- id: hd-jpm-10q-001
+  question: How does JPMorgan describe the wholesale loans it modifies for borrowers in financial difficulty?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-069523"
+      section: MD&A
+      snippet_hint: "generally align with loans graded substandard or worse"
+  must_not_appear: []
+  tags: [jpm, loan-modifications, heldout4]
+  difficulty: medium
+
+- id: hd-jpm-10q-002
+  question: What explained the drop in retained residential real estate loans versus year-end 2025?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: MD&A
+      snippet_hint: "driven by paydowns, predominantly offset by originations"
+  must_not_appear: []
+  tags: [jpm, credit, heldout4]
+  difficulty: medium
+
+- id: hd-jpm-10q-003
+  question: What does a one-star Morningstar fund rating represent according to JPMorgan?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001628280-26-054343"
+      section: Financial Statements
+      snippet_hint: "represents the bottom 10% of industry-wide ranked funds"
+  must_not_appear: []
+  tags: [jpm, funds, heldout4]
+  difficulty: easy
+
+- id: hd-nvda-10k-001
+  question: How large were NVIDIA's unrealized gains on its listed equity stakes at the end of fiscal 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Financial Statements
+      snippet_hint: "equity securities held at period end were $ 6.6 billion for fiscal year 2026"
+  must_not_appear: []
+  tags: [nvda, investments, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10k-002
+  question: How much did NVIDIA hold in cash and liquid investments at the close of fiscal 2025?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: MD&A
+      snippet_hint: "As of January 26, 2025, we had $43.2 billion"
+  must_not_appear: []
+  tags: [nvda, liquidity, heldout4]
+  difficulty: easy
+
+- id: hd-nvda-10k-003
+  question: How does NVIDIA check that its high-risk suppliers meet security standards?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Cybersecurity
+      snippet_hint: "We routinely assess our high-risk suppliers’ conformance to industry standards"
+  must_not_appear: []
+  tags: [nvda, cybersecurity, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10k-004
+  question: How does NVIDIA estimate the price of a product it never sells on its own?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: MD&A
+      snippet_hint: "based on market data and other observable inputs"
+  must_not_appear: []
+  tags: [nvda, revenue-recognition, heldout4]
+  difficulty: hard
+
+- id: hd-nvda-10k-005
+  question: How is revenue from indirect customers estimated by NVIDIA?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-25-000023"
+      section: MD&A
+      snippet_hint: "Indirect customer revenue is an estimation based upon multiple factors"
+  must_not_appear: []
+  tags: [nvda, customer-concentration, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10k-006
+  question: What shares of NVIDIA's receivables were owed by its three largest direct customers as of January 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000021"
+      section: Financial Statements
+      snippet_hint: "Three direct customers accounted for 25 %, 18 %, and 13 % of our accounts receivable balance"
+  must_not_appear: []
+  tags: [nvda, customer-concentration, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10q-001
+  question: What claims does the pending derivative lawsuit allege against certain NVIDIA officers and directors?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: Financial Statements
+      snippet_hint: "breach of fiduciary duty, unjust enrichment, waste of corporate assets"
+  must_not_appear: []
+  tags: [nvda, litigation, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10q-002
+  question: What tariff applies to H200 chips shipped under the licensing program, and can NVIDIA pass it on?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "subject to a 25% tariff upon importation into the United States"
+  must_not_appear: []
+  tags: [nvda, china, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10q-003
+  question: How much did NVIDIA's supply and capacity commitments grow between last quarter and July 2026?
+  answer_type: numeric
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: MD&A
+      snippet_hint: "from $119 billion last quarter to $279 billion as of July 26, 2026"
+  must_not_appear: []
+  tags: [nvda, supply-chain, heldout4]
+  difficulty: medium
+
+- id: hd-nvda-10q-004
+  question: How does NVIDIA account for gains and losses on foreign currency forward contracts it designates as hedges?
+  answer_type: grounded
+  expected_evidence:
+    - accession: "0001045810-26-000075"
+      section: Financial Statements
+      snippet_hint: "recognized in Accumulated other comprehensive income or loss and reclassified to Operating expenses"
+  must_not_appear: []
+  tags: [nvda, hedging, heldout4]
+  difficulty: medium
