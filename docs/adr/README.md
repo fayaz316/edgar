@@ -7,7 +7,7 @@ else we could have chosen, and what the choice costs us. The format is Michael N
 ## Why bother?
 Code shows **what** the system does. It cannot show **why** — which options were rejected,
 what constraint forced the choice, what we knowingly gave up. Six months later (or in an
-interview, or in a customer's review meeting) "why is it built like this?" is the question
+code review, or in a customer's review meeting) "why is it built like this?" is the question
 that gets asked, and nobody remembers. For a forward-deployed engineer this is the job:
 you leave behind a system someone else must run, and the ADRs are how they inherit your
 reasoning, not just your code.
