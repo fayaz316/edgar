@@ -15,8 +15,8 @@ by pre-registered experiments and a regression gate, not by feel (see *How decis
 | P2 agent + MCP | Tool registry, MCP server, LangGraph agent, streaming API, trace UI: **done and tested**. Missing: the contradiction-hunter sub-agent; Claude Desktop is not connected yet. |
 | P3 evals | 4 retrieval sets (78 questions), two claim sets (36 + 20 labeled claims), a two-layer regression gate, and a calibrated independent faithfulness judge with a first measurement (ADR 0018). Missing: ≥100 questions, the full gate in CI, an answer-quality gate, a human check of the judge. |
 | P4 hardening | API-key auth, rate limits, strict CSP, prompt-injection defence, threat model, clean dependency audit. Missing: Secret Manager/service accounts/IAP, shared rate-limit store, semantic cache, load test with SLOs. |
-| P5 fine-tuning | Not started. |
-| P6 UI + demo | A single-file UI exists; the Next.js app and the demo video do not. |
+| P5 fine-tuning | Not started. Planned: fine-tune the bge embedder on filing-derived pairs, judged by the regression gate (see `docs/STATUS.md`). |
+| P6 UI + demo | A single-file UI exists. Screenshots are planned; the Next.js app and demo video are dropped. |
 | P7 wrapper | 21 ADRs and a threat model exist; runbook, postmortem and blog post do not. |
 
 Current status, open items and how to resume: [`docs/STATUS.md`](docs/STATUS.md). Decisions and their evidence: [`docs/adr/`](docs/adr/).
@@ -55,7 +55,7 @@ make verify          # lint + strict types + tests + the full retrieval gate (ne
 make eval-gate       # retrieval regression gate vs the committed baseline (evals/GATE.md)
 make eval-gate-baseline   # regenerate the baseline: deliberate; add a DECISION_LOG entry
 ```
-CI (`.github/workflows/ci.yml`) runs lint, strict mypy, the tests, golden-set validation, the frozen-file check and an image build.
+CI (`.github/workflows/ci.yml`, passing) runs lint, strict mypy, the tests, golden-set validation, the frozen-file check and an image build.
 It does **not** run the retrieval gate: runners have no corpus or embedding model (ADR 0016).
 
 ## How decisions are made
