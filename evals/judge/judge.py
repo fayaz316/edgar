@@ -140,9 +140,9 @@ class GenaiJudgeModel:
     """The real judge model, paced for the free tier (15 requests/minute)."""
 
     def __init__(self, api_key: str, model: str = JUDGE_MODEL, pause_s: float = 4.5) -> None:
-        from google import genai
+        from services.genai_client import make_genai_client
 
-        self._client = genai.Client(api_key=api_key)
+        self._client = make_genai_client(api_key)
         self.model = model
         self._pause = pause_s
         self.calls = 0

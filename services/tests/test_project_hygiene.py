@@ -34,5 +34,11 @@ def test_mypy_covers_every_service_package() -> None:
 
 def test_dockerfile_copies_every_module_the_gateway_imports() -> None:
     dockerfile = (ROOT / "services/gateway/Dockerfile").read_text()
-    for needed in ("services/embeddings.py", "services/db.py", "services/agent", "services/tools"):
+    for needed in (
+        "services/embeddings.py",
+        "services/genai_client.py",
+        "services/db.py",
+        "services/agent",
+        "services/tools",
+    ):
         assert needed in dockerfile, f"Dockerfile does not copy {needed}"

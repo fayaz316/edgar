@@ -40,6 +40,7 @@ from services.gateway.security import (
     authenticated,
     parse_keys,
 )
+from services.genai_client import make_genai_client, uses_vertex
 from services.tools.filings import ToolContext, build_registry
 
 load_dotenv()  # shared repo .env; Settings picks only its aliased keys
@@ -101,8 +102,10 @@ log = structlog.get_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Open expensive clients once; close cleanly on shutdown."""
-    if not settings.database_url or not settings.gemini_api_key:
-        raise RuntimeError("EA_DATABASE_URL / GEMINI_API_KEY required")
+    if not settings.database_url or not (settings.gemini_api_key or uses_vertex()):
+        raise RuntimeError(
+            "EA_DATABASE_URL and GEMINI_API_KEY (or EA_GENAI_BACKEND=vertex) required"
+        )
     # Pooled + autocommit: each request borrows its own connection, and a failed
     # statement can't leave a shared connection stuck in an aborted transaction
     # (which a single long-lived non-autocommit connection would, until restart).
@@ -116,7 +119,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     )
     pool.open(wait=True, timeout=15)
     app.state.security = _build_security()
-    genai_client = genai.Client(api_key=settings.gemini_api_key)
+    genai_client = make_genai_client(settings.gemini_api_key)
     app.state.pool = pool
     app.state.genai = genai_client
     embedder = make_embedder(settings.embedder, api_key=settings.gemini_api_key)

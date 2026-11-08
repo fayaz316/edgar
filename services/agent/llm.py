@@ -84,9 +84,9 @@ def to_contents(messages: list[Message]) -> list[Any]:
 
 class GeminiLLM:
     def __init__(self, api_key: str, model: str = GEMINI_AGENT_MODEL, retries: int = 3) -> None:
-        from google import genai
+        from services.genai_client import make_genai_client
 
-        self._client = genai.Client(api_key=api_key)
+        self._client = make_genai_client(api_key)
         self.model = model
         self._retries = retries
 

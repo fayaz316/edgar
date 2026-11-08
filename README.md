@@ -47,7 +47,8 @@ Needs `DATABASE_URL` and `GEMINI_API_KEY` in `.env` (see `.env.example`), and `S
 | `EA_AGENT_DAILY_CAP` | 50 | Agent runs per key per UTC day (each is several model calls; tune to your Gemini quota). |
 | `EA_AGENT_MAX_STEPS` | 8 | Model turns per run; clients cannot raise it. |
 | `EA_AGENT_MAX_SECONDS` | 120 | Wall-clock budget per run, checked between steps. |
-| `EA_EMBEDDER` | `local` | Must match the model the corpus was embedded with. |
+| `EA_EMBEDDER` | `local` | `local`, `gemini` or `finetuned` (ADR 0022; needs `EA_FT_MODEL_PATH`). Must match the model the corpus was embedded with. |
+| `EA_GENAI_BACKEND` | `api` | `api` = Gemini API key (free tier, daily quotas); `vertex` = Vertex AI with application-default credentials, billed to your GCP project; needs `GOOGLE_CLOUD_PROJECT`. Same model names on both. |
 
 ## Quality gates
 ```bash

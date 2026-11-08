@@ -156,3 +156,44 @@ def test_finetuned_embedder_takes_its_tag_from_the_checkpoint_directory(
     (tmp_path / "model_id.txt").write_text("something-else")
     with pytest.raises(ValueError, match="unexpected"):
         model_id_for("finetuned")
+
+
+def test_genai_client_factory_picks_the_backend_from_the_environment(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import pytest
+
+    from services import genai_client as gc
+
+    seen: dict[str, object] = {}
+
+    class FakeGenai:
+        class Client:
+            def __init__(self, **kw: object) -> None:
+                seen.update(kw)
+
+    class FakeTypes:
+        class HttpOptions:
+            def __init__(self, timeout: int) -> None:
+                self.timeout = timeout
+
+    import sys
+    import types as pytypes
+
+    google = pytypes.ModuleType("google")
+    google.genai = FakeGenai  # type: ignore[attr-defined]
+    FakeGenai.types = FakeTypes  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "google", google)
+    monkeypatch.setitem(sys.modules, "google.genai", FakeGenai)
+    monkeypatch.setitem(sys.modules, "google.genai.types", FakeTypes)
+
+    monkeypatch.delenv("EA_GENAI_BACKEND", raising=False)
+    gc.make_genai_client("key123")
+    assert seen == {"api_key": "key123"}
+
+    seen.clear()
+    monkeypatch.setenv("EA_GENAI_BACKEND", "vertex")
+    monkeypatch.delenv("GOOGLE_CLOUD_PROJECT", raising=False)
+    with pytest.raises(ValueError, match="GOOGLE_CLOUD_PROJECT"):
+        gc.make_genai_client("ignored")
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "my-proj")
+    gc.make_genai_client("ignored")
+    assert seen["vertexai"] is True and seen["project"] == "my-proj" and "api_key" not in seen

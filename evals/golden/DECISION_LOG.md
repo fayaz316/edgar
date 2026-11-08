@@ -49,3 +49,6 @@ in the manifest. A new defence needs new attacks written before it is tried; reu
 ## Embedder fine-tune (evals/finetune/PROTOCOL.md)
 - `golden_v4_heldout.yaml` (28 questions) was written and frozen BEFORE any training data existed; the control retriever was run on it once (hit@8 23/28, MRR 0.497). Frozen in the manifest on 2026-11-08. Uses for decisions: 0 so far.
 - Result (2026-11-08): the fine-tuned embedder passed the pre-registered rule (v4 hit@8 23 -> 26, MRR 0.497 -> 0.609; v0..v3 62 -> 66; 4 questions lost overall). Passed narrowly: hit@8 gain equals the +3 bar. v4 uses: 1. golden_v0..v3 served as the regression check (design-exposed). The base-model gate baseline is unchanged because the product default is unchanged.
+
+## Judge client construction (2026-11-08)
+`evals/judge/judge.py` (frozen) changed in exactly two lines: the client is now built by `services.genai_client.make_genai_client` so the judge can run on Vertex AI (GCP credits) when `EA_GENAI_BACKEND=vertex`, because the free API key was rejected. The judge prompt, model name, parsing, pacing and guard are unchanged. Manifest updated deliberately. The calibration result (36/36, ADR 0018) was obtained through the API route; a judge run on the Vertex route is the same model but has not been re-calibrated, and any score from it must say so.

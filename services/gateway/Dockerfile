@@ -13,7 +13,7 @@ FROM python:3.12-slim-bookworm
 RUN useradd --system --uid 10001 --no-create-home app
 WORKDIR /app
 COPY --from=build /app/.venv /app/.venv
-COPY services/__init__.py services/db.py services/embeddings.py services/
+COPY services/__init__.py services/db.py services/embeddings.py services/genai_client.py services/
 COPY services/gateway services/gateway
 COPY services/agent services/agent
 COPY services/tools services/tools
