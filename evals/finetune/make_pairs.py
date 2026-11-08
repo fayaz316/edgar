@@ -15,8 +15,6 @@ import random
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-
 from evals.finetune.exclusion import NEAR_DUP_JACCARD, jaccard, shingles
 from services.embeddings import BGE_QUERY_PREFIX, LOCAL_MODEL, LOCAL_REVISION
 
@@ -55,6 +53,7 @@ def pick_negative(
 
 
 def main() -> None:
+    import numpy as np  # optional dependency (local-embed group); imported here so CI can import this module
     from sentence_transformers import SentenceTransformer
 
     eligible: list[dict[str, Any]] = json.loads((DATA / "eligible.json").read_text())
