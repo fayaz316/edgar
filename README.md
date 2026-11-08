@@ -13,7 +13,7 @@ by pre-registered experiments and a regression gate, not by feel (see *How decis
 | P0 guardrails | Terraform, budget alerts, hello service. Done earlier. |
 | P1 data + RAG | **Done**, with one deliberate gap: a cross-encoder reranker is built but not enabled (it lost recall; ADR 0011). |
 | P2 agent + MCP | Tool registry, MCP server, LangGraph agent, streaming API, trace UI: **done and tested**. Missing: the contradiction-hunter sub-agent; Claude Desktop is not connected yet. |
-| P3 evals | 4 retrieval sets (78 questions), a 36-claim set, a two-layer regression gate, and a calibrated independent faithfulness judge with a first measurement (ADR 0018). Missing: ≥100 questions, the full gate in CI, an answer-quality gate, a human check of the judge. |
+| P3 evals | 4 retrieval sets (78 questions), two claim sets (36 + 20 labeled claims), a two-layer regression gate, and a calibrated independent faithfulness judge with a first measurement (ADR 0018). Missing: ≥100 questions, the full gate in CI, an answer-quality gate, a human check of the judge. |
 | P4 hardening | API-key auth, rate limits, strict CSP, prompt-injection defence, threat model, clean dependency audit. Missing: Secret Manager/service accounts/IAP, shared rate-limit store, semantic cache, load test with SLOs. |
 | P5 fine-tuning | Not started. |
 | P6 UI + demo | A single-file UI exists; the Next.js app and the demo video do not. |
