@@ -1,5 +1,5 @@
 # ADR 0014 — Claim-level support checking: only the deterministic layer is enforced
-Status: Accepted · Date: 2026-11-07
+Status: Accepted · Date: 2026-11-07 · date handling amended by ADR 0019
 
 ## Context
 The agent's verify step (ADR 0013) only checked that each `[n]` points at a retrieved passage. A model can

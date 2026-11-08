@@ -31,3 +31,7 @@ in the manifest. A new defence needs new attacks written before it is tried; reu
 - The 17 held-out v3 questions and 3 golden_v0 multi-step questions were used to MEASURE the agent's answer faithfulness; no design choice depends on picking among variants,
   so this is a baseline measurement, not an adaptive decision. Any future change judged on these needs a fresh set.
 
+## L1 date change (ADR 0019)
+- `claims_v2` (20 claims, new passages) was used ONCE to decide whether the date-aware L1 may replace the old one (guard in `evals/claims/L1_DATES.md`). Uses: 1. Consumed.
+- The 20 answerable agent questions from the judge evaluation were re-run as a REGRESSION check (refusals and repairs before/after), not to choose between variants.
+
