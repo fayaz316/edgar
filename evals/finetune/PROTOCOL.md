@@ -109,3 +109,11 @@ that dropped the company name ("the firm") and one that invented a detail ("thir
 noisy, so the prompt was tightened ONCE: both questions must name the company, and dates/periods/numbers must stay exact.
 The same 8 chunks were re-run to confirm (company named, dates exact). No other change; the model, sample and rules are as above.
 Generation runs through Vertex AI (`--vertex`, billed to GCP credits) because the free API key was rejected.
+
+## Addendum D — training data built (2026-11-08, before any training)
+1,500 chunks were sent to the generator (two network retries; no chunk skipped): 2,843 questions kept (1,485 direct, 1,358 paraphrase;
+127 paraphrases dropped for sharing a 4-word run, 15 chunks answered null). After hard-negative selection: **2,664 training triples**
+and 163 validation triples from 1,479 chunks (16 queries dropped for lack of a valid negative). Every chunk used, as positive or
+negative, is in the eligible set (assertion passed; hashes in `eligible_manifest.json` and `pairs_manifest.json`).
+Observation, not acted on: restricted to the eligible chunks, the base model puts the question's own chunk in its top 8 for 47% of
+these machine-written questions (median rank 10), so the training questions are harder or noisier than the hand-written v4 set.

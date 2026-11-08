@@ -163,6 +163,13 @@ def main() -> int:
                         print(f"stopping on API error {code}: {str(exc)[:200]}")
                         return 1
                     time.sleep(20.0 if code == 429 else 8.0 * (attempt + 1))
+                except (
+                    Exception
+                ) as exc:  # network timeouts and resets are not APIError: retry them too
+                    if attempt == 3:
+                        print(f"stopping on network error: {type(exc).__name__}: {str(exc)[:200]}")
+                        return 1
+                    time.sleep(8.0 * (attempt + 1))
             calls += 1
             parsed = parse_response(resp.text or "")
             rec: dict[str, Any] = {"chunk_id": c["id"], "parsed": parsed is not None}

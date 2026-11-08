@@ -1,0 +1,15 @@
+{
+ "pairs_train": 2664,
+ "pairs_val": 163,
+ "dropped_no_negative": 16,
+ "chunks_with_pairs": 1479,
+ "base_model_positive_rank_median": 10,
+ "base_model_positive_in_top8": 0.473,
+ "train_sha256": "ba25873887b33d06d18fd5192a60e1c3d2ac302b00e854147d020b849069b748",
+ "all_chunks_eligible_assertion": "passed",
+ "negative_band_ranks": [
+  10,
+  40
+ ],
+ "seed": 42
+}
