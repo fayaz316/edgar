@@ -152,3 +152,73 @@ def test_daily_quota_errors_are_told_apart_from_per_minute_ones() -> None:
     assert is_daily_quota("Generate content requests per day limit exceeded on Free Tier")
     assert is_daily_quota("quotaId: GenerateRequestsPerDayPerProjectPerModel-FreeTier")
     assert not is_daily_quota("Quota exceeded for metric ...requests_per_minute... retry in 12s")
+
+
+def _row(
+    kind: str, refused: bool, verdicts: list[str], infra: bool = False, uncited: int = 0
+) -> dict[str, Any]:
+    claims = [{"text": "c", "verdict": v, "reason": "", "invalid": False} for v in verdicts]
+    faith = (sum(v == "supported" for v in verdicts) / len(verdicts)) if verdicts else None
+    return {
+        "id": "q",
+        "kind": kind,
+        "refused": refused,
+        "infra_error": infra,
+        "claims": claims,
+        "uncited": ["u"] * uncited,
+        "faithfulness": faith,
+    }
+
+
+def test_summary_scores_answers_and_checks_refusals_separately() -> None:
+    from evals.judge.run_answers import summarize
+
+    rows = [
+        _row("answerable", False, ["supported", "supported"]),
+        _row("answerable", False, ["supported", "unsupported"], uncited=2),
+        _row(
+            "answerable", True, []
+        ),  # the agent declined an answerable question: not scored for faithfulness
+        _row("unanswerable", True, []),
+        _row("unanswerable", False, ["unsupported"]),  # answered when it should have refused
+    ]
+    s = summarize(rows)
+    assert s["answerable"]["n"] == 3 and s["answerable"]["answered"] == 2
+    assert s["answerable"]["claims_judged"] == 4 and s["answerable"]["claims_supported"] == 3
+    assert s["answerable"]["mean_answer_faithfulness"] == 0.75
+    assert (
+        s["answerable"]["answers_with_an_unsupported_claim"] == 1
+        and s["answerable"]["uncited_sentences"] == 2
+    )
+    assert s["unanswerable"] == {"n": 2, "refused_correctly": 1, "answered_instead": ["q"]}
+
+
+def test_a_refusal_caused_by_a_failed_model_call_is_not_counted_as_a_correct_refusal() -> None:
+    from evals.judge.run_answers import summarize
+
+    s = summarize([_row("unanswerable", True, [], infra=True), _row("unanswerable", True, [])])
+    assert (
+        s["infra_errors"] == 1
+        and s["unanswerable"]["n"] == 1
+        and s["unanswerable"]["refused_correctly"] == 1
+    )
+
+
+def test_evidence_is_rebuilt_by_citation_number_for_the_judge() -> None:
+    from evals.judge.run_answers import evidence_from_citations
+
+    ev = evidence_from_citations([{"passage": 3, "text": "c"}, {"passage": 1, "text": "a"}])
+    assert [e.get("text") for e in ev] == ["a", None, "c"]
+    assert evidence_from_citations([]) == []
+
+
+def test_server_errors_are_told_apart_from_client_errors() -> None:
+    from evals.judge.judge import is_transient_server_error
+
+    class E(Exception):
+        def __init__(self, code: int) -> None:
+            self.code = code
+
+    assert is_transient_server_error(E(503)) and is_transient_server_error(E(500))
+    assert not is_transient_server_error(E(429)) and not is_transient_server_error(E(400))
+    assert not is_transient_server_error(ValueError("no code"))

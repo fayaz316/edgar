@@ -127,6 +127,11 @@ class DailyQuotaExhausted(RuntimeError):
     """The free tier's per-day request limit is used up: waiting seconds will not help."""
 
 
+def is_transient_server_error(exc: Exception) -> bool:
+    """A 5xx from the API (for example 503 'high demand'): worth retrying after a pause."""
+    return 500 <= int(getattr(exc, "code", 0) or 0) < 600
+
+
 def is_daily_quota(message: str) -> bool:
     return "PerDay" in message or "per day" in message.lower()
 
@@ -145,7 +150,7 @@ class GenaiJudgeModel:
     def __call__(self, prompt: str) -> str:
         from google.genai import errors
 
-        for attempt in range(4):
+        for attempt in range(5):
             try:
                 time.sleep(self._pause)
                 self.calls += 1
@@ -156,7 +161,10 @@ class GenaiJudgeModel:
                 )
                 return resp.text or ""
             except errors.APIError as exc:
-                if getattr(exc, "code", None) != 429 or attempt == 3:
+                if is_transient_server_error(exc) and attempt < 4:
+                    time.sleep(10.0 * (attempt + 1))  # 10s, 20s, 30s, 40s
+                    continue
+                if getattr(exc, "code", None) != 429 or attempt == 4:
                     raise
                 if is_daily_quota(str(exc)):
                     raise DailyQuotaExhausted(str(exc)[:200]) from exc

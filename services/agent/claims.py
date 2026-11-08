@@ -20,7 +20,7 @@ from typing import Any, Protocol
 NLI_MODEL = "cross-encoder/nli-MiniLM2-L6-H768"
 ENTAIL_THRESHOLD = 0.5
 
-CITE_RE = re.compile(r"\[(\d{1,2})\]")
+CITE_RE = re.compile(r"\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]")  # "[3]" and "[12, 14, 15]"
 _ABBREV = ("U.S.", "Inc.", "Co.", "Corp.", "No.", "vs.", "e.g.", "i.e.", "Ltd.", "N.A.")
 _NUMBER_RE = re.compile(r"(\$\s?)?(\d[\d,]*(?:\.\d+)?)(\s?%)?")
 _NOISE_RE = re.compile(r"\b10-[KQ]\b|\bQ[1-4]\b|\bItem\s+\d+[A-C]?\b", re.I)
@@ -67,11 +67,13 @@ def split_claims(answer: str) -> list[tuple[str, list[int]]]:
     """(sentence text with citations removed, cited passage numbers) for every sentence/bullet."""
     out: list[tuple[str, list[int]]] = []
     for line in answer.splitlines():
-        line = re.sub(r"([.!?])\s*((?:\[\d{1,2}\])+)", r"\2\1", line.strip())  # ". [1]" -> "[1]."
+        line = re.sub(r"([.!?])\s*((?:\[[\d,\s]+\])+)", r"\2\1", line.strip())  # ". [1]" -> "[1]."
         if not line:
             continue
         for sentence in _sentences(line):
-            cites = [int(m.group(1)) for m in CITE_RE.finditer(sentence)]
+            cites = [
+                int(n) for m in CITE_RE.finditer(sentence) for n in re.findall(r"\d+", m.group(1))
+            ]
             text = strip_markup(sentence)
             if len(text) >= 8:
                 out.append((text, list(dict.fromkeys(cites))))

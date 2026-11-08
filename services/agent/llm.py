@@ -116,9 +116,12 @@ class GeminiLLM:
                 )
                 break
             except errors.APIError as exc:
-                if getattr(exc, "code", None) != 429 or attempt == self._retries - 1:
+                code = int(getattr(exc, "code", 0) or 0)
+                if attempt == self._retries - 1 or code not in (429, 500, 502, 503, 504):
                     raise
-                time.sleep(20.0)  # free tier is 15 requests/minute
+                time.sleep(
+                    20.0 if code == 429 else 8.0 * (attempt + 1)
+                )  # 429: 15 requests/minute free tier
         calls = tuple(
             ToolCall(c.name or "", dict(c.args or {})) for c in (resp.function_calls or [])
         )

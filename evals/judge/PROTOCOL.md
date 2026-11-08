@@ -57,3 +57,18 @@ guard and Step 2 are exactly as written above, and the calibration is run from t
 Independence is WEAKER than first planned: both models are "flash-lite" tier (generator 3.1, judge 3.5), so shared blind spots are more likely and
 a smaller judge may be less accurate. The calibration guard exists to catch the second problem; nothing here addresses the first.
 The runner is now resumable (each verdict is saved as it arrives) and stops immediately on a daily-quota error instead of retrying.
+
+## Amendment 2 — transient server errors (infrastructure only; prompt, guard and verdict logic unchanged)
+The first Step-2 attempt crashed on its first question because the judge model answered 503 "high demand", which the judge wrapper did not retry
+(only per-minute 429s were). Fix: the judge wrapper and the agent's Gemini adapter now retry 5xx errors with a growing pause. The Step-2 runner
+now re-runs any question whose agent call failed for infrastructure reasons instead of keeping the failed row. No judged verdict had been produced
+when this was written (0 of 30 questions done), so no result influenced this change.
+
+## Amendment 3 — a measurement bug found by Step 2 (written BEFORE re-running; prompt, guard and judge logic unchanged)
+Reading the Step-2 results showed that 8 of the 12 "uncited" sentences did carry citations, written in the comma form `[12, 14, 15]`. The
+citation parser only recognised `[n]`, so those sentences (a) were never judged, which makes the original faithfulness figure an
+over-count of what was measured, and (b) also bypassed the dangling-citation check and the in-loop L1 check. This is a defect in the shared
+validation code, not in the judge; it is fixed (`[n]` and `[n, m, ...]` are both parsed, in answer.py, claims.py and the UI) with tests.
+Handling: the original run is kept unchanged as `answers_run1_original.jsonl` and its numbers are reported as such. Only the questions that
+contained comma-form citations are re-run (the agent now validates them, so their answers may differ); everything else is kept. Both sets of
+numbers are reported. The judge prompt, the guard and the question lists are not touched.

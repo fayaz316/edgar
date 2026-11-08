@@ -1,0 +1,295 @@
+{
+ "model": "gemini-3.5-flash-lite",
+ "valid": true,
+ "failures": [],
+ "rows": [
+  {
+   "id": "f01",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passages explicitly state that as of March 28, 2026 and September 27, 2025, the Company had $2.0 billion and $8.0 billion of commercial paper outstanding, respectively."
+  },
+  {
+   "id": "f02",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The claim exactly matches the passage stating that Equity Markets revenue was $5.0 billion, up 49%, driven by strong performance across products."
+  },
+  {
+   "id": "f03",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that a hypothetical 10% decrease in publicly-held equity securities would decrease the fair value by $1.8 billion as of January 25, 2026."
+  },
+  {
+   "id": "f04",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that as of January 26, 2025, there were federal research tax credit carryforwards of $46 million that begin to expire in fiscal year 2026."
+  },
+  {
+   "id": "f05",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that revenue growth in the first quarter was driven by data center products for accelerated computing and AI solutions."
+  },
+  {
+   "id": "f06",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that NVIDIA provides a complete, end-to-end accelerated computing platform for AI, addressing both training and inferencing."
+  },
+  {
+   "id": "f07",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that basic earnings per share is calculated using the two-class method."
+  },
+  {
+   "id": "f08",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that there are three reportable business segments: Consumer & Community Banking, Commercial & Investment Bank, and Asset & Wealth Management."
+  },
+  {
+   "id": "f09",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that producing its own digital content can be costly due to intense and increasing competition for talent, content and subscribers."
+  },
+  {
+   "id": "f10",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that the company may need to seek or renew licenses for third-party technology and that there is no guarantee they can be obtained on reasonable terms."
+  },
+  {
+   "id": "f11",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that the company may have limited insight into the data privacy or security practices of third-party suppliers."
+  },
+  {
+   "id": "f12",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that the methods and assumptions used reflect management judgment and may vary across the Firm\u2019s businesses and portfolios."
+  },
+  {
+   "id": "f13",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that compliance with these laws and regulations is onerous and expensive, and that violations could result in penalties and fines."
+  },
+  {
+   "id": "f14",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that equity method investments were not material."
+  },
+  {
+   "id": "f15",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that on March 25, 2026, the district court granted plaintiffs' motion for class certification for investors who purchased NVIDIA common stock between August 10, 2017, and November 15, 2018."
+  },
+  {
+   "id": "f16",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that the notional value of foreign currency contracts designated as accounting hedges was $2,114 million as of April 26, 2026."
+  },
+  {
+   "id": "f17",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states conduct risks include the negative impact that could result from misconduct of JPMorganChase's employees."
+  },
+  {
+   "id": "f18",
+   "kind": "faithful",
+   "label": "supported",
+   "verdict": "supported",
+   "invalid": false,
+   "reason": "The passage explicitly states that all derivative instruments are recorded in the Consolidated Balance Sheets at fair value."
+  },
+  {
+   "id": "n01",
+   "kind": "number",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passage states that Apple had $2.0 billion of commercial paper outstanding as of March 28, 2026, not $3.5 billion."
+  },
+  {
+   "id": "n02",
+   "kind": "number",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The claim states that Equity Markets revenue was up 94%, whereas the passage states it was up 49%."
+  },
+  {
+   "id": "n03",
+   "kind": "number",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The claim states the decrease would be $2.8 billion, whereas the passage states it would be $1.8 billion as of January 25, 2026."
+  },
+  {
+   "id": "n04",
+   "kind": "number",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages state that the federal research tax credit carryforwards were $46 million, not $64 million."
+  },
+  {
+   "id": "e01",
+   "kind": "entity",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passage attributes first-quarter revenue growth to NVIDIA, not Apple."
+  },
+  {
+   "id": "e02",
+   "kind": "entity",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The claim attributes the description to JPMorgan, but the passage is from an NVIDIA 10-K filing."
+  },
+  {
+   "id": "e03",
+   "kind": "entity",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passage discusses JPMorgan Chase & Co., not Apple."
+  },
+  {
+   "id": "e04",
+   "kind": "entity",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages refer to JPMorgan, not NVIDIA, and the business segments belong to JPMorgan."
+  },
+  {
+   "id": "x01",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages do not mention expectations of reduced profit margins next year."
+  },
+  {
+   "id": "x02",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages do not state that Apple will lose access to key licensed technology within two years."
+  },
+  {
+   "id": "x03",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages state that third-party suppliers have suffered security incidents in the past, but do not state that this has exposed NVIDIA's customers' data."
+  },
+  {
+   "id": "x04",
+   "kind": "extrapolation",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages mention that imprecision in estimating inputs can affect gains or losses, but do not state that the valuation methods have caused material losses in recent quarters."
+  },
+  {
+   "id": "d01",
+   "kind": "direction",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passage explicitly states that compliance is onerous and expensive, directly contradicting the claim."
+  },
+  {
+   "id": "d02",
+   "kind": "direction",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passage explicitly states that equity method investments were not material, which directly contradicts the claim."
+  },
+  {
+   "id": "d03",
+   "kind": "direction",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passage states that the district court granted plaintiffs' motion for class certification on March 25, 2026, not denied it."
+  },
+  {
+   "id": "w01",
+   "kind": "wrong_passage",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages do not mention foreign currency contracts or their notional value."
+  },
+  {
+   "id": "w02",
+   "kind": "wrong_passage",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages do not mention conduct risks or employee misconduct."
+  },
+  {
+   "id": "w03",
+   "kind": "wrong_passage",
+   "label": "unsupported",
+   "verdict": "unsupported",
+   "invalid": false,
+   "reason": "The passages do not mention Apple's past ability to obtain third-party licenses."
+  }
+ ]
+}

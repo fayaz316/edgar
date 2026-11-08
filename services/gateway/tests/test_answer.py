@@ -63,3 +63,18 @@ def test_explicit_refusal_passes_through() -> None:
 
 def test_system_prompt_states_contract() -> None:
     assert "ONLY" in SYSTEM_PROMPT and "INSUFFICIENT_CONTEXT" in SYSTEM_PROMPT
+
+
+def test_comma_separated_citations_are_parsed_like_separate_ones() -> None:
+    from services.gateway.answer import extract_citations, validate_answer
+
+    assert extract_citations("A [12, 14, 15] and B [3]. C [4,5].") == [12, 14, 15, 3, 4, 5]
+    ok = validate_answer("Revenue rose [1, 2].", n_passages=3)
+    assert not ok.refused and ok.cited_passages == [1, 2]
+
+
+def test_a_dangling_number_inside_a_comma_citation_is_still_caught() -> None:
+    from services.gateway.answer import validate_answer
+
+    bad = validate_answer("Revenue rose [1, 9].", n_passages=3)
+    assert bad.refused and bad.dangling_citations == [9]

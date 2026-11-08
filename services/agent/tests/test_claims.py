@@ -87,3 +87,19 @@ def test_uncited_sentences_are_reported_not_rejected() -> None:
 def test_citation_to_a_nonexistent_passage_is_unsupported() -> None:
     [c] = check_answer("Revenue was large [9].", EVIDENCE)
     assert c.unsupported
+
+
+def test_comma_form_citations_are_claims_with_cites_not_uncited_sentences() -> None:
+    assert split_claims("NVIDIA leads in AI [12, 14, 15].") == [
+        ("NVIDIA leads in AI.", [12, 14, 15])
+    ]
+    assert split_claims("It grew. [1, 2] Next point [3].") == [
+        ("It grew.", [1, 2]),
+        ("Next point.", [3]),
+    ]
+
+
+def test_l1_applies_to_comma_form_citations_too() -> None:
+    evidence = [{"ticker": "NVDA", "text": "NVIDIA revenue was $12.5 billion."}] * 2
+    [c] = check_answer("NVIDIA revenue was $13.5 billion [1, 2].", evidence)
+    assert c.cites == [1, 2] and c.missing_numbers == ["13.5"]

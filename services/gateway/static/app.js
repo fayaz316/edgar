@@ -41,14 +41,18 @@ function appendText(box, text) {
 }
 function renderAnswer(text, hasCitations) {
   const box = $("answer"); box.className = ""; box.replaceChildren();
-  text.split(/(\[\d{1,2}\])/).forEach((part) => {
-    const m = /^\[(\d{1,2})\]$/.exec(part);
-    if (m && hasCitations.has(Number(m[1]))) {
-      const b = el("button", "cite", part); b.type = "button";
-      b.setAttribute("aria-label", "Show passage " + m[1]);
-      b.addEventListener("click", () => focusPassage(Number(m[1])));
-      box.appendChild(b);
-    } else appendText(box, part);
+  text.split(/(\[\d{1,2}(?:\s*,\s*\d{1,2})*\])/).forEach((part) => {
+    const m = /^\[(\d{1,2}(?:\s*,\s*\d{1,2})*)\]$/.exec(part);
+    if (!m) { appendText(box, part); return; }
+    // "[12, 14]" becomes one chip per cited passage that exists
+    m[1].split(",").map((s) => Number(s.trim())).forEach((n) => {
+      if (hasCitations.has(n)) {
+        const b = el("button", "cite", "[" + n + "]"); b.type = "button";
+        b.setAttribute("aria-label", "Show passage " + n);
+        b.addEventListener("click", () => focusPassage(n));
+        box.appendChild(b);
+      } else box.appendChild(document.createTextNode("[" + n + "]"));
+    });
   });
 }
 function focusPassage(n) {

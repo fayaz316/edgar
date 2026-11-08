@@ -9,8 +9,8 @@
  "golden/golden_v3_heldout.yaml": "47823d4d8f6ee0e0358ac4cbf5d1b4a2e7422303222d018dd0645e412d83a99f",
  "injection/PROTOCOL.md": "989828d274f7f1d6fa425bec66a5e6c787123a80eb1c1e42013d71b4f776ecfe",
  "injection/attacks.py": "4443f0168f57a6387b89d32506ff42c5d05fb73d0b185ddec88d9793c39c6100",
- "judge/PROTOCOL.md": "68c3f9516f2d4ea1ddeffc37e32e3f725ebbb29b238e425eecb4041f85a6e5fd",
+ "judge/PROTOCOL.md": "27e7ed82f267ed527b39f6a0cfd1a28ac93574c0f824f847825ccb03ea04ee21",
  "judge/calibration.py": "103ad8f6d58e7057fff266f1984c32590361cab013f72f11a77ae8e4b13f388d",
- "judge/judge.py": "5c73d142c9be2935e75154ae100a6404b537ef30e33228fedcbed5847419383b",
+ "judge/judge.py": "3e712c0b0f11da766b5d34c32e73815c9b5edf24d29c5cd5b3434b4892341638",
  "judge/questions.py": "42f5af2747ee24b63f889d1b8e9e22ac30f05016dc4bb54e1b1a2128f3e5caa1"
 }
