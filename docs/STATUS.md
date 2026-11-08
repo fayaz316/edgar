@@ -25,7 +25,7 @@ Retrieval hit@8 62/78 over four question sets; 91% of 54 cited claims judged sup
 2. A human check of the judge's "supported" verdicts is still open. A second-model cross-check (different vendor, 25 claims, `evals/judge/CROSSCHECK.md`) agreed on 22; the 3 disagreements were all cross-company comparison sentences (cite-washing).
 3. Retrieval misses still cause the weakest answers (the fine-tune helps a little: ADR 0022).
 4. **Deployment:** deliberately not done. The container has no torch, so the local embedder cannot run in it; a free route would be Cloud Run plus a free hosted Postgres with an ONNX embedder (parity to be gated).
-5. Phase gaps: contradiction-hunter sub-agent; Claude Desktop connection (ADR 0012); fine-tuning; runbook, postmortem, write-up. Dropped for now: semantic cache, load test, Secret Manager / service accounts, Next.js UI, demo video; per-user identity.
+5. Phase gaps: contradiction-hunter sub-agent; Claude Desktop connection (ADR 0012); runbook, postmortem, write-up. (Fine-tuning is done: ADR 0022.) Dropped for now: semantic cache, load test, Secret Manager / service accounts, Next.js UI, demo video; per-user identity.
 6. CI gaps: the retrieval gate runs locally only (needs a hosted corpus snapshot); the dependency audit is not in CI.
 
 ## Resume
