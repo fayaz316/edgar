@@ -1,0 +1,162 @@
+[
+ {
+  "id": "hc-aapl-10k-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-aapl-10k-002",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-aapl-10k-003",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-aapl-10k-004",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-aapl-10q-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-aapl-10q-002",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-jpm-10k-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-jpm-10q-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-jpm-10q-002",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-jpm-10q-003",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-nvda-10k-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-nvda-10k-002",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-nvda-10k-003",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-nvda-10q-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": true,
+  "repairs_before": 2
+ },
+ {
+  "id": "hc-nvda-10q-002",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-nvda-10q-003",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "hc-nvda-10q-004",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "nvda-10q-009",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "x-001",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ },
+ {
+  "id": "x-003",
+  "refused_now": false,
+  "repairs_now": 0,
+  "infra": false,
+  "refused_before": false,
+  "repairs_before": 0
+ }
+]

@@ -1,0 +1,206 @@
+{
+ "adopt": true,
+ "failures": [],
+ "rows": [
+  {
+   "id": "m01",
+   "kind": "meta_date",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "m02",
+   "kind": "meta_date",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "m03",
+   "kind": "meta_date",
+   "label": "supported",
+   "new": false,
+   "old": true,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "m04",
+   "kind": "meta_date",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "m05",
+   "kind": "meta_date",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "m06",
+   "kind": "meta_date",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "f01",
+   "kind": "faithful",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "f02",
+   "kind": "faithful",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "f03",
+   "kind": "faithful",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "f04",
+   "kind": "faithful",
+   "label": "supported",
+   "new": false,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": []
+  },
+  {
+   "id": "w01",
+   "kind": "wrong_date",
+   "label": "unsupported",
+   "new": true,
+   "old": true,
+   "missing_dates": [
+    "May 21, 2026"
+   ],
+   "missing_numbers": []
+  },
+  {
+   "id": "w02",
+   "kind": "wrong_date",
+   "label": "unsupported",
+   "new": true,
+   "old": false,
+   "missing_dates": [
+    "September 26, 2026"
+   ],
+   "missing_numbers": []
+  },
+  {
+   "id": "w03",
+   "kind": "wrong_date",
+   "label": "unsupported",
+   "new": true,
+   "old": true,
+   "missing_dates": [
+    "June 29, 2026"
+   ],
+   "missing_numbers": []
+  },
+  {
+   "id": "w04",
+   "kind": "wrong_date",
+   "label": "unsupported",
+   "new": true,
+   "old": false,
+   "missing_dates": [
+    "March 27, 2026"
+   ],
+   "missing_numbers": []
+  },
+  {
+   "id": "l01",
+   "kind": "laundering",
+   "label": "unsupported",
+   "new": true,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": [
+    "26"
+   ]
+  },
+  {
+   "id": "l02",
+   "kind": "laundering",
+   "label": "unsupported",
+   "new": true,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": [
+    "2026"
+   ]
+  },
+  {
+   "id": "l03",
+   "kind": "laundering",
+   "label": "unsupported",
+   "new": true,
+   "old": false,
+   "missing_dates": [],
+   "missing_numbers": [
+    "30"
+   ]
+  },
+  {
+   "id": "c01",
+   "kind": "number",
+   "label": "unsupported",
+   "new": true,
+   "old": true,
+   "missing_dates": [],
+   "missing_numbers": [
+    "3.0"
+   ]
+  },
+  {
+   "id": "c02",
+   "kind": "number",
+   "label": "unsupported",
+   "new": true,
+   "old": true,
+   "missing_dates": [],
+   "missing_numbers": [
+    "3.6"
+   ]
+  },
+  {
+   "id": "c03",
+   "kind": "number",
+   "label": "unsupported",
+   "new": true,
+   "old": true,
+   "missing_dates": [],
+   "missing_numbers": [
+    "97"
+   ]
+  }
+ ]
+}

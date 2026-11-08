@@ -1,0 +1,33 @@
+# Labeled claims for the L1 date change. See L1_DATES.md (written first). Each claim cites [1] = evidence[0] (passages_v2.yaml).
+# metadata = the filing dates the tools would have returned in the run (filed_at, period_end). Labels are frozen at authoring time.
+# kinds: faithful | meta_date (faithful, cites a date from metadata) | wrong_date | laundering | number
+
+# ---- faithful: the date comes from filing metadata (may or may not also be in the passage text) ----
+- {id: m01, kind: meta_date, label: supported, evidence: [p1], metadata: ["2026-03-28", "2026-05-01"], claim: "Apple's 10-Q filed on May 1, 2026 reports $2.0 billion of commercial paper outstanding as of March 28, 2026. [1]"}
+- {id: m02, kind: meta_date, label: supported, evidence: [p1], metadata: ["2026-03-28", "2026-05-01"], claim: "In its May 2026 filing, Apple reported fixed-rate notes with an aggregate carrying amount of $82.7 billion. [1]"}
+- {id: m03, kind: meta_date, label: supported, evidence: [p2], metadata: ["2026-04-26", "2026-05-20"], claim: "NVIDIA's filing dated May 20, 2026 reports $20.8 billion of aggregate unearned stock-based compensation expense. [1]"}
+- {id: m04, kind: meta_date, label: supported, evidence: [p3], metadata: ["2026-07-26", "2026-08-26"], claim: "NVIDIA's 10-Q filed on August 26, 2026 reports equity investments of $99 billion. [1]"}
+- {id: m05, kind: meta_date, label: supported, evidence: [p4], metadata: ["2026-06-30", "2026-08-06"], claim: "JPMorgan's 10-Q filed on August 6, 2026 reports that approximately 91% of the noninvestment-grade Leisure portfolio is secured. [1]"}
+- {id: m06, kind: meta_date, label: supported, evidence: [p2], metadata: ["2026-04-26", "2026-05-20"], claim: "For the period ended April 26, 2026, NVIDIA reports aggregate unearned stock-based compensation expense of $20.8 billion. [1]"}
+
+# ---- faithful: plain, numbers and dates all in the passage ----
+- {id: f01, kind: faithful, label: supported, evidence: [p1], metadata: ["2026-03-28", "2026-05-01"], claim: "As of March 28, 2026, Apple had $2.0 billion of commercial paper outstanding. [1]"}
+- {id: f02, kind: faithful, label: supported, evidence: [p2], metadata: ["2026-04-26", "2026-05-20"], claim: "NVIDIA expects to recognize that expense over a weighted average period of 2.6 years for RSUs, PSUs and market-based PSUs. [1]"}
+- {id: f03, kind: faithful, label: supported, evidence: [p3], metadata: ["2026-07-26", "2026-08-26"], claim: "NVIDIA holds an option to provide additional credit support for approximately 3.8 additional gigawatts. [1]"}
+- {id: f04, kind: faithful, label: supported, evidence: [p4], metadata: ["2026-06-30", "2026-08-06"], claim: "As of June 30, 2026, approximately 91% of the noninvestment-grade Leisure portfolio is secured. [1]"}
+
+# ---- unfaithful: a date that neither the passage nor the metadata supports ----
+- {id: w01, kind: wrong_date, label: unsupported, evidence: [p2], metadata: ["2026-04-26", "2026-05-20"], claim: "NVIDIA's filing dated May 21, 2026 reports $20.8 billion of aggregate unearned stock-based compensation expense. [1]"}
+- {id: w02, kind: wrong_date, label: unsupported, evidence: [p3], metadata: ["2026-07-26", "2026-08-26"], claim: "NVIDIA's 10-Q filed on September 26, 2026 reports equity investments of $99 billion. [1]"}
+- {id: w03, kind: wrong_date, label: unsupported, evidence: [p4], metadata: ["2026-06-30", "2026-08-06"], claim: "As of June 29, 2026, approximately 91% of the noninvestment-grade Leisure portfolio is secured. [1]"}
+- {id: w04, kind: wrong_date, label: unsupported, evidence: [p1], metadata: ["2026-03-28", "2026-05-01"], claim: "Apple's 10-Q for the period ended March 27, 2026 reports $2.0 billion of commercial paper outstanding. [1]"}
+
+# ---- unfaithful: an invented AMOUNT whose digits equal a date digit (metadata or passage) ----
+- {id: l01, kind: laundering, label: unsupported, evidence: [p2], metadata: ["2026-04-26", "2026-05-20"], claim: "NVIDIA's aggregate unearned stock-based compensation expense rose 26% in the quarter. [1]"}
+- {id: l02, kind: laundering, label: unsupported, evidence: [p3], metadata: ["2026-07-26", "2026-08-26"], claim: "NVIDIA's equity investment commitments totaled $2,026 million. [1]"}
+- {id: l03, kind: laundering, label: unsupported, evidence: [p4], metadata: ["2026-06-30", "2026-08-06"], claim: "Approximately 30% of the Leisure portfolio is unsecured. [1]"}
+
+# ---- unfaithful: a changed figure ----
+- {id: c01, kind: number, label: unsupported, evidence: [p1], metadata: ["2026-03-28", "2026-05-01"], claim: "As of March 28, 2026, Apple had $3.0 billion of commercial paper outstanding. [1]"}
+- {id: c02, kind: number, label: unsupported, evidence: [p2], metadata: ["2026-04-26", "2026-05-20"], claim: "NVIDIA expects to recognize that expense over a weighted average period of 3.6 years for RSUs, PSUs and market-based PSUs. [1]"}
+- {id: c03, kind: number, label: unsupported, evidence: [p3], metadata: ["2026-07-26", "2026-08-26"], claim: "NVIDIA reports equity investments of $97 billion as of July 26, 2026. [1]"}

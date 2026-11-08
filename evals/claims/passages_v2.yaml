@@ -1,0 +1,173 @@
+# Passages for claims_v2.yaml: verbatim from the corpus, with their real filing dates. Sampled with md5(c.id::text || 'claims-v2'), 10-Q chunks with amounts, plain-text prose.
+p1:
+  accession: 0000320193-26-000013
+  chunk_id: 9129
+  filed_at: '2026-05-01'
+  form_type: 10-Q
+  period_end: '2026-03-28'
+  section: Financial Statements
+  text: 's: Current portion of intangible assets, net | ( 4,463 ) | ( 2,208 )
+
+    Non-current portion of intangible assets, net | $21,334 | $11,093
+
+    Apple Inc. | Q2 2026 Form 10-Q | 9
+
+    Note 6 –
+
+    Debt
+
+    Commercial Paper
+
+    The Company issues unsecured short-term promissory notes pursuant to a commercial paper program. The Company uses net proceeds from the commercial paper program for general corporate purposes, including dividends and share repurchases. As of March 28, 2026 and September 27, 2025, the Company had $
+
+    2.0
+
+    billion and $
+
+    8.0
+
+    billion of commercial paper outstanding, respectively.
+
+    The following table provides a summary of cash flows associated with commercial paper for the six months ended March 28, 2026 and March 29, 2025 (in millions):
+
+    Six Months Ended
+
+    March 28, 2026 | March 29, 2025
+
+    Maturities 90 days or less:
+
+    Repayments of commercial paper, net | $( 2,123 ) | $( 3,968 )
+
+    Maturities greater than 90 days:
+
+    Repayments of commercial paper | ( 3,788 ) | —
+
+    Total repayments of commercial paper, net | $( 5,911 ) | $( 3,968 )
+
+    Term Debt
+
+    As of March 28, 2026 and September 27, 2025, the Company had outstanding fixed-rate notes with varying maturities for an aggregate carrying amount of $
+
+    82.7
+
+    billion'
+  ticker: AAPL
+p2:
+  accession: 0001045810-26-000052
+  chunk_id: 4795
+  filed_at: '2026-05-20'
+  form_type: 10-Q
+  period_end: '2026-04-26'
+  section: Financial Statements
+  text: 'and market-based PSUs, and issuances under our employee stock purchase plan, or ESPP.
+
+    8
+
+    NVIDIA Corporation and Subsidiaries
+
+    Notes to Condensed Consolidated Financial Statements (Continued)
+
+    (Unaudited)
+
+    Condensed Consolidated Statements of Income include stock-based compensation expense as follows:
+
+    Three Months Ended
+
+    Apr 26, 2026 | Apr 27, 2025
+
+    (In millions)
+
+    Cost of revenue | $68 | $64
+
+    Research and development | 1,459 | 1,063
+
+    Sales, general and administrative | 401 | 347
+
+    Total | $1,928 | $1,474
+
+    Equity Award Activity
+
+    The following is a summary of our equity award transactions under our equity incentive plans:
+
+    RSUs, PSUs and Market-based PSUs Outstanding
+
+    Number of Shares | Weighted Average Grant-Date Fair Value Per Share
+
+    (In millions, except per share data)
+
+    Balance as of Jan 25, 2026 | 189 | $81.51
+
+    Granted | 44 | $181.73
+
+    Vested | ( 31 ) | $48.04
+
+    Canceled and forfeited | ( 2 ) | $95.82
+
+    Balance as of Apr 26, 2026 | 200 | $108.92
+
+    As of April 26, 2026, aggregate unearned stock-based compensation expense was $
+
+    20.8
+
+    billion, which is expected to be recognized over a weighted average period of
+
+    2.6
+
+    years for RSUs, PSUs, and market-based PSUs, and
+
+    one year
+
+    for ESPP.
+
+    Note 3 -'
+  ticker: NVDA
+p3:
+  accession: 0001045810-26-000075
+  chunk_id: 4682
+  filed_at: '2026-08-26'
+  form_type: 10-Q
+  period_end: '2026-07-26'
+  section: MD&A
+  text: 'of the site or all of the tenant’s obligations. The guarantees terminate upon certain events, including OpenAI achieving a satisfactory credit rating or after each respective lease term has completed.
+
+    We also hold an option, exercisable in our sole discretion, to provide additional credit support in phases for approximately 3.8 additional gigawatts as the site scales. Refer to Note 10 of the Notes to Condensed Consolidated Financial Statements in Part 1, Item 1 of this Quarterly Report on Form 10-Q.
+
+    We have made, and may continue to make, investments and commitments in our ecosystem to enhance our growth opportunities, cultivate our ecosystem, and strengthen our competitive position. These include equity investments of $99 billion and equity investment commitments of $25 billion as of July 26, 2026.'
+  ticker: NVDA
+p4:
+  accession: 0001628280-26-054343
+  chunk_id: 6795
+  filed_at: '2026-08-06'
+  form_type: 10-Q
+  period_end: '2026-06-30'
+  section: MD&A
+  text: '| 31,513 | 855 | 32,368 | 53 | 36
+
+    Consumer Hard Goods | 14,824 | 309 | 15,133 | 43 | 33
+
+    Leisure (b) | 10,721 | 136 | 10,857 | 33 | 45
+
+    Total Consumer & Retail | $131,710 | $2,235 | $133,945 | 47% | 37%
+
+    (a)
+
+    Retail consists of Home Improvement & Specialty Retailers, Discount & Drug Stores, Restaurants, Specialty Apparel, Supermarkets, and Department Stores.
+
+    (b)
+
+    Leisure consists of Travel Services, Arts & Culture, Gaming, and Sports & Recreation. As of June 30, 2026, approximately 91% of the noninvestment-grade Leisure portfolio is secured.
+
+    (c)
+
+    Consumer & Retail exposure is approximately 58% secured; unsecured exposure is approximately 78% investment-grade.
+
+    (d)
+
+    Represents drawn exposure as a percentage of credit exposure.
+
+    71
+
+    Loans
+
+    In its wholesale businesses, the Firm provides loans to a variety of clients, ranging from large corporate and institutional clients to high-net-worth individuals. Refer to Note 11 for a further discussion on loans, including information about delinquencies, loan modifications and other credit quality indicators.'
+  ticker: JPM

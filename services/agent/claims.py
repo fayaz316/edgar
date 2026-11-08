@@ -13,7 +13,7 @@ All rules and constants are fixed by the protocol; they are not tuned.
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -41,12 +41,13 @@ class ClaimCheck:
     cites: list[int]
     uncited: bool = False
     missing_numbers: list[str] = field(default_factory=list)
+    missing_dates: list[str] = field(default_factory=list)
     missing_companies: list[str] = field(default_factory=list)
     entailment: float | None = None  # best P(entailment) over the cited passages
 
     @property
     def l1_unsupported(self) -> bool:
-        return bool(self.missing_numbers or self.missing_companies)
+        return bool(self.missing_numbers or self.missing_dates or self.missing_companies)
 
     @property
     def l2_unsupported(self) -> bool:
@@ -111,14 +112,145 @@ def passage_numbers(text: str) -> set[str]:
     return {m.group(2).replace(",", "") for m in _NUMBER_RE.finditer(text)}
 
 
+# ---- dates (spec: evals/claims/L1_DATES.md) -------------------------------------------------------------
+_MONTH = (
+    r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+    r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
+)
+_MONTH_NUM = {
+    m: i
+    for i, m in enumerate(
+        ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1
+    )
+}
+# order matters: longer forms first; matched spans are blanked so later patterns cannot re-match them
+_DATE_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)"), "ymd"),
+    (re.compile(r"(?<!\d)(\d{1,2})/(\d{1,2})/(\d{4})(?!\d)"), "mdy_slash"),
+    (re.compile(rf"\b({_MONTH})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(\d{{4}})\b"), "Mdy"),
+    (re.compile(rf"\b(\d{{1,2}})\s+({_MONTH})\.?,?\s+(\d{{4}})\b"), "dMy"),
+    (re.compile(rf"\b({_MONTH})\.?,?\s+(\d{{4}})\b"), "My"),
+    (re.compile(rf"\b({_MONTH})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?\b"), "Md"),
+]
+_YEAR_RE = re.compile(r"(?<![\d,.])(?:19|20)\d{2}(?![\d,]|\.\d)")
+DateKey = tuple[int | None, int | None, int | None]  # (year, month, day); a missing part is None
+
+
+def _month(name: str) -> int:
+    return _MONTH_NUM[name[:3].lower()]
+
+
+def scan_dates(text: str) -> tuple[list[tuple[str, DateKey]], str]:
+    """(dates found as (surface text, key), the text with every date blanked out)."""
+    found: list[tuple[str, DateKey]] = []
+    for rx, shape in _DATE_PATTERNS:
+        for m in rx.finditer(text):
+            g = m.groups()
+            if shape == "ymd":
+                key: DateKey = (int(g[0]), int(g[1]), int(g[2]))
+            elif shape == "mdy_slash":
+                key = (int(g[2]), int(g[0]), int(g[1]))
+            elif shape == "Mdy":
+                key = (int(g[2]), _month(g[0]), int(g[1]))
+            elif shape == "dMy":
+                key = (int(g[2]), _month(g[1]), int(g[0]))
+            elif shape == "My":
+                key = (int(g[1]), _month(g[0]), None)
+            else:
+                key = (None, _month(g[0]), int(g[1]))
+            found.append((m.group(0), key))
+        text = rx.sub(lambda m: " " * len(m.group(0)), text)
+    return found, text
+
+
+@dataclass(frozen=True)
+class KnownDates:
+    full: frozenset[tuple[int, int, int]] = frozenset()
+    ym: frozenset[tuple[int, int]] = frozenset()
+    md: frozenset[tuple[int, int]] = frozenset()
+    years: frozenset[int] = frozenset()
+
+    def merged(self, other: KnownDates) -> KnownDates:
+        return KnownDates(
+            self.full | other.full, self.ym | other.ym, self.md | other.md, self.years | other.years
+        )
+
+    def covers(self, key: DateKey) -> bool:
+        y, m, d = key
+        if y is not None and m is not None and d is not None:
+            return (y, m, d) in self.full
+        if y is not None and m is not None:
+            return (y, m) in self.ym
+        if m is not None and d is not None:
+            return (m, d) in self.md
+        return False
+
+
+def known_dates(keys: Iterable[DateKey], years: Iterable[int] = ()) -> KnownDates:
+    full, ym, md = set(), set(), set()
+    ys = set(years)
+    for y, m, d in keys:
+        if y is not None:
+            ys.add(y)
+        if y is not None and m is not None and d is not None:
+            full.add((y, m, d))
+        if y is not None and m is not None:
+            ym.add((y, m))
+        if m is not None and d is not None:
+            md.add((m, d))
+    return KnownDates(frozenset(full), frozenset(ym), frozenset(md), frozenset(ys))
+
+
+def parse_metadata_dates(values: Iterable[str]) -> KnownDates:
+    """Filing metadata (e.g. '2026-07-26') as known dates; anything unparseable is ignored."""
+    keys: list[DateKey] = []
+    for v in values:
+        found, _ = scan_dates(str(v)[:10])
+        keys += [k for _, k in found]
+    return known_dates(keys)
+
+
+def passage_facts(text: str) -> tuple[KnownDates, set[str]]:
+    """(dates the passage states, the AMOUNTS it states). Digits that belong to a date or a bare year are not amounts."""
+    found, rest = scan_dates(text)
+    years = {int(y) for y in _YEAR_RE.findall(text)}
+    rest = _YEAR_RE.sub(" ", rest)
+    return known_dates((k for _, k in found), years), passage_numbers(rest)
+
+
+def ground_claim(
+    claim: str, passages: Sequence[dict[str, Any]], metadata: KnownDates
+) -> tuple[list[str], list[str]]:
+    """(claim dates no passage or metadata supports, claim amounts/years no passage supports)."""
+    known = metadata
+    amounts: set[str] = set()
+    for p in passages:
+        d, a = passage_facts(p["text"])
+        known = known.merged(d)
+        amounts |= a
+    found, rest = scan_dates(CITE_RE.sub(" ", claim))
+    missing_dates = [surface for surface, key in found if not known.covers(key)]
+    years = {int(y) for y in _YEAR_RE.findall(rest)}
+    missing_years = [str(y) for y in sorted(years) if y not in known.years]
+    rest = _YEAR_RE.sub(" ", rest)
+    return missing_dates, sorted(set(missing_years) | (numbers_in(rest) - amounts))
+
+
 def companies_in(text: str) -> set[str]:
     return {ticker for ticker, rx in _COMPANIES.items() if rx.search(text)}
 
 
 def check_answer(
-    answer: str, evidence: Sequence[dict[str, Any]], nli: NliScorer | None = None
+    answer: str,
+    evidence: Sequence[dict[str, Any]],
+    nli: NliScorer | None = None,
+    metadata_dates: Iterable[str] = (),
 ) -> list[ClaimCheck]:
-    """`evidence[n-1]` is passage n: a dict with at least `text` and `ticker`."""
+    """`evidence[n-1]` is passage n: a dict with at least `text` and `ticker`.
+
+    `metadata_dates` are filing dates (ISO strings) the tools returned in this run; they can ground a claim's DATES,
+    never its amounts (evals/claims/L1_DATES.md)."""
+    metadata = parse_metadata_dates(metadata_dates)
     checks: list[ClaimCheck] = []
     for text, cites in split_claims(answer):
         valid = [n for n in cites if 1 <= n <= len(evidence)]
@@ -128,12 +260,13 @@ def check_answer(
                 checks[-1].missing_numbers = ["<unknown passage>"]
             continue
         passages = [evidence[n - 1] for n in valid]
-        grounded = set().union(*(passage_numbers(p["text"]) for p in passages))
         tickers = {p["ticker"] for p in passages}
+        missing_dates, missing_numbers = ground_claim(text, passages, metadata)
         check = ClaimCheck(
             text,
             valid,
-            missing_numbers=sorted(numbers_in(text) - grounded),
+            missing_numbers=missing_numbers,
+            missing_dates=missing_dates,
             missing_companies=sorted(companies_in(text) - tickers),
         )
         if nli is not None:

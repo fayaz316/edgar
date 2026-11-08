@@ -64,6 +64,9 @@ class AgentState(TypedDict):
     question: str
     messages: list[Message]
     evidence: list[dict[str, Any]]  # passage n is evidence[n - 1]
+    metadata_dates: list[
+        str
+    ]  # filing dates the tools returned (ground DATES in claims, never amounts)
     trace: list[TraceEvent]
     steps: int
     tool_calls: int
@@ -147,6 +150,7 @@ def build_graph(
         turn = state["messages"][-1].turn or ModelTurn()
         messages = list(state["messages"])
         evidence = list(state["evidence"])
+        metadata_dates = list(state["metadata_dates"])
         trace = list(state["trace"])
         used = state["tool_calls"]
         for call in turn.tool_calls:
@@ -159,9 +163,9 @@ def build_graph(
             else:
                 used += 1
                 try:
-                    result = _number_passages(
-                        registry.call(call.name, call.args), evidence, PASSAGE_NOTE[prompt_variant]
-                    )
+                    raw = registry.call(call.name, call.args)
+                    metadata_dates += _metadata_dates(raw)
+                    result = _number_passages(raw, evidence, PASSAGE_NOTE[prompt_variant])
                 except ToolError as exc:  # the caller's mistake: tell the model so it can repair
                     result = {"error": str(exc)}
                 except Exception as exc:  # our failure (database, embedder): do not leak it
@@ -189,6 +193,7 @@ def build_graph(
             **state,
             "messages": messages,
             "evidence": evidence,
+            "metadata_dates": metadata_dates,
             "trace": trace,
             "tool_calls": used,
         }
@@ -198,7 +203,13 @@ def build_graph(
         checked = validate_answer(text, n_passages=len(state["evidence"]))
         model_refused = text.strip().upper().startswith("INSUFFICIENT_CONTEXT")
         if not model_refused and not checked.refused and claim_check == "l1":
-            bad = [c for c in check_answer(text, state["evidence"]) if c.l1_unsupported]
+            bad = [
+                c
+                for c in check_answer(
+                    text, state["evidence"], metadata_dates=state["metadata_dates"]
+                )
+                if c.l1_unsupported
+            ]
             if bad:
                 return _reject(state, _l1_problem(bad), max_repairs)
         if model_refused or not checked.refused:
@@ -243,6 +254,10 @@ def _l1_problem(bad: list[ClaimCheck]) -> str:
         what = []
         if c.missing_numbers:
             what.append(f"figures not in the cited passages {c.missing_numbers}")
+        if c.missing_dates:
+            what.append(
+                f"dates in neither the cited passages nor the filing metadata {c.missing_dates}"
+            )
         if c.missing_companies:
             what.append(f"company not among the cited passages {c.missing_companies}")
         parts.append(f'"{c.text[:70]}" ({"; ".join(what)})')
@@ -255,7 +270,8 @@ def _reject(state: AgentState, problem: str, max_repairs: int) -> AgentState:
         return _refuse(state, f"the answer could not be grounded ({problem})", "verify")
     feedback = (
         f"Your answer was rejected: {problem}. State figures exactly as they appear in the "
-        "passages you cite (do not state computed or rounded values), name only the company "
+        "passages you cite (do not state computed or rounded values; a filing date may come from the "
+        "metadata the tools returned), name only the company "
         "whose passage you cite, and cite only passage numbers the tools returned, as [n]. "
         "Search again if you need more evidence, or reply INSUFFICIENT_CONTEXT."
     )
@@ -265,6 +281,12 @@ def _reject(state: AgentState, problem: str, max_repairs: int) -> AgentState:
         "repairs": state["repairs"] + 1,
         "trace": [*state["trace"], TraceEvent("verify", f"rejected: {problem}")],
     }
+
+
+def _metadata_dates(result: dict[str, Any]) -> list[str]:
+    """Filing dates a tool result carries: list_filings rows and the filing date of each retrieved passage."""
+    rows = result.get("filings", []) + result.get("passages", [])
+    return [str(r[k]) for r in rows for k in ("period_end", "filed_at") if r.get(k)]
 
 
 def _short(args: dict[str, Any]) -> str:
@@ -315,6 +337,7 @@ def stream_agent(
         "question": question,
         "messages": [Message("user", text=question)],
         "evidence": [],
+        "metadata_dates": [],
         "trace": [],
         "steps": 0,
         "tool_calls": 0,

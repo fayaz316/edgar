@@ -58,3 +58,34 @@ def test_claim_check_l1_keeps_its_enforcement_contract() -> None:
     assert number_caught / number_total >= 0.90, (
         f"L1 caught only {number_caught}/{number_total} changed numbers"
     )
+
+
+def test_claims_v2_is_well_formed_and_balanced_as_specified() -> None:
+    passages = yaml.safe_load((HERE / "passages_v2.yaml").read_text())
+    items = yaml.safe_load((HERE / "claims_v2.yaml").read_text())
+    counts = Counter(str(i["kind"]) for i in items)
+    assert counts == {"meta_date": 6, "faithful": 4, "wrong_date": 4, "laundering": 3, "number": 3}
+    for i in items:
+        assert i["label"] == (
+            "supported" if i["kind"] in {"meta_date", "faithful"} else "unsupported"
+        )
+        assert all(k in passages for k in i["evidence"]) and i["metadata"]
+
+
+def test_date_guard_passes_a_perfect_checker_and_fails_the_real_failure_shape() -> None:
+    from evals.claims.run_dates import guard
+
+    def rows(**flag: bool) -> list[dict[str, object]]:
+        kinds = [("m03", "meta_date", "supported", False)] + [
+            (f"w0{i}", "wrong_date", "unsupported", True) for i in range(4)
+        ]
+        kinds += [(f"l0{i}", "laundering", "unsupported", True) for i in range(3)] + [
+            (f"c0{i}", "number", "unsupported", True) for i in range(3)
+        ]
+        return [{"id": i, "kind": k, "label": lab, "new": flag.get(i, v)} for i, k, lab, v in kinds]
+
+    assert guard(rows()) == (True, [])
+    ok, why = guard(rows(m03=True))
+    assert not ok and any("m03" in w for w in why)
+    ok, why = guard(rows(l00=False))
+    assert not ok and any("laundering" in w for w in why)
