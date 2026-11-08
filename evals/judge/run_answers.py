@@ -72,6 +72,8 @@ def row_from(
         ],
         "uncited": [] if judged is None else judged.uncited,
         "faithfulness": None if judged is None else judged.faithfulness,
+        # the passages the claims were judged against, so a verdict can be re-checked later by someone else
+        "evidence": evidence_from_citations(result.citations),
     }
 
 

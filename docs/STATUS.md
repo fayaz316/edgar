@@ -13,7 +13,7 @@ Retrieval hit@8 62/78 over four question sets; 91% of 54 cited claims judged sup
 
 ## Plan (decided 2026-11-08; not deployed, nothing public)
 1. **Fine-tune the embedder (P5): DONE (ADR 0022).** Passed the pre-registered rule narrowly (fresh set hit@8 23 -> 26 = exactly the bar, MRR 0.497 -> 0.609; older 78 questions 62 -> 66). Offered as an opt-in `finetuned` embedder; the default stays `local` until the 440 MB weights are hosted and a new gate baseline is made.
-2. A human check of ~30 judge verdicts.
+2. Judge check: second-model cross-check DONE (22/25 agree, `evals/judge/CROSSCHECK.md`); a human check is still open.
 3. One targeted cite-washing fix, tested on fresh data.
 4. Contradiction-hunter sub-agent and a Claude Desktop MCP demo.
 5. README screenshots, a one-page write-up, refreshed status.
@@ -22,7 +22,7 @@ Retrieval hit@8 62/78 over four question sets; 91% of 54 cited claims judged sup
 
 ## Open items (priority order; each needs its own pre-registered spec and fresh data, because all existing evaluation sets are consumed: see `evals/golden/DECISION_LOG.md`)
 1. **Cite-washing** (ADR 0020, 0021): comparison sentences can carry citations their passages do not support.
-2. A human check of the judge's "supported" verdicts (the judge is same-vendor and was calibrated on claims written by the author).
+2. A human check of the judge's "supported" verdicts is still open. A second-model cross-check (different vendor, 25 claims, `evals/judge/CROSSCHECK.md`) agreed on 22; the 3 disagreements were all cross-company comparison sentences (cite-washing).
 3. Retrieval misses still cause the weakest answers (the fine-tune helps a little: ADR 0022).
 4. **Deployment:** deliberately not done. The container has no torch, so the local embedder cannot run in it; a free route would be Cloud Run plus a free hosted Postgres with an ONNX embedder (parity to be gated).
 5. Phase gaps: contradiction-hunter sub-agent; Claude Desktop connection (ADR 0012); fine-tuning; runbook, postmortem, write-up. Dropped for now: semantic cache, load test, Secret Manager / service accounts, Next.js UI, demo video; per-user identity.
