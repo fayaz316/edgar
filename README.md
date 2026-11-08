@@ -19,7 +19,7 @@ by pre-registered experiments and a regression gate, not by feel (see *How decis
 | P6 UI + demo | A single-file UI exists; the Next.js app and the demo video do not. |
 | P7 wrapper | 21 ADRs and a threat model exist; runbook, postmortem and blog post do not. |
 
-Decisions and their evidence: `docs/adr/`.
+Current status, open items and how to resume: [`docs/STATUS.md`](docs/STATUS.md). Decisions and their evidence: [`docs/adr/`](docs/adr/).
 
 ## Quick start
 ```bash
@@ -35,7 +35,7 @@ uv run --group local-embed uvicorn services.gateway.main:app --port 8089
 uv run --group local-embed python -m services.agent.run "How do NVIDIA's and Apple's supply-chain risks differ?"
 make mcp                                          # MCP server over stdio (config snippet: docs/adr/0012-*.md)
 ```
-Needs `DATABASE_URL` and `GEMINI_API_KEY` in `.env` (see `.env.example`). Generation uses Gemini; embeddings are local.
+Needs `DATABASE_URL` and `GEMINI_API_KEY` in `.env` (see `.env.example`), and `SEC_USER_AGENT` (a contact address, required by the SEC) for `make fetch`. Generation uses Gemini; embeddings are local.
 
 ## Configuration (environment variables, `EA_` prefix)
 | Variable | Default | Meaning |
@@ -87,3 +87,6 @@ often it has informed a decision (`evals/golden/DECISION_LOG.md`), and frozen fi
 - Nothing is deployed to GCP beyond the Phase 0 canary; deploying creates billable resources and needs an explicit go-ahead.
 
 Cost stance: scale-to-zero everywhere, `make teardown` is the panic button. Budget alarms at €5/€25/€100.
+
+## License
+MIT, see [`LICENSE`](LICENSE).

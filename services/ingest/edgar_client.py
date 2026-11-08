@@ -9,6 +9,7 @@ We go politer (0.15s floor between calls) and retry with backoff on
 
 from __future__ import annotations
 
+import os
 import time
 from dataclasses import dataclass
 
@@ -16,7 +17,6 @@ import httpx
 
 BASE_URL = "https://data.sec.gov"  # JSON APIs (submissions, xbrl)
 ARCHIVE_URL = "https://www.sec.gov"  # filing documents (/Archives/...)
-DEFAULT_USER_AGENT = "edgar-analyst dev (contact: you@example.com)"
 THROTTLE_SECONDS = 0.15
 
 
@@ -46,11 +46,23 @@ class Filing:
         )
 
 
+def user_agent_from_env() -> str:
+    """The SEC requires a contact address in the User-Agent and may block anonymous clients, so it is
+    configuration (SEC_USER_AGENT in .env), not something hardcoded in a public repository."""
+    ua = os.environ.get("SEC_USER_AGENT", "").strip()
+    if not ua:
+        raise EdgarError(
+            'Set SEC_USER_AGENT, e.g. SEC_USER_AGENT="edgar-analyst (contact: you@example.com)" (in .env). '
+            "The SEC requires a contact address in the User-Agent."
+        )
+    return ua
+
+
 class EdgarClient:
-    def __init__(self, user_agent: str = DEFAULT_USER_AGENT) -> None:
+    def __init__(self, user_agent: str | None = None) -> None:
         self._client = httpx.Client(
             base_url=BASE_URL,
-            headers={"User-Agent": user_agent},
+            headers={"User-Agent": user_agent or user_agent_from_env()},
             timeout=30.0,
             follow_redirects=True,
         )

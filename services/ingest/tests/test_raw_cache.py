@@ -55,3 +55,15 @@ def test_iter_cached_filters_by_ticker_and_restores_metadata(tmp_path: Path) -> 
     only_aapl = list(raw_cache.iter_cached(["aapl"], root=tmp_path))
     assert [f.accession for f, _ in only_aapl] == ["0000320193-26-000026"]
     assert only_aapl[0][0].document_url.endswith("nvda-20260726.htm")  # metadata round-tripped
+
+
+def test_sec_user_agent_comes_from_the_environment_and_is_required(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import pytest
+
+    from services.ingest.edgar_client import EdgarError, user_agent_from_env
+
+    monkeypatch.delenv("SEC_USER_AGENT", raising=False)
+    with pytest.raises(EdgarError, match="SEC_USER_AGENT"):
+        user_agent_from_env()
+    monkeypatch.setenv("SEC_USER_AGENT", "  edgar-analyst (contact: me@example.com) ")
+    assert user_agent_from_env() == "edgar-analyst (contact: me@example.com)"
