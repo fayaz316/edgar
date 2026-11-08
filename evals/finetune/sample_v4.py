@@ -28,7 +28,8 @@ def existing_anchors_and_skips() -> tuple[list[EvidenceAnchor], set[int]]:
     anchors: list[EvidenceAnchor] = []
     skips: set[int] = set()
     for f in sorted(glob.glob("evals/golden/golden_*.yaml")):
-        text = open(f).read()
+        with open(f) as fh:
+            text = fh.read()
         skips |= skipped_ids_from_header(text)
         for it in yaml.safe_load(text):
             anchors += [EvidenceAnchor(**e) for e in it.get("expected_evidence") or []]
