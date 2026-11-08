@@ -25,16 +25,17 @@ load_dotenv(".env")
 DATA = Path("evals/finetune/data")
 MODEL = "gemini-3.1-flash-lite"
 TARGET_CHUNKS = 1500
-PAUSE_S = (
-    4.2  # 15 requests/minute free tier (kept on Vertex too: simple and well inside its limits)
-)
+PAUSE_S = 4.2  # 15 requests/minute free tier
+VERTEX_PAUSE_S = 0.3
+REQUEST_TIMEOUT_MS = 60_000  # a hung call must fail and retry, not stall the run
 
 PROMPT = """You write search questions for a search engine over SEC filings (10-K / 10-Q).
 You get ONE passage from a filing. Write two questions that this passage answers:
 - "direct": a natural question an analyst would type, answerable from the passage.
 - "paraphrase": a different question about the same fact that does NOT reuse any four consecutive words from the passage.
-Rules: each question must make sense without seeing the passage (never say "this passage" or "the above"); name the company only
-if the filing line below does; no yes/no questions; under 220 characters.
+Rules: each question must make sense without seeing the passage (never say "this passage" or "the above"); BOTH questions must
+name the company from the filing line by its common name (NVIDIA, Apple, JPMorgan), never "the firm" or "the company" alone; keep
+every date, period and number exact and add no fact that is not in the passage; no yes/no questions; under 220 characters.
 If the passage has no standalone factual content (cover page, table of contents, signatures, a bare table), answer null for both.
 Reply with JSON only: {"direct": "...", "paraphrase": "..."}
 
@@ -126,9 +127,17 @@ def main() -> int:
     todo = [c for c in chunks if c["id"] not in done]
     print(f"sample {len(chunks)} chunks; done {len(done)}; to do {len(todo)}")
     client = (
-        genai.Client(vertexai=True, project=os.environ["GOOGLE_CLOUD_PROJECT"], location="global")
+        genai.Client(
+            vertexai=True,
+            project=os.environ["GOOGLE_CLOUD_PROJECT"],
+            location="global",
+            http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
+        )
         if args.vertex
-        else genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        else genai.Client(
+            api_key=os.environ["GEMINI_API_KEY"],
+            http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
+        )
     )
     cfg = types.GenerateContentConfig(temperature=0.0, response_mime_type="application/json")
     calls = 0
@@ -164,7 +173,7 @@ def main() -> int:
                 rec["paraphrase_echo_dropped"] = bool(para) and rec["paraphrase"] is None
             f.write(json.dumps(rec) + "\n")
             f.flush()
-            time.sleep(PAUSE_S)
+            time.sleep(VERTEX_PAUSE_S if args.vertex else PAUSE_S)
     print(f"made {calls} calls")
     return 0
 

@@ -102,3 +102,10 @@ note on how the image would carry it (not deployed, so documentation only).
   directories (unit-tested; it refuses to compare different corpora or configs).
 - Provider: the candidate is scored through a new `finetuned` embedder (`EA_FT_MODEL_PATH` points at the checkpoint; the vector tag
   comes from the weights' SHA-256), in a scratch database so the main corpus and its baseline stay untouched.
+
+## Addendum C — generator prompt revised once, before the full run (2026-11-08)
+The first 8 probe outputs (chunks 4599-4606, all from filings' ordinary text; no evaluation question involved) showed paraphrases
+that dropped the company name ("the firm") and one that invented a detail ("third week of August"). Training labels like that are
+noisy, so the prompt was tightened ONCE: both questions must name the company, and dates/periods/numbers must stay exact.
+The same 8 chunks were re-run to confirm (company named, dates exact). No other change; the model, sample and rules are as above.
+Generation runs through Vertex AI (`--vertex`, billed to GCP credits) because the free API key was rejected.
