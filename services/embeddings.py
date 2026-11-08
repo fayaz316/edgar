@@ -21,7 +21,9 @@ Providers:
 
 from __future__ import annotations
 
+import os
 import time
+from pathlib import Path
 from typing import Any, Protocol
 
 DIMS = 768
@@ -36,7 +38,28 @@ LOCAL_MODEL_ID = f"{LOCAL_MODEL}@{LOCAL_REVISION[:8]}"
 # From the model card: queries get this instruction, passages get none.
 BGE_QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
-MODEL_IDS: dict[str, str] = {"gemini": GEMINI_MODEL_ID, "local": LOCAL_MODEL_ID}
+# "finetuned": a locally trained checkpoint (evals/finetune/PROTOCOL.md). Its tag is read from <dir>/model_id.txt, where
+# EA_FT_MODEL_PATH names <dir>, so a corpus embedded by it can never be mistaken for one embedded by another model.
+FT_PLACEHOLDER = "edgar-ft-bge-base@unset"
+MODEL_IDS: dict[str, str] = {
+    "gemini": GEMINI_MODEL_ID,
+    "local": LOCAL_MODEL_ID,
+    "finetuned": FT_PLACEHOLDER,
+}
+
+
+def ft_model_dir() -> Path:
+    raw = os.environ.get("EA_FT_MODEL_PATH", "").strip()
+    if not raw:
+        raise ValueError("EA_FT_MODEL_PATH must name the fine-tuned checkpoint directory")
+    return Path(raw)
+
+
+def ft_model_id() -> str:
+    tag = (ft_model_dir() / "model_id.txt").read_text().strip()
+    if not tag.startswith("edgar-ft-"):
+        raise ValueError(f"unexpected fine-tuned model tag {tag!r}")
+    return tag
 
 
 class EmbeddingError(RuntimeError):
@@ -57,6 +80,8 @@ class Embedder(Protocol):
 
 def model_id_for(name: str) -> str:
     """Model tag for a provider name WITHOUT loading it (ingest only needs the tag)."""
+    if name == "finetuned":
+        return ft_model_id()
     try:
         return MODEL_IDS[name]
     except KeyError:
@@ -175,10 +200,37 @@ class LocalEmbedder:
         return self._encode([BGE_QUERY_PREFIX + text])[0]
 
 
+class FinetunedEmbedder(LocalEmbedder):
+    """Same encoding rules as the base model (query prefix, normalised vectors); weights come from a directory."""
+
+    def __init__(self, path: Path, model: Any | None = None, device: str | None = None) -> None:
+        super().__init__(model=model, device=device)
+        self._path = path
+        self.model_id = (path / "model_id.txt").read_text().strip()
+
+    def _load(self) -> Any:
+        if self._model is None:
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError as exc:
+                raise EmbeddingError(
+                    "local embedder needs the optional group: uv sync --group local-embed"
+                ) from exc
+            self._model = SentenceTransformer(
+                str(self._path), device=self._device, trust_remote_code=False
+            )
+            got = self._model.get_sentence_embedding_dimension()
+            if got != DIMS:
+                raise EmbeddingError(f"fine-tuned model produced {got} dims, schema expects {DIMS}")
+        return self._model
+
+
 def make_embedder(name: str, *, api_key: str | None = None) -> Embedder:
     model_id_for(name)  # validates the name
     if name == "gemini":
         if not api_key:
             raise ValueError("GEMINI_API_KEY required for the gemini embedder")
         return GeminiEmbedder(api_key)
+    if name == "finetuned":
+        return FinetunedEmbedder(ft_model_dir())
     return LocalEmbedder()

@@ -14,3 +14,4 @@ node_modules/
 .next/
 data/
 evals/results/latest.json
+evals/finetune/data/

@@ -136,3 +136,23 @@ def test_gemini_query_wraps_failures() -> None:
     client = FakeGeminiClient([RuntimeError("network down")])
     with pytest.raises(EmbeddingError, match="query embedding failed"):
         GeminiEmbedder("k", client=client).embed_query("q")
+
+
+def test_finetuned_embedder_takes_its_tag_from_the_checkpoint_directory(
+    tmp_path, monkeypatch
+) -> None:  # type: ignore[no-untyped-def]
+    import pytest
+
+    from services.embeddings import FinetunedEmbedder, make_embedder, model_id_for
+
+    monkeypatch.delenv("EA_FT_MODEL_PATH", raising=False)
+    with pytest.raises(ValueError, match="EA_FT_MODEL_PATH"):
+        model_id_for("finetuned")
+    (tmp_path / "model_id.txt").write_text("edgar-ft-bge-base@abc12345\n")
+    monkeypatch.setenv("EA_FT_MODEL_PATH", str(tmp_path))
+    assert model_id_for("finetuned") == "edgar-ft-bge-base@abc12345"
+    emb = make_embedder("finetuned")
+    assert isinstance(emb, FinetunedEmbedder) and emb.model_id == "edgar-ft-bge-base@abc12345"
+    (tmp_path / "model_id.txt").write_text("something-else")
+    with pytest.raises(ValueError, match="unexpected"):
+        model_id_for("finetuned")

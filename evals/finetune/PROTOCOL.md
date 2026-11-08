@@ -86,3 +86,19 @@ note on how the image would carry it (not deployed, so documentation only).
   and the write-up must say so rather than loosen the rule afterwards.
 - Cost of freezing: the manifest gained one entry. v4 is deliberately NOT part of the regression gate yet (adding it would change
   the baseline's set list); it joins the gate only if a candidate is adopted.
+
+## Addendum B — implementation details fixed before any training question exists (2026-11-08; no rule above changes)
+- Exclusion result (`eligible_manifest.json`): 4,867 chunks, 890 excluded (evidence, neighbours, skipped ids, near-duplicates), 3,889
+  eligible; the leak assertion passed. JPMorgan has 66% of the eligible chunks.
+- Sampling: instead of a random draw, 1,500 chunks are taken by water-filling across the 11 filings (small filings give everything,
+  the rest are capped equally) so the training mix is not 66% JPMorgan. Order inside a filing: md5 of the chunk id with a fixed salt.
+- Questions: model `gemini-3.1-flash-lite`, prompt committed in `generate_questions.py`; the model may answer null for a chunk with
+  no standalone content (cover page, table of contents, bare table). Paraphrase questions sharing a 4-word run with the chunk are dropped.
+- Hard negatives are chosen only among ELIGIBLE chunks (never an evaluation passage, even as a negative), rank 10-40 of the base
+  model, not in the positive's document + section, not a near-duplicate of the positive. Max 3,000 pairs.
+- Training: `NO_DUPLICATES` batch sampler so two questions about one chunk are never each other's in-batch negatives; all other
+  hyperparameters as above. The validation split (5% of chunks) is used only to see that the loss behaves.
+- Scoring of the candidate: `evals/finetune/decide.py` applies the decision rule mechanically to the control and candidate result
+  directories (unit-tested; it refuses to compare different corpora or configs).
+- Provider: the candidate is scored through a new `finetuned` embedder (`EA_FT_MODEL_PATH` points at the checkpoint; the vector tag
+  comes from the weights' SHA-256), in a scratch database so the main corpus and its baseline stay untouched.

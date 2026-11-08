@@ -31,6 +31,11 @@ dev = [
 local-embed = [
     "sentence-transformers>=3",
 ]
+finetune = [
+    "sentence-transformers>=3",
+    "datasets>=3",
+    "accelerate>=1.1",
+]
 
 [tool.ruff]
 line-length = 100
@@ -46,7 +51,7 @@ strict = true
 files = ["services/gateway", "services/ingest", "services/tools", "services/mcp", "services/agent", "evals"]
 
 [[tool.mypy.overrides]]
-module = ["bs4.*", "sentence_transformers.*"]
+module = ["bs4.*", "sentence_transformers.*", "datasets.*", "torch.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
